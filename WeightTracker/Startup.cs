@@ -1,12 +1,18 @@
+using JFN.User;
+using JFN.UserAuthenticationWeb.Middleware;
+using JFN.UserAuthenticationWeb.Settings;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Proto;
+using System.Diagnostics;
+using System.IO;
+using static JFN.Utilities.Paths;
 
 namespace WeightTracker
 {
@@ -22,7 +28,39 @@ namespace WeightTracker
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddRazorPages();
+            services
+                .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+                {
+                    options.LoginPath = "/login";
+                    options.LogoutPath = "/login?handler=logout";
+                    options.Cookie.Name = "user_session";
+                    options.SlidingExpiration = true;
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SameSite = SameSiteMode.Strict;
+                });
+            services.AddRazorPages(options =>
+            {
+                options.Conventions.AuthorizeFolder("/app");
+                options.Conventions.AuthorizeFolder("/api");
+            });
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
+            services.AddControllers();
+            services.AddMemoryCache();
+
+            services.Configure<UserSettings>(Configuration);
+            services.AddSingleton<ActorSystem>();
+            services.AddSingleton(x =>
+                new User
+                ( x.GetRequiredService<ActorSystem>(), new OneForOneStrategy((pid, reason) =>
+                    {
+                        Debug.WriteLine(reason);
+                        return SupervisorDirective.Resume;
+                    }, 1, null), Path.Combine(GetAppDir("weight-tracker"), "user.db")
+                ));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -34,17 +72,21 @@ namespace WeightTracker
             }
             else
             {
-                app.UseExceptionHandler("/Error");
+                app.UseForwardedHeaders();
+                app.UseHsts();
             }
 
             app.UseStaticFiles();
 
             app.UseRouting();
 
+            app.UseAuthentication();
+            app.UseUserAuthenticationValidationMiddleware();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
                 endpoints.MapRazorPages();
             });
         }
