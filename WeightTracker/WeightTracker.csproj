@@ -2,11 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <CopyRefAssembliesToPublishDirectory>false</CopyRefAssembliesToPublishDirectory>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="JFN.UserAuthenticationWeb" Version="1.0.6" />
+    <PackageReference Include="JFN.UserAuthenticationWeb" Version="1.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WeightTracker.Data\WeightTracker.Data.csproj" />
   </ItemGroup>
 
 </Project>

@@ -12,6 +12,8 @@ using Microsoft.Extensions.Hosting;
 using Proto;
 using System.Diagnostics;
 using System.IO;
+using WeightTracker.Data;
+using WeightTracker.Data.Database;
 using static JFN.Utilities.Paths;
 
 namespace WeightTracker
@@ -53,13 +55,17 @@ namespace WeightTracker
 
             services.Configure<UserSettings>(Configuration);
             services.AddSingleton<ActorSystem>();
+
+            var appDir = "weight-tracker";
+            services.AddSingleton(x =>
+                new DataAction(x.GetRequiredService<ActorSystem>(), Path.Combine(GetAppDir(appDir), "data.db")));
             services.AddSingleton(x =>
                 new User
                 ( x.GetRequiredService<ActorSystem>(), new OneForOneStrategy((pid, reason) =>
                     {
                         Debug.WriteLine(reason);
                         return SupervisorDirective.Resume;
-                    }, 1, null), Path.Combine(GetAppDir("weight-tracker"), "user.db")
+                    }, 1, null), Path.Combine(GetAppDir(appDir), "user.db")
                 ));
         }
 
