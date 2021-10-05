@@ -1,0 +1,56 @@
+body {
+    max-width: 800px;
+    margin: auto;
+    margin-bottom: 25%;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+section, article {
+    display: none;
+}
+section:target, article:target {
+    display: block;
+}
+body.show-section article, body.show-section section {
+    display: block;
+}
+.hidden {
+    display: none !important;
+}
+.bold {
+    font-weight: bold;
+}
+[data-tags]::before {
+    content: 'tags: ' attr(data-tags);
+    font-size: smaller;
+}
+h3 {
+    margin-top: 0.25em;
+}
+blockquote {
+    border-left: 0.25em solid blue;
+    padding-left: 1em;
+}
+figure > blockquote {
+    margin: 0;
+    border-left: 0;
+    padding-left: 0;
+}
+figure {
+    border-left: 0.25em solid blue;
+    padding-left: 1em;
+}
+img {
+    max-width: 100%;
+}
+[data-tags] {
+    border-bottom: 1px dotted blue;
+    margin-bottom: 1em;
+}
+textarea {
+    width: 100%;
+}
+
+.message {
+    color: blue;
+}
