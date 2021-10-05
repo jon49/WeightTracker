@@ -45,7 +45,12 @@ namespace WeightTracker.Data.Actors
             {
                 lastSyncedId = _db!.SaveData(
                     d.UploadedData.Select(
-                        x => new Database.Data( Id: null, Key: x.Key, UserId: d.UserId, Value: x.Value, Source: d.Source )));
+                        x => new Database.Data
+                            ( Id: null
+                            , Key: x.Key
+                            , UserId: d.UserId
+                            , Value: x.Value
+                            , Source: d.Source )));
                 data = data.Where(x => !d.UploadedData.Any(y => y.Key == x.Key)).ToList();
             }
             lastSyncedId =

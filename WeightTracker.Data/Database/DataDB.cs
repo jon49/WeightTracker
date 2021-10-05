@@ -47,7 +47,7 @@ VALUES ({D._Key}, {D._Source}, {D._UserId}, {D._Value});";
                     new(Name: D._UserId, x.UserId),
                     new(Name: D._Value, x.Value),
                 }));
-            return DB.ExecuteCommand<long>(_readOnlyConnection, "select last_insert_rowid()");
+            return DB.ExecuteCommand<long>(_readOnlyConnection, $"SELECT MAX({D.Id}) FROM {D.Table};");
         }
 
         private static readonly string _getDataCommand = $@"
