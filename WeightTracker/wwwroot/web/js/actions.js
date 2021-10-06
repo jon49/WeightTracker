@@ -2,8 +2,6 @@
 
 /** @type {Map<string, () => Promise<void>>} */
 export const route = new Map()
-// /** @type {WeakMap<HTMLFormElement, (form: HTMLFormElement) => Promise<void>>} */
-// export const form = new WeakMap()
 /** @type {Map<string, (detail: any) => Promise<void>>} */
 export const subscribe = new Map()
 
