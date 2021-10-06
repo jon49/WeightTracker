@@ -1,11 +1,13 @@
+/// <reference types="../@types/global" />
 // @ts-check
 
-import { action, publish, form, subscribe, sendEvent } from "./actions.js"
+import { action, publish, subscribe, sendEvent } from "./actions.js"
 import { get, set, update } from "./db.js"
 import { dateToString, getById } from "./utils.js"
 
 // @ts-ignore
-form.set(getById("entry-form"), async f => {
+action.set(getById("entry-form"), async ({element: f}) => {
+    if (!(f instanceof HTMLFormElement)) return
     /** @type {{[key: string]: string}} */
     const raw = {}
     for (let input of new FormData(f)) {
