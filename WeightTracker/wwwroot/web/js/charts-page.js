@@ -37,10 +37,6 @@ action.set("create-chart", async ({ element }) => {
     }
 })
 
-export default async () => {
-    // TODO: check if updatedEntries has any items, if so then update opened charts
-}
-
 async function weightAverageChartData() {
     const startDate = dateAdd(new Date(), -274 /* 9 months */)
     while (startDate.getDay() > 0) {

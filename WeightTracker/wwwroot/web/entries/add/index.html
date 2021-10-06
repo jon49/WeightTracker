@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weight Tracker</title>
+    <link href="/web/css/index.css" rel=stylesheet>
+</head>
+<body>
+    <header>
+        <h1>Weight Tracker</h1>
+        <nav><a href="/web/entries/add">Add Entry</a> | <a href="/web/charts">Charts</a></nav>
+    </header>
+
+    <main>
+
+        <h2>Add Entry</h2>
+        <p id=entry-message class=message>&nbsp;</p>
+        <form id=entry-form>
+            <label for=entry-date>Date</label><br>
+            <input id=entry-date name=date type=date required><br><br>
+
+            <label for=entry-weight>Weight</label><br>
+            <input id=entry-weight name=weight type=number step=any><br><br>
+
+            <label for=entry-bedtime>Bedtime</label><br>
+            <input id=entry-bedtime name=bedtime type=datetime><br><br>
+
+            <label for=entry-hours-slept>Number of hours slept</label><br>
+            <input id=entry-hours-slept name=sleep type=number step=any><br><br>
+
+            <label for=entry-waist>Waist Size (cm)</label><br>
+            <input id=entry-waist name=waist type=number step=any><br><br>
+
+            <label for=entry-comments>Comment</label><br>
+            <textarea id=entry-comments name=comments></textarea><br><br>
+
+            <button>Submit</button>
+        </form>
+
+    </main>
+
+    <script src="/web/js/entry-page.js" async type=module></script>
+    <script src="/web/js/errors.js" defer type=module></script>
+
+</body>
+</html>

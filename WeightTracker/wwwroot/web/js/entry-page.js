@@ -59,11 +59,11 @@ subscribe.set("entry-updated", async _ => {
     getById("entry-message").innerText = "Saved!"
 })
 
-export default async () => {
+;(async function start() {
     /** @type {HTMLInputElement} */
     // @ts-ignore
     const $date = getById("entry-date")
     if ($date.value.length === 10) return
     $date.value = dateToString(new Date())
     sendEvent($date, "change")
-}
+})()
