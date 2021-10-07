@@ -1,0 +1,27 @@
+---
+---
+<h2>Add Entry</h2>
+<p id=entry-message class=message>&nbsp;</p>
+<form id=entry-form>
+    <label for=entry-date>Date</label><br>
+    <input id=entry-date name=date type=date required><br><br>
+
+    <label for=entry-weight>Weight</label><br>
+    <input id=entry-weight name=weight type=number step=any><br><br>
+
+    <label for=entry-bedtime>Bedtime</label><br>
+    <input id=entry-bedtime name=bedtime type=datetime><br><br>
+
+    <label for=entry-hours-slept>Number of hours slept</label><br>
+    <input id=entry-hours-slept name=sleep type=number step=any><br><br>
+
+    <label for=entry-waist>Waist Size (cm)</label><br>
+    <input id=entry-waist name=waist type=number step=any><br><br>
+
+    <label for=entry-comments>Comment</label><br>
+    <textarea id=entry-comments name=comments></textarea><br><br>
+
+    <button>Submit</button>
+</form>
+
+<script src="/web/js/entry-page.js" async type=module></script>

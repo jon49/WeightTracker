@@ -2,13 +2,47 @@
 
 /** @type {Map<string, () => Promise<void>>} */
 export const route = new Map()
-/** @type {Map<string, (detail: any) => Promise<void>>} */
-export const subscribe = new Map()
 
 /**
  * @typedef ActionFunction
  * @type {({element: HTMLElement, event: string}) => Promise<void>}
  */
+
+/**
+ * @param {{has: (a: any) => boolean, get: (a: any) => any, set: (a: any, b: any) => void}} m
+ * @param {ActionFunction} f
+ * @param {string | HTMLElement} a
+ */
+function setFunction(m, f, a) {
+    if (m.has(a)) {
+        m.get(a).push(f)
+    } else {
+        m.set(a, [f])
+    }
+}
+
+/**
+ * @typedef SubscriptionFunction
+ * @type {(detail: any) => Promise<void>}
+ */
+
+function Subscription() {
+    /** @type {Map<string, SubscriptionFunction[]>} */
+    const subscriptions = new Map()
+    return {
+        set: (/** @type {string} */ key, /** @type {{ (detail: any): Promise<void> }} */ f) => {
+            if (subscriptions.has(key)) {
+                subscriptions.get(key).push(f)
+            } else {
+                subscriptions.set(key, [f])
+            }
+        },
+        get: (/** @type {string} */ key) => subscriptions.get(key),
+        has: (/** @type {string} */ key) => subscriptions.has(key)
+    }
+}
+
+export const subscribe = Subscription()
 
 class Action {
     /** @type {WeakMap<HTMLElement, ActionFunction[]>} */
@@ -20,18 +54,6 @@ class Action {
      * @param {ActionFunction} f
      */
     set(action, f) {
-        /**
-         * @param {{has: (a: any) => boolean, get: (a: any) => any, set: (a: any, b: any) => void}} m
-         * @param {ActionFunction} f
-         * @param {string | HTMLElement} a
-         */
-        function setFunction(m, f, a) {
-            if (m.has(a)) {
-                m.get(a).push(f)
-            } else {
-                m.set(a, [f])
-            }
-        }
         if (typeof action === "string")
         {
             setFunction(this.action, f, action)
@@ -87,10 +109,11 @@ window.addEventListener("hashchange", () =>
 
 document.addEventListener("jfn", async e => {
     // @ts-ignore
-    const event = e.detail.event
+    const event = e?.detail?.event
     if (subscribe.has(event)) {
-        // @ts-ignore
-        subscribe.get(event)(e.detail).catch(x => publish("error", { message: `Handling event "${event}"" failed.`, error: x }))
+        for (const f of subscribe.get(event)) {
+            f(e).catch(x => publish("error", { message: `Handling event "${event}"" failed.`, error: x }))
+        }
     } else {
         console.warn(`Unknown event send on the event bus. ${event}`)
         // @ts-ignore
