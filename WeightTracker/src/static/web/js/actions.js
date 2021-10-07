@@ -121,13 +121,47 @@ document.addEventListener("jfn", async e => {
     }
 })
 
+class Debounce {
+    /** @type {WeakMap<object, number>} */
+    weak = new WeakMap()
+    /** @type {Map<string, number>} */
+    map = new Map()
+
+    shouldSkip(key) {
+        if (!key) return false
+        const isString = typeof key === "string"
+        let lastUsed =
+            isString
+                ? this.map.get(key)
+            : this.weak.get(key)
+        if (!lastUsed) {
+            const now = Date.now()
+            if (isString) {
+                this.map.set(key, now)
+            } else {
+                this.weak.set(key, now)
+            }
+            return false
+        }
+        return (Date.now() - lastUsed) < 250
+    }
+
+}
+
+const debouncer = new Debounce()
 const handleEventActions = (/** @type {string} */ type, /** @type {boolean} */ preventDefault = false) =>
     async function (/** @type {MouseEvent} */ e) {
         let target = e.target
         if (target && (target instanceof HTMLButtonElement || target instanceof HTMLInputElement || target instanceof HTMLFormElement) && target.constructor.name === type) {
-            let functions = action.get(target) || action.get(target.dataset.action)
-            functions &&
-                Promise.all(functions.map(f => f({element: target, event: e.type})))
+            let key =
+                action.has(target)
+                    ? target
+                : action.has(target.dataset.action)
+                    ? target.dataset.action
+                : null
+            if (debouncer.shouldSkip(key)) return
+            Promise
+                .all(action.get(key).map(f => f({ element: target, event: e.type })))
                 .catch((/** @type {any} */ error) => publish("error", { error, message: `An element was not properly handled for the event ${e.type}.`, target: e.target }))
             preventDefault && e.preventDefault()
         }
