@@ -1,8 +1,16 @@
 ---
 ---
 <h2>Charts</h2>
-<button id=chart-weight data-action=create-chart>Show Weight History</button>
-<button id=chart-weight-average data-action=create-chart>Show Average</button>
+<button id=chart-weight-btn data-action=create-chart data-target=chart-weight-template>Show Weight History</button>
+<button id=chart-weight-average-btn data-action=create-chart data-target=chart-weight-average-template>Show Average</button>
 <div id=charts-location></div>
+
+<template id=chart-weight-template>
+<div><canvas id=chart-weight></canvas></div>
+</template>
+
+<template id=chart-weight-average-template>
+<div><canvas id=chart-weight-average></canvas></div>
+</template>
 
 <script src="/web/js/charts-page.js" async type=module></script>

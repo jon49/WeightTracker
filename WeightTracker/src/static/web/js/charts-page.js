@@ -4,37 +4,36 @@
 import { get, getMany } from "./db.js"
 import { dateAdd, dateFill, getById } from "./utils.js"
 import { action } from "./actions.js"
+// @ts-ignore
+import { } from "https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"
 
 const red = "#ff6384", blue = "#6391ff", green = "#63ff83"
+const chartsLocation = getById("charts-location")
 
-let weightChart, weightAverageChart
+/**
+ * @param {HTMLButtonElement} button
+ */
+function hide(button) {
+    button.classList.add("hidden")
+}
+
+const charts = {
+    "chart-weight": weightData,
+    "chart-weight-average": weightAverageChartData
+}
+
 action.set("create-chart", async ({ element }) => {
-    // This needs to be refactored. It's really messy!
+    /** @type {HTMLButtonElement} */
+    const e = element
+    hide(e)
+
+    const target = e.dataset.target
     // @ts-ignore
-    let { } = await import("https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js")
-    const id = element.id,
-          canvas = document.createElement("div")
-    canvas.innerHTML = `<canvas id=${id}></canvas>`
-    let data =
-        id === "chart-weight"
-            ? await weightData()
-        : id === "chart-weight-average"
-            ? await weightAverageChartData()
-        : null
-    element.remove()
-    getById("charts-location").prepend(canvas)
-    switch (id) {
-        case "chart-weight":
-            // @ts-ignore
-            weightChart = new Chart(id, data)
-            break;
-        case "chart-weight-average":
-            // @ts-ignore
-            weightAverageChart = new Chart(id, data)
-            break;
-        default:
-            break;
-    }
+    chartsLocation.prepend(getById(target).content.cloneNode(true))
+
+    const id = target.slice(0, -9)
+    // @ts-ignore
+    new Chart(id, await charts[id]())
 })
 
 async function weightAverageChartData() {
