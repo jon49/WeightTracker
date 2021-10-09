@@ -3,9 +3,9 @@
 // @ts-ignore
 import { get, getMany, set as set1, update as update1 } from "./lib/db.min.js"
 
-const _updated = async (/** @type {string} */ key) => update1("updated", (/** @type {?Set} */ val) => (val || new Set()).add(key))
+const _updated = async (/** @type {IDBValidKey} */ key) => update1("updated", (/** @type {?Set} */ val) => (val || new Set()).add(key))
 /**
- * @param {string} key
+ * @param {IDBValidKey} key
  * @param {*} value
  * @param {boolean} sync
  */
@@ -18,8 +18,8 @@ async function set(key, value, sync = true) {
 
 /**
  * @template T
- * @param {string} key
- * @param {(val: T) => T} f
+ * @param {IDBValidKey} key
+ * @param {(val: T | undefined) => T} f
  * @param {boolean} sync
  */
 async function update(key, f, sync = true) {
