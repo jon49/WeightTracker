@@ -8,7 +8,7 @@ public
 *.zip
 bin
 wwwroot
-!WeightTracker/src/static/node_modules/@types/globals.d.ts
+!WeightTracker/src/static/web/node_modules/@types/global.d.ts
 
 # Logs
 logs
