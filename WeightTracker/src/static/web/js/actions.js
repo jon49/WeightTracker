@@ -159,7 +159,7 @@ const handleEventActions = (/** @type {string} */ type, /** @type {boolean} */ p
                 : action.has(target.dataset.action)
                     ? target.dataset.action
                 : null
-            if (debouncer.shouldSkip(key)) return
+            if (!key || debouncer.shouldSkip(key)) return
             Promise
                 .all(action.get(key).map(f => f({ element: target, event: e.type })))
                 .catch((/** @type {any} */ error) => publish("error", { error, message: `An element was not properly handled for the event ${e.type}.`, target: e.target }))

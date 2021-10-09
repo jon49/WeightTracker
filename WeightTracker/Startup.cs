@@ -82,7 +82,14 @@ namespace WeightTracker
                 app.UseHsts();
             }
 
-            app.UseStaticFiles();
+            if (env.IsDevelopment())
+            {
+                var options = new DefaultFilesOptions();
+                options.DefaultFileNames.Clear();
+                options.DefaultFileNames.Add("index.html");
+                app.UseDefaultFiles(options);
+                app.UseStaticFiles();
+            }
 
             app.UseRouting();
 

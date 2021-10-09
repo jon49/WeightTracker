@@ -1,10 +1,9 @@
-/// <reference types="../@types/global" />
 // @ts-check
 
 import { get, getMany } from "./db.js"
 import { dateAdd, dateFill, getById } from "./utils.js"
 import { action } from "./actions.js"
-import { Chart } from "./lib/chart.min.js"
+import { } from "./lib/chart.min.js"
 
 const red = "#ff6384", blue = "#6391ff", green = "#63ff83"
 const chartsLocation = getById("charts-location")
@@ -31,6 +30,7 @@ action.set("create-chart", async ({ element }) => {
     chartsLocation.prepend(getById(target).content.cloneNode(true))
 
     const id = target.slice(0, -9)
+    // @ts-ignore
     new Chart(id, await charts[id]())
 })
 
@@ -40,8 +40,7 @@ async function weightAverageChartData() {
         dateAdd(startDate, -1)
     }
     const dates = dateFill(startDate, new Date())
-    /** @type {[WeightData?]} */
-    const rawValues = await getMany(dates)
+    const rawValues = /** @type {[DB.WeightData?]} */(await getMany(dates))
     const results = reduceSlice(dates, 7, (acc, x, i) => {
         let weight
         acc.date = acc.date ?? x
@@ -113,11 +112,10 @@ async function weightAverageChartData() {
 }
 
 async function weightData() {
-    const startDate = (/** @type {?Settings} */(await get("settings")))?.earliestDate
+    const startDate = (/** @type {?DB.UserSettings} */(await get("user-settings")))?.earliestDate
     if (!startDate) return
     const labels = dateFill(new Date(startDate), new Date())
-    /** @type {[WeightData?]} */
-    const rawValues = await getMany(labels)
+    const rawValues = /** @type {[DB.WeightData?]} */(await getMany(labels))
     const values = rawValues.map(x => x?.weight || null)
     const data = {
         labels: labels,

@@ -1,9 +1,11 @@
 // @ts-check
 
 // @ts-ignore
-import { get, getMany, set as set1, update as update1 } from "./lib/db.min.js"
+import { get, getMany, setMany, set as set1, update as update1 } from "./lib/db.min.js"
 
-const _updated = async (/** @type {IDBValidKey} */ key) => update1("updated", (/** @type {?Set} */ val) => (val || new Set()).add(key))
+const _updated =
+    async (/** @type {IDBValidKey} */ key) =>
+        update1("updated", (/** @type {?Set} */ val) => (val || new Set()).add(key))
 /**
  * @param {IDBValidKey} key
  * @param {*} value
@@ -20,13 +22,13 @@ async function set(key, value, sync = true) {
  * @template T
  * @param {IDBValidKey} key
  * @param {(val: T | undefined) => T} f
- * @param {boolean} sync
+ * @param {{sync: boolean}} sync
  */
-async function update(key, f, sync = true) {
+async function update(key, f, sync = { sync: true }) {
     await update1(key, f)
-    if (sync) {
+    if (sync.sync) {
         await _updated(key)
     }
 }
 
-export { update, set, get, getMany }
+export { update, set, get, getMany, setMany }

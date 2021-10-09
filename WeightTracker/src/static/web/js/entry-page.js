@@ -1,4 +1,3 @@
-/// <reference types="../@types/global" />
 // @ts-check
 
 import { action, publish, subscribe, sendEvent } from "./actions.js"
@@ -18,7 +17,7 @@ action.set(getById("entry-form"), async ({element: f}) => {
         console.error("Date is required!")
     }
 
-    /** @type {WeightData} */
+    /** @type {DB.WeightData} */
     const data = {
         bedtime: raw.bedtime,
         comments: raw.comments,
@@ -28,14 +27,15 @@ action.set(getById("entry-form"), async ({element: f}) => {
         weight: +raw.weight || null,
     }
     await set(data.date, data)
-    await update("settings", (/** @type {?Settings} */ settings) => {
+    let shouldSyncUserSettings = { sync: false }
+    await update("user-settings", (/** @type {?DB.UserSettings} */ settings) => {
         const earliestDate = settings?.earliestDate
         return !earliestDate
-            ? { ...settings, earliestDate: data.date }
+            ? (shouldSyncUserSettings.sync = true, { ...settings, earliestDate: data.date })
         : new Date(earliestDate) < new Date(data.date)
             ? settings
-        : { ...settings, earliestDate: data.date }
-    })
+        : (shouldSyncUserSettings.sync = true, { ...settings, earliestDate: data.date })
+    }, shouldSyncUserSettings)
 
     publish("entry-updated", { date: data.date })
 })
@@ -44,7 +44,7 @@ action.set(getById("entry-date"), async ({element}) => {
     /** @type {HTMLInputElement} */
     let e = element
     if (e.value?.length !== 10) return
-    /** @type {?WeightData} */
+    /** @type {?DB.WeightData} */
     const data = await get(e.value)
     const $form = e.form
     $form["weight"].value = data?.weight ?? null

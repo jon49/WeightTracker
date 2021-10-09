@@ -50,6 +50,9 @@ img {
 textarea {
     width: 100%;
 }
+button {
+    cursor: pointer;
+}
 
 .message {
     color: blue;
