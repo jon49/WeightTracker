@@ -4,8 +4,7 @@
 import { get, getMany } from "./db.js"
 import { dateAdd, dateFill, getById } from "./utils.js"
 import { action } from "./actions.js"
-// @ts-ignore
-import { } from "https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"
+import { Chart } from "./lib/chart.min.js"
 
 const red = "#ff6384", blue = "#6391ff", green = "#63ff83"
 const chartsLocation = getById("charts-location")
@@ -32,7 +31,6 @@ action.set("create-chart", async ({ element }) => {
     chartsLocation.prepend(getById(target).content.cloneNode(true))
 
     const id = target.slice(0, -9)
-    // @ts-ignore
     new Chart(id, await charts[id]())
 })
 
