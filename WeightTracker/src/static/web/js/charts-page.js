@@ -1,19 +1,13 @@
+/// <reference types="../node_modules/@types/global" />
 // @ts-check
 
 import { get, getMany } from "./db.js"
 import { dateAdd, dateFill, getById } from "./utils.js"
 import { action } from "./actions.js"
-import { } from "./lib/chart.min.js"
+import * as a from "./lib/chart.min.js"
 
 const red = "#ff6384", blue = "#6391ff", green = "#63ff83"
 const chartsLocation = getById("charts-location")
-
-/**
- * @param {HTMLButtonElement} button
- */
-function hide(button) {
-    button.classList.add("hidden")
-}
 
 const charts = {
     "chart-weight": weightData,
@@ -23,7 +17,7 @@ const charts = {
 action.set("create-chart", async ({ element }) => {
     /** @type {HTMLButtonElement} */
     const e = element
-    hide(e)
+    e.classList.add("hidden")
 
     const target = e.dataset.target
     // @ts-ignore
