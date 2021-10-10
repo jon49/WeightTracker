@@ -9,23 +9,23 @@ import * as a from "./lib/chart.min.js"
 const red = "#ff6384", blue = "#6391ff", green = "#63ff83"
 const chartsLocation = getById("charts-location")
 
-const charts = {
+const chartFunc = {
     "chart-weight": weightData,
     "chart-weight-average": weightAverageChartData
 }
 
+const charts = new Map()
 action.set("create-chart", async ({ element }) => {
     /** @type {HTMLButtonElement} */
     const e = element
     e.classList.add("hidden")
 
-    const target = e.dataset.target
+    const baseId = e.id.slice(0, -4)
     // @ts-ignore
-    chartsLocation.prepend(getById(target).content.cloneNode(true))
+    chartsLocation.prepend(getById(`${baseId}-template`).content.cloneNode(true))
 
-    const id = target.slice(0, -9)
     // @ts-ignore
-    new Chart(id, await charts[id]())
+    charts.set(baseId, new Chart(baseId, await chartFunc[id]()))
 })
 
 async function weightAverageChartData() {
