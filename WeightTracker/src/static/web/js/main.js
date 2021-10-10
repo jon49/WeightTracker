@@ -18,8 +18,7 @@ async function updateSyncButton() {
 
 subscribe.set("entry-updated", updateSyncButton)
 subscribe.set("data-synced", updateSyncButton)
-
-publish("data-synced", {})
+updateSyncButton()
 
 action.set("save", async _ => {
     const response = await fetch("/api/auth/logged-in")
