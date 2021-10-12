@@ -13,7 +13,7 @@ subscribe.set("error", async({ detail }) => {
 async function updateSyncButton() {
     const updated = /** @type {DB.Updated} */ (await get("updated"))
     const sync = /** @type {HTMLButtonElement} */ getById("sync")
-    sync.innerText = `Sync - ${updated.size}`
+    sync.innerText = `Sync - ${updated?.size ?? 0}`
 }
 
 subscribe.set("entry-updated", updateSyncButton)
@@ -25,7 +25,7 @@ action.set("save", async _ => {
     if (response.redirected) {
         window.location.href = response.url
     }
-    const updated = /** @type {DB.Updated} */ (await get("updated"))
+    const updated = /** @type {DB.Updated|undefined} */ (await get("updated")) ?? new Set
     const keys = Array.from(updated)
     const items = await getMany(keys)
     const data = new Array(updated.size)
