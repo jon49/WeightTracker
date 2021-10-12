@@ -13,7 +13,10 @@ subscribe.set("error", async({ detail }) => {
 async function updateSyncButton() {
     const updated = /** @type {DB.Updated} */ (await get("updated"))
     const sync = /** @type {HTMLButtonElement} */ getById("sync")
-    sync.innerText = `Sync - ${updated?.size ?? 0}`
+    const s = `Sync - ${updated?.size ?? 0}`
+    if (sync.innerText !== s) {
+        sync.innerText = s
+    }
 }
 
 subscribe.set("updated", updateSyncButton)
