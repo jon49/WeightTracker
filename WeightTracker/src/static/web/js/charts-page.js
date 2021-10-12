@@ -25,7 +25,7 @@ action.set("create-chart", async ({ element }) => {
     chartsLocation.prepend(getById(`${baseId}-template`).content.cloneNode(true))
 
     // @ts-ignore
-    charts.set(baseId, new Chart(baseId, await chartFunc[id]()))
+    charts.set(baseId, new Chart(baseId, await chartFunc[baseId]()))
 })
 
 async function weightAverageChartData() {
