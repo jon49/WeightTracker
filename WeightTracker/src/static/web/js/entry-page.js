@@ -2,17 +2,13 @@
 
 import { action, publish, subscribe, sendEvent } from "./actions.js"
 import { get, set, update } from "./db.js"
-import { dateToString, getById } from "./utils.js"
+import { dateToString, getById, getFormData } from "./utils.js"
 
 // @ts-ignore
 action.set(getById("entry-form"), async ({element: f}) => {
     if (!(f instanceof HTMLFormElement)) return
-    /** @type {{[key: string]: string}} */
-    const raw = {}
-    for (let input of new FormData(f)) {
-        // @ts-ignore
-        raw[input[0]] = input[1]
-    }
+    /** @type {Form.WeightData} */
+    const raw = getFormData(f)
     if (!/\d{4}-[01]\d-[0123]\d/.test(raw.date)) {
         console.error("Date is required!")
     }

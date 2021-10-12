@@ -3,17 +3,14 @@
 
 import { action, publish, subscribe } from "./actions.js";
 import { get, set } from "./db.js"
-import { getById } from "./utils.js";
+import { getById, getFormData } from "./utils.js";
 
 const form = document.forms[0]
 
 action.set(form, async ({element: f}) => {
     if (!(f instanceof HTMLFormElement)) return
-    const raw = {}
-    for (let input of new FormData(f)) {
-        // @ts-ignore
-        raw[input[0]] = input[1]
-    }
+    /** @type {Form.UserSettings} */
+    const raw = getFormData(f)
     /** @type {DB.UserSettings} */
     const data = {
         height: +raw.height || null,

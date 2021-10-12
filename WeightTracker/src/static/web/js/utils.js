@@ -1,3 +1,4 @@
+/// <reference types="../node_modules/@types/global" />
 // @ts-check
 
 export const getById = (/** @type {string} */ id) => document.getElementById(id)
@@ -32,4 +33,18 @@ export function dateFill(from, to) {
         dateAdd(from, 1)
     }
     return dates
+}
+
+/** @type {Form.getFormData} */
+export function getFormData(f) {
+    /** @type {{[key: string]: string}} */
+    const raw = {}
+    for (let input of new FormData(f)) {
+        /** @type {string} */
+        const key = input[0]
+        const value = input[1]
+        if (typeof value !== "string") continue
+        raw[key] = value
+    }
+    return raw
 }
