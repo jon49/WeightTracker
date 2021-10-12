@@ -1,6 +1,6 @@
 // @ts-check
 
-import { action, publish, subscribe, sendEvent } from "./actions.js"
+import { action, sendEvent } from "./actions.js"
 import { get, set, update } from "./db.js"
 import { dateToString, fillForm, getById, getFormData } from "./utils.js"
 
@@ -34,7 +34,7 @@ action.set(getById("entry-form"), async ({element: f}) => {
     }, shouldSyncUserSettings)
 
     getById("entry-message").innerText = "Saved!"
-    publish("clear-message", {}, { wait: 2e3 })
+    action.publish("clear-message", {}, { wait: 2e3 })
 })
 
 action.set(getById("entry-date"), async ({element}) => {
@@ -53,7 +53,7 @@ action.set(getById("entry-date"), async ({element}) => {
     fillForm(e.form, data)
 })
 
-subscribe.set("clear-message", async _ => {
+action.subscribe("clear-message", async _ => {
     getById("entry-message").innerHTML = "&nbsp;"
 })
 

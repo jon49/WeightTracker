@@ -1,7 +1,7 @@
 /// <reference types="../node_modules/@types/global" />
 // @ts-check
 
-import { action, publish, subscribe } from "./actions.js";
+import { action } from "./actions.js";
 import { get, set } from "./db.js"
 import { fillForm, getById, getFormData } from "./utils.js";
 
@@ -18,10 +18,10 @@ action.set(form, async ({element: f}) => {
     }
     await set("user-settings", data)
     getById("message").innerText = "Saved!"
-    publish("clear-message", {}, { wait: 2e3 })
+    action.publish("clear-message", {}, { wait: 2e3 })
 })
 
-subscribe.set("clear-message", async _ => {
+action.subscribe("clear-message", async _ => {
     getById("message").innerHTML = "&nbsp;"
 })
 

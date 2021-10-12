@@ -42,7 +42,7 @@ function Subscription() {
     }
 }
 
-export const subscribe = Subscription()
+const subscribe = Subscription()
 
 class Action {
     /** @type {WeakMap<HTMLElement, ActionFunction[]>} */
@@ -81,25 +81,33 @@ class Action {
             ? this.action.has(action)
         : this.ref.has(action)
     }
+
+    /**
+     * @param {string} event
+     * @param {any} detail
+     * @param {{ wait: number; }} [options]
+     */
+    publish(event, detail, options) {
+        if (options?.wait) {
+            let timeout = setTimeout(_ => {
+                document.dispatchEvent(new CustomEvent("jfn", { detail: { event, ...detail } }))
+                clearTimeout(timeout)
+            }, options.wait)
+        } else {
+            document.dispatchEvent(new CustomEvent("jfn", { detail: { event, ...detail } }))
+        }
+    }
+
+    /**
+     * @param {string} key 
+     * @param {{ (detail: any): Promise<void> }} f 
+     */
+    subscribe(key, f) {
+        subscribe.set(key, f)
+    }
 }
 
 export const action = new Action()
-
-/**
- * @param {string} event
- * @param {any} detail
- * @param {{ wait: number; }} [options]
- */
-export function publish(event, detail, options) {
-    if (options?.wait) {
-        let timeout = setTimeout(_ => {
-            document.dispatchEvent(new CustomEvent("jfn", { detail: { event, ...detail } }))
-            clearTimeout(timeout)
-        }, options.wait)
-    } else {
-        document.dispatchEvent(new CustomEvent("jfn", { detail: { event, ...detail } }))
-    }
-}
 
 /**
  * @param {HTMLElement} element
@@ -112,7 +120,7 @@ export function sendEvent(element, event) {
 window.addEventListener("hashchange", () =>
     route.has(location.hash)
         && route.get(location.hash)()
-            .catch((/** @type {any} */ x) => publish("error", { error: x, message: `Routing handler failed - ${location.hash}` }))
+            .catch((/** @type {any} */ x) => action.publish("error", { error: x, message: `Routing handler failed - ${location.hash}` }))
 )
 
 document.addEventListener("jfn", async e => {
@@ -120,7 +128,7 @@ document.addEventListener("jfn", async e => {
     const event = e?.detail?.event
     if (subscribe.has(event)) {
         for (const f of subscribe.get(event)) {
-            f(e).catch(x => publish("error", { message: `Handling event "${event}"" failed.`, error: x }))
+            f(e).catch(x => action.publish("error", { message: `Handling event "${event}"" failed.`, error: x }))
         }
     } else {
         console.warn(`Unknown event send on the event bus. ${event}`)
@@ -170,7 +178,7 @@ const handleEventActions = (/** @type {string} */ type, /** @type {boolean} */ p
             if (!key || debouncer.shouldSkip(key)) return
             Promise
                 .all(action.get(key).map(f => f({ element: target, event: e.type })))
-                .catch((/** @type {any} */ error) => publish("error", { error, message: `An element was not properly handled for the event ${e.type}.`, target: e.target }))
+                .catch((/** @type {any} */ error) => action.publish("error", { error, message: `An element was not properly handled for the event ${e.type}.`, target: e.target }))
             preventDefault && e.preventDefault()
         }
     }

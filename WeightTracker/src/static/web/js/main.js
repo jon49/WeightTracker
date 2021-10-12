@@ -1,11 +1,11 @@
 /// <reference types="../node_modules/@types/global" />
 // @ts-check
 
-import { subscribe, action, publish } from "./actions.js"
+import { action } from "./actions.js"
 import { get, getMany, setMany, update } from "./db.js"
 import { getById } from "./utils.js"
 
-subscribe.set("error", async({ detail }) => {
+action.subscribe("error", async({ detail }) => {
     console.error(detail.message)
     console.log(detail.error)
 })
@@ -19,8 +19,8 @@ async function updateSyncButton() {
     }
 }
 
-subscribe.set("updated", updateSyncButton)
-subscribe.set("data-synced", updateSyncButton)
+action.subscribe("updated", updateSyncButton)
+action.subscribe("data-synced", updateSyncButton)
 updateSyncButton()
 
 action.set("save", async _ => {
@@ -49,13 +49,13 @@ action.set("save", async _ => {
     if (res.status >= 200 && res.status <= 299) {
         newData = await res.json()
     } else {
-        publish("error", { error: res.statusText, message: "Could not sync data!" })
+        action.publish("error", { error: res.statusText, message: "Could not sync data!" })
         return
     }
 
     await setMany(newData.data)
     await update("settings", val => ({ ...val, lastSyncedId: newData.lastSyncedId }), { sync: false })
     await update("updated", (/** @type {DB.Updated} */val) => (val.clear(), val), { sync: false })
-    publish("data-synced", {})
+    action.publish("data-synced", {})
 })
 
