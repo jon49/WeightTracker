@@ -1,0 +1,1 @@
+hugo -s . -d ..\wwwroot -w -t web --cleanDestinationDir
