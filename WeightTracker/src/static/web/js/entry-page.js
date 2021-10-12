@@ -2,7 +2,7 @@
 
 import { action, publish, subscribe, sendEvent } from "./actions.js"
 import { get, set, update } from "./db.js"
-import { dateToString, getById, getFormData } from "./utils.js"
+import { dateToString, fillForm, getById, getFormData } from "./utils.js"
 
 // @ts-ignore
 action.set(getById("entry-form"), async ({element: f}) => {
@@ -42,13 +42,15 @@ action.set(getById("entry-date"), async ({element}) => {
     let e = element
     if (e.value?.length !== 10) return
     /** @type {?DB.WeightData} */
-    const data = await get(e.value)
-    const $form = e.form
-    $form["weight"].value = data?.weight ?? null
-    $form["bedtime"].value = data?.bedtime ?? null
-    $form["sleep"].value = data?.sleep ?? null
-    $form["waist"].value = data?.waist ?? null
-    $form["comments"].value = data?.comments ?? null
+    const data = (await get(e.value)) || {
+        date: e.value,
+        bedtime: null,
+        comments: null,
+        sleep: null,
+        waist: null,
+        weight: null
+    }
+    fillForm(e.form, data)
 })
 
 subscribe.set("clear-message", async _ => {

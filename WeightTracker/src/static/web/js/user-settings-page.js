@@ -3,7 +3,7 @@
 
 import { action, publish, subscribe } from "./actions.js";
 import { get, set } from "./db.js"
-import { getById, getFormData } from "./utils.js";
+import { fillForm, getById, getFormData } from "./utils.js";
 
 const form = document.forms[0]
 
@@ -28,8 +28,5 @@ subscribe.set("clear-message", async _ => {
 ;(async function() {
     /** @type {DB.UserSettings | undefined} */
     const settings = await get("user-settings")
-    if (settings) {
-        form.height.value = settings.height
-        form.earliestDate.value = settings.earliestDate
-    }
+    fillForm(form, settings)
 })()

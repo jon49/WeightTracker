@@ -48,3 +48,16 @@ export function getFormData(f) {
     }
     return raw
 }
+
+/**
+ * @param {HTMLFormElement} f
+ * @param {{ [x: string]: any; }} data
+ */
+export function fillForm(f, data) {
+    if (!(f instanceof HTMLFormElement) || !data) return
+    for (const key of Object.keys(data)) {
+        if (f[key]) {
+            f[key].value = data[key]
+        }
+    }
+}
