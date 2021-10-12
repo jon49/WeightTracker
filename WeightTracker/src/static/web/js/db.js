@@ -2,10 +2,14 @@
 
 // @ts-ignore
 import { get, getMany, setMany, set as set1, update as update1 } from "./lib/db.min.js"
+import { publish } from "./actions.js"
 
 const _updated =
-    async (/** @type {IDBValidKey} */ key) =>
-        update1("updated", (/** @type {?Set} */ val) => (val || new Set()).add(key))
+    async (/** @type {IDBValidKey} */ key) => {
+        await update1("updated", (/** @type {?Set} */ val) => (val || new Set()).add(key))
+        publish("updated", { key })
+    }
+
 /**
  * @param {IDBValidKey} key
  * @param {*} value

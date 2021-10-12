@@ -16,7 +16,7 @@ async function updateSyncButton() {
     sync.innerText = `Sync - ${updated?.size ?? 0}`
 }
 
-subscribe.set("entry-updated", updateSyncButton)
+subscribe.set("updated", updateSyncButton)
 subscribe.set("data-synced", updateSyncButton)
 updateSyncButton()
 
