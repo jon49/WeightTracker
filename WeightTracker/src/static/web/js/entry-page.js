@@ -37,7 +37,8 @@ action.set(getById("entry-form"), async ({element: f}) => {
         : (shouldSyncUserSettings.sync = true, { ...settings, earliestDate: data.date })
     }, shouldSyncUserSettings)
 
-    publish("entry-updated", { date: data.date })
+    getById("entry-message").innerText = "Saved!"
+    publish("clear-message", {}, { wait: 2e3 })
 })
 
 action.set(getById("entry-date"), async ({element}) => {
@@ -52,11 +53,10 @@ action.set(getById("entry-date"), async ({element}) => {
     $form["sleep"].value = data?.sleep ?? null
     $form["waist"].value = data?.waist ?? null
     $form["comments"].value = data?.comments ?? null
-    getById("entry-message").innerHTML = "&nbsp;"
 })
 
-subscribe.set("entry-updated", async _ => {
-    getById("entry-message").innerText = "Saved!"
+subscribe.set("clear-message", async _ => {
+    getById("entry-message").innerHTML = "&nbsp;"
 })
 
 ;(async function start() {

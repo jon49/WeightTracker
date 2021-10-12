@@ -153,3 +153,11 @@ function reduceSlice(data, step, f, init) {
   }
   return arr
 }
+
+;(async function() {
+    const userSettings = /** @type {DB.UserSettings | undefined} */ await get("user-settings")
+    if (!userSettings?.height) {
+        // @ts-ignore
+        getById("stats-message").classList.remove("hidden")
+    }
+})()

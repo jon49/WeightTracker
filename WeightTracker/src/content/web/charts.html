@@ -1,6 +1,16 @@
 ---
 ---
 <h2>Charts</h2>
+
+<div>
+    <h3>Stats</h3>
+    <p class=hidden id=stats-message><a href="/web/user-settings/edit">Would you like to see your stats? Click here and add some information.</a></p>
+    <table class=hidden id=stats>
+        <thead> <tr> <th>BMI Prime</th> <th>Weeks to Go</th> <th>Deviation</th> <th>Goal</th> <th>Weight</th> <th>Rate</th> </tr> </thead>
+        <tbody><tr> <td id=bmi></td><td id=weeks></td><td id=deviation></td><td id=goal></td><td id=weight></td><td id=rate></td> </tr></tbody>
+    </table>
+</div>
+
 <button id=chart-weight-btn data-action=create-chart>Show Weight History</button>
 <button id=chart-weight-average-btn data-action=create-chart>Show Average</button>
 <div id=charts-location></div>

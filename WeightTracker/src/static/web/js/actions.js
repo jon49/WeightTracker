@@ -88,9 +88,17 @@ export const action = new Action()
 /**
  * @param {string} event
  * @param {any} detail
+ * @param {{ wait: number; }} [options]
  */
-export function publish(event, detail) {
-    document.dispatchEvent(new CustomEvent("jfn", { detail: { event, ...detail } }))
+export function publish(event, detail, options) {
+    if (options?.wait) {
+        let timeout = setTimeout(_ => {
+            document.dispatchEvent(new CustomEvent("jfn", { detail: { event, ...detail } }))
+            clearTimeout(timeout)
+        }, options.wait)
+    } else {
+        document.dispatchEvent(new CustomEvent("jfn", { detail: { event, ...detail } }))
+    }
 }
 
 /**
