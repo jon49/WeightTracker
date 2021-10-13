@@ -1,5 +1,5 @@
 // @ts-check
-const CACHE_NAME = "web-v0"
+const CACHE_NAME = "web-v2"
 
 self.addEventListener("install", e => {
     console.log(`Installing version '${CACHE_NAME}' service worker.`)

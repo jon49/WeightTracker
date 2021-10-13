@@ -20,8 +20,10 @@ action.set(form, async ({element: f}) => {
     action.publish("user-message", { message: "Saved!" })
 })
 
-;(async function() {
-    /** @type {DB.UserSettings | undefined} */
-    const settings = await get("user-settings")
-    fillForm(form, settings)
-})()
+async function fill() {
+    fillForm(form, await get("user-settings"))
+}
+
+action.subscribe("data-synced", fill)
+
+fill()

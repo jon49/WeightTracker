@@ -52,6 +52,10 @@ action.set(getById("entry-date"), async ({element}) => {
     fillForm(e.form, data)
 })
 
+action.subscribe("data-synced", async _ => {
+    sendEvent(getById("entry-date"), "change")
+})
+
 ;(async function start() {
     /** @type {HTMLInputElement} */
     // @ts-ignore
