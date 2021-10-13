@@ -24,10 +24,19 @@ action.subscribe("data-synced", updateSyncButton)
 updateSyncButton()
 
 action.set("save", async _ => {
-    const response = await fetch("/api/auth/logged-in")
-    if (response.redirected) {
-        window.location.href = response.url
-    }
+    let success = true
+    await fetch("/api/auth/logged-in")
+    .then(response => {
+        if (response.redirected) {
+            window.location.href = response.url
+        }
+    })
+    .catch(error => {
+        action.publish("error", { error, message: "Could not contact back end." })
+        action.publish("user-message", { message: "Could not sync. Are you online?" })
+        success = false
+    })
+    if (!success) return
     const updated = /** @type {DB.Updated|undefined} */ (await get("updated")) ?? new Set
     const keys = Array.from(updated)
     const items = await getMany(keys)
@@ -59,6 +68,9 @@ action.set("save", async _ => {
     action.publish("data-synced", {})
 })
 
+/**
+ * @param {string} message
+ */
 function showSnackBar(message) {
     const $snack = document.createElement("snack-bar")
     $snack.classList.add("show")
@@ -71,6 +83,17 @@ function showSnackBar(message) {
 }
 
 action.subscribe("user-message", async ({ detail }) => {
-    if (!detail.message) return
-    showSnackBar(detail.message)
+    detail.message && showSnackBar(detail.message)
 })
+
+// SERVICE WORKER
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/web/sw.js').then(function(registration) {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }, function(error) {
+            action.publish("error", { error, message: "Service worker registration failed!" })
+        });
+    });
+}
