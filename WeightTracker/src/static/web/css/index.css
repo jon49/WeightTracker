@@ -69,3 +69,7 @@ button {
     border-width: 0px;
     height: 0;
 }
+
+footer {
+    font-size: 0.65em;
+}

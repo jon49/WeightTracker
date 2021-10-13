@@ -1,5 +1,15 @@
 // @ts-check
-const CACHE_NAME = "web-v2"
+const CACHE_NAME = "v1"
+
+// self.addEventListener("message", e => {
+//     if (e.data?.command === "getVersion") {
+//         if (e.ports[0]) {
+//             e.ports[0].postMessage({version: CACHE_NAME})
+//         } else if (self.postMessage) {
+//             self.postMessage({version: CACHE_NAME})
+//         }
+//     }
+// })
 
 self.addEventListener("install", e => {
     console.log(`Installing version '${CACHE_NAME}' service worker.`)
@@ -78,8 +88,14 @@ function createLinks(root, links, files = []) {
  * @returns {Promise<CacheResponse>}
  */
 async function getResponse(event)  {
+    /** @type {Request} */
     const req = event.request
     const url = normalizeUrl(req.url)
+    let command
+    if (command = req.headers.get("sw-command")) {
+        if (command === "getVersion") return { url, res: new Response(JSON.stringify({version: CACHE_NAME}), { status: 200, headers: { "Content-Type": "application/json" } }) }
+        return { url, res: new Response(null, {status: 400}) }
+    }
     if (url.endsWith("sw.js") || req.method == "POST") return { url, res: await fetch(req) }
     return cacheResponse(url, event)
 }
