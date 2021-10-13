@@ -56,4 +56,14 @@ button {
 
 .message {
     color: blue;
+    margin: 0;
+    padding: 0.25em;
+}
+
+#messages {
+    padding-top: 0.25em;
+    position: sticky;
+    top: 0;
+    border-width: 0px;
+    height: 0;
 }

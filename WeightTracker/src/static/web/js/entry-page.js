@@ -33,8 +33,7 @@ action.set(getById("entry-form"), async ({element: f}) => {
         : (shouldSyncUserSettings.sync = true, { ...settings, earliestDate: data.date })
     }, shouldSyncUserSettings)
 
-    getById("entry-message").innerText = "Saved!"
-    action.publish("clear-message", {}, { wait: 2e3 })
+    action.publish("user-message", { message: "Saved!" })
 })
 
 action.set(getById("entry-date"), async ({element}) => {
@@ -51,10 +50,6 @@ action.set(getById("entry-date"), async ({element}) => {
         weight: null
     }
     fillForm(e.form, data)
-})
-
-action.subscribe("clear-message", async _ => {
-    getById("entry-message").innerHTML = "&nbsp;"
 })
 
 ;(async function start() {

@@ -17,12 +17,7 @@ action.set(form, async ({element: f}) => {
         earliestDate: raw.earliestDate
     }
     await set("user-settings", data)
-    getById("message").innerText = "Saved!"
-    action.publish("clear-message", {}, { wait: 2e3 })
-})
-
-action.subscribe("clear-message", async _ => {
-    getById("message").innerHTML = "&nbsp;"
+    action.publish("user-message", { message: "Saved!" })
 })
 
 ;(async function() {

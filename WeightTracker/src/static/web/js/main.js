@@ -59,3 +59,18 @@ action.set("save", async _ => {
     action.publish("data-synced", {})
 })
 
+function showSnackBar(message) {
+    const $snack = document.createElement("snack-bar")
+    $snack.classList.add("show")
+    const $p = document.createElement("p")
+    $p.setAttribute("slot", "message")
+    $p.classList.add("message")
+    $p.textContent = message
+    $snack.append($p)
+    getById("messages").append($snack)
+}
+
+action.subscribe("user-message", async ({ detail }) => {
+    if (!detail.message) return
+    showSnackBar(detail.message)
+})
