@@ -64,7 +64,7 @@ action.set("save", async _ => {
 
     await setMany(newData.data)
     await update("settings", val => ({ ...val, lastSyncedId: newData.lastSyncedId }), { sync: false })
-    await update("updated", (/** @type {DB.Updated} */val) => (val.clear(), val), { sync: false })
+    await update("updated", (/** @type {DB.Updated} */val) => (val?.clear(), val), { sync: false })
     action.publish("data-synced", {})
 })
 
