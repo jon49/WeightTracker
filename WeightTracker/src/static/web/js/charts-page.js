@@ -5,6 +5,7 @@ import { get, getMany } from "./db.js"
 import { dateAdd, dateFill, getById } from "./utils.js"
 import { action } from "./actions.js"
 import * as a from "./lib/chart.min.js"
+import h from "./h.js"
 
 const red = "#ff6384", blue = "#6391ff", green = "#63ff83"
 const chartsLocation = getById("charts-location")
@@ -155,9 +156,60 @@ function reduceSlice(data, step, f, init) {
 }
 
 ;(async function() {
-    const userSettings = /** @type {DB.UserSettings | undefined} */ await get("user-settings")
-    if (!userSettings?.height) {
-        // @ts-ignore
-        getById("stats-message").classList.remove("hidden")
+//<tr> <td id=bmi></td><td id=weeks></td><td id=deviation></td><td id=goal></td><td id=weight></td><td id=rate></td> </tr>
+    /** @type {DB.UserSettings} */
+    const userSettings = await get("user-settings")
+    const now = new Date(),
+        startDate = getSunday(new Date()),
+        dates = dateFill(startDate, now),
+        /** @type {DB.WeightData[]} */
+        data = (await getMany(dates)).filter(x => x),
+        weights = data.filter(x => x.weight).map(x => x.weight),
+        averageWeight =
+            weights.length > 0 ?
+                weights
+                .reduce((acc, val) => acc + val, 0)/weights.length
+            : 0
+
+    let bmiPrime
+    if (userSettings?.height) {
+        bmiPrime = formatNumber(Math.round(averageWeight / Math.pow(userSettings.height, 2) * 703 / 25), 3)
     }
+    getById("stats").append(
+        h("tbody",
+            h("tr",
+                // BMI
+                h("td", bmiPrime || ""),
+                // Weeks to go
+                h("td", 0),
+                // Deviation during week
+                h("td", ""),
+                // Goal
+                h("td", ""),
+                // Average weight
+                h("td", formatNumber(averageWeight, 2)),
+                // Weight change rate
+                h("td", "")
+            )
+        ).el)
 })()
+
+/**
+ * @param {number} number
+ * @param {number} precision
+ * @returns {string}
+ */
+function formatNumber(number, precision) {
+    let multiplier = Math.pow(10, precision)
+    return (Math.round(number * multiplier) / multiplier).toFixed(precision)
+}
+
+/**
+ * @param {Date} startDate
+ */
+function getSunday(startDate) {
+    while (startDate.getDay() > 0) {
+        dateAdd(startDate, -1)
+    }
+    return startDate
+}
