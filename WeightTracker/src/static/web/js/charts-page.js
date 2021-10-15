@@ -4,7 +4,7 @@
 import { get, getMany } from "./db.js"
 import { dateAdd, dateFill, getById } from "./utils.js"
 import { action } from "./actions.js"
-import * as a from "./lib/chart.min.js"
+import "./lib/chart.min.js"
 import h from "./h.js"
 
 const red = "#ff6384", blue = "#6391ff", green = "#63ff83"
