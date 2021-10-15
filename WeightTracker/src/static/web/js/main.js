@@ -4,6 +4,7 @@
 import { action } from "./actions.js"
 import { get, getMany, setMany, update } from "./db.js"
 import { getById } from "./utils.js"
+import { h } from "./dom.js"
 
 action.subscribe("error", async({ detail }) => {
     console.error(detail.message)
@@ -69,17 +70,12 @@ action.set("save", async _ => {
 })
 
 /**
- * @param {string} message
+ * @param {string} text
  */
-function showSnackBar(message) {
-    const $snack = document.createElement("snack-bar")
-    $snack.classList.add("show")
-    const $p = document.createElement("p")
-    $p.setAttribute("slot", "message")
-    $p.classList.add("message")
-    $p.textContent = message
-    $snack.append($p)
-    getById("messages").append($snack)
+function showSnackBar(text) {
+    getById("messages").append(
+        h(["snack-bar", { class: "show" },
+            h(["p", { slot: "message", class: "message", text }]) ]).el)
 }
 
 action.subscribe("user-message", async ({ detail }) => {
