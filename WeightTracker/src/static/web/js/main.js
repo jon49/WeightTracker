@@ -4,7 +4,7 @@
 import { action } from "./actions.js"
 import { get, getMany, setMany, update } from "./db.js"
 import { getById } from "./utils.js"
-import { h } from "./dom.js"
+import h from "./h.js"
 
 action.subscribe("error", async({ detail }) => {
     console.error(detail.message)
@@ -74,8 +74,8 @@ action.set("save", async _ => {
  */
 function showSnackBar(text) {
     getById("messages").append(
-        h(["snack-bar", { class: "show" },
-            h(["p", { slot: "message", class: "message", text }]) ]).el)
+        h("snack-bar", { class: "show" },
+            h("p", { slot: "message", class: "message", text }) ).el)
 }
 
 action.subscribe("user-message", async ({ detail }) => {
