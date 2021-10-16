@@ -155,26 +155,34 @@ function reduceSlice(data, step, f, init) {
   return arr
 }
 
-;(async function() {
-//<tr> <td id=bmi></td><td id=weeks></td><td id=deviation></td><td id=goal></td><td id=weight></td><td id=rate></td> </tr>
+setupStats()
+
+async function setupStats() {
     /** @type {DB.UserSettings} */
     const userSettings = await get("user-settings")
     const now = new Date(),
         startDate = getSunday(new Date()),
         dates = dateFill(startDate, now),
         /** @type {DB.WeightData[]} */
+        previousData = await getMany(dateFill(dateAdd(new Date(startDate), -7), dateAdd(new Date(startDate), -1))),
+        /** @type {DB.WeightData[]} */
         data = (await getMany(dates)).filter(x => x),
-        weights = data.filter(x => x.weight).map(x => x.weight),
-        averageWeight =
-            weights.length > 0 ?
-                weights
-                .reduce((acc, val) => acc + val, 0)/weights.length
+        weights = data.filter(x => x?.weight).map(x => x.weight),
+        averageWeight = avg(weights),
+        previousWeightAvg = avg(previousData.filter(x => x?.weight).map(x => x.weight)),
+        std =
+            weights.length > 0
+                ? Math.sqrt(avg(weights.map(x => Math.pow(averageWeight - x, 2))))
             : 0
 
     let bmiPrime
+    let goalWeight
     if (userSettings?.height) {
-        bmiPrime = formatNumber(Math.round(averageWeight / Math.pow(userSettings.height, 2) * 703 / 25), 3)
+        let heightSquared = Math.pow(userSettings.height, 2)
+        bmiPrime = formatNumber(Math.round(averageWeight / heightSquared * 703 / 25), 3)
+        goalWeight = 25 * heightSquared / 703
     }
+    goalWeight = formatNumber(userSettings?.goalWeight ?? goalWeight, 2)
     getById("stats").append(
         h("tbody",
             h("tr",
@@ -183,16 +191,16 @@ function reduceSlice(data, step, f, init) {
                 // Weeks to go
                 h("td", 0),
                 // Deviation during week
-                h("td", ""),
+                h("td", formatNumber(std, 2)),
                 // Goal
-                h("td", ""),
+                h("td",  goalWeight),
                 // Average weight
                 h("td", formatNumber(averageWeight, 2)),
                 // Weight change rate
-                h("td", "")
+                h("td", formatNumber(averageWeight - previousWeightAvg, 2))
             )
         ).el)
-})()
+}
 
 /**
  * @param {number} number
@@ -200,6 +208,7 @@ function reduceSlice(data, step, f, init) {
  * @returns {string}
  */
 function formatNumber(number, precision) {
+    if (!number || Number.isNaN(number)) return
     let multiplier = Math.pow(10, precision)
     return (Math.round(number * multiplier) / multiplier).toFixed(precision)
 }
@@ -212,4 +221,15 @@ function getSunday(startDate) {
         dateAdd(startDate, -1)
     }
     return startDate
+}
+
+/**
+ * @param {number[] | undefined} numbers
+ * @returns {number}
+ */
+function avg(numbers) {
+    return numbers?.length > 0
+        ? numbers
+          .reduce((acc, x) => acc + x, 0) / numbers.length
+    : 0
 }
