@@ -246,3 +246,7 @@ a.external {
 footer {
     font-size: 0.65em;
 }
+
+.hidden {
+    display: none !important;
+}
