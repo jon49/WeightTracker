@@ -56,11 +56,11 @@ action.subscribe("data-synced", async _ => {
     sendEvent(getById("entry-date"), "change")
 })
 
-;(async function start() {
+action.subscribe("start", async () => {
     /** @type {HTMLInputElement} */
     // @ts-ignore
     const $date = getById("entry-date")
     if ($date.value.length === 10) return
     $date.value = dateToString(new Date())
     sendEvent($date, "change")
-})()
+})

@@ -22,7 +22,6 @@ async function updateSyncButton() {
 
 action.subscribe("updated", updateSyncButton)
 action.subscribe("data-synced", updateSyncButton)
-updateSyncButton()
 
 action.set("save", async _ => {
     let success = true
@@ -82,38 +81,45 @@ action.subscribe("user-message", async ({ detail }) => {
     detail.message && showSnackBar(detail.message)
 })
 
-// SERVICE WORKER
+action.subscribe("start", async () => {
 
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/web/sw.js').then(function(registration) {
-            console.log('ServiceWorker registration successful with scope: ', registration.scope);
-            fetch("/web", { headers: {"sw-command": "getVersion"} })
-            .then(x => {
-                if (x.headers.get("Content-Type")?.startsWith("application/json")) return x.json()
-                return Promise.reject("Not a JSON response.")
-            })
-            .then(x => {
-                if (x?.version) {
-                    const $ = document.getElementsByTagName("footer")[0]
-                    if (!$) return
-                    $.innerHTML = `<p>Version ${x.version}</p>`
-                }
-            })
-            .catch(error => action.publish("error", {error, message: "Couldn't get version from service worker."}))
-        }, function(error) {
-            action.publish("error", { error, message: "Service worker registration failed!" })
+    updateSyncButton()
+
+    // SERVICE WORKER
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/web/sw.js').then(function(registration) {
+                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                fetch("/web", { headers: {"sw-command": "getVersion"} })
+                .then(x => {
+                    if (x.headers.get("Content-Type")?.startsWith("application/json")) return x.json()
+                    return Promise.reject("Not a JSON response.")
+                })
+                .then(x => {
+                    if (x?.version) {
+                        const $ = document.getElementsByTagName("footer")[0]
+                        if (!$) return
+                        $.innerHTML = `<p>Version ${x.version}</p>`
+                    }
+                })
+                .catch(error => action.publish("error", {error, message: "Couldn't get version from service worker."}))
+            }, function(error) {
+                action.publish("error", { error, message: "Service worker registration failed!" })
+            });
         });
-    });
 
-    // navigator.serviceWorker.addEventListener("message", e => {
-    //     if (e.data?.version) {
-    //         const $ = document.getElementsByTagName("footer")[0]
-    //         if (!$) return
-    //         $.innerHTML = `<p>Version '${e.data.version}'</p>`
-    //     }
-    // })
-    // if (navigator.serviceWorker?.controller?.postMessage) {
-    //     navigator.serviceWorker.controller.postMessage({command: "getVersion"})
-    // }
-}
+        // navigator.serviceWorker.addEventListener("message", e => {
+        //     if (e.data?.version) {
+        //         const $ = document.getElementsByTagName("footer")[0]
+        //         if (!$) return
+        //         $.innerHTML = `<p>Version '${e.data.version}'</p>`
+        //     }
+        // })
+        // if (navigator.serviceWorker?.controller?.postMessage) {
+        //     navigator.serviceWorker.controller.postMessage({command: "getVersion"})
+        // }
+    }
+})
+
+action.publish("start", {})

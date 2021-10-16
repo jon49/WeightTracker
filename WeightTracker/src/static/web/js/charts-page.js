@@ -164,7 +164,7 @@ function reduceSlice(data, step, f, init) {
   return arr
 }
 
-setupStats()
+action.subscribe("start", setupStats)
 
 async function setupStats() {
     /** @type {DB.UserSettings} */
@@ -192,22 +192,22 @@ async function setupStats() {
         goalWeight = 25 * heightSquared / 703
     }
     goalWeight = formatNumber(userSettings?.goalWeight ?? goalWeight, 2)
-    getById("stats").append(
-        h("tbody",
-            h("tr",
-                // BMI
-                h("td", bmiPrime || ""),
-                // Weeks to go
-                h("td", 0),
-                // Deviation during week
-                h("td", formatNumber(std, 2)),
-                // Goal
-                h("td",  goalWeight),
-                // Average weight
-                h("td", formatNumber(averageWeight, 2)),
-                // Weight change rate
-                h("td", formatNumber(averageWeight - previousWeightAvg, 2))
-            )
+    let $stats = getById("stats")
+    $stats.innerHTML = ""
+    $stats.appendChild(
+        h("tr",
+            // BMI
+            h("td", bmiPrime || ""),
+            // Weeks to go
+            h("td", 0),
+            // Deviation during week
+            h("td", formatNumber(std, 2)),
+            // Goal
+            h("td",  goalWeight),
+            // Average weight
+            h("td", formatNumber(averageWeight, 2)),
+            // Weight change rate
+            h("td", formatNumber(averageWeight - previousWeightAvg, 2))
         ).el)
 }
 

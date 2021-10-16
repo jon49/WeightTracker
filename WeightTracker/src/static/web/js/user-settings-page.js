@@ -41,4 +41,4 @@ async function updateGoalWeight() {
 
 action.subscribe("data-synced", fill)
 
-fill()
+action.subscribe("start", fill)
