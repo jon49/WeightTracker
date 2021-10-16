@@ -68,7 +68,12 @@ async function weightAverageChartData() {
     }
 
     const borderWidth = labels.length < 500 ? 2 : 1
-    const pointRadius = labels.length < 500 ? 2 : 0
+    const pointRadius =
+        labels.length < 500
+            ? 2
+        : labels.length > 750
+            ? 1
+        : 0
     const data = {
         labels,
         normalized: true,
@@ -112,6 +117,10 @@ async function weightData() {
     const labels = dateFill(new Date(startDate), new Date())
     const rawValues = /** @type {[DB.WeightData?]} */(await getMany(labels))
     const values = rawValues.map(x => x?.weight || null)
+    const pointRadius =
+        labels.length < 500
+            ? 2
+        : 1
     const data = {
         labels: labels,
         normalized: true,
@@ -122,7 +131,7 @@ async function weightData() {
             backgroundColor: red,
             borderColor: red,
             data: values,
-            pointRadius: values.length < 500 ? 1 : 0,
+            pointRadius,
             borderWidth: 1
         }]
     }
