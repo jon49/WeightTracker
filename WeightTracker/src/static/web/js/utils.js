@@ -7,8 +7,21 @@ export const getById = (/** @type {string} */ id) => document.getElementById(id)
  * @param {Date} date
  * @param {number} value
  */
-export function dateAdd(date, value) {
-    date.setDate(date.getDate() + value)
+export function dateAdd(date, value, mutate = false) {
+    let newDate = mutate ? date : new Date(date)
+    newDate.setDate(date.getDate() + value)
+    return newDate
+}
+
+/**
+ * @param {Date} date
+ * @param {number} targetDay
+ */
+export function getPreviousDay(date, targetDay) {
+    date = new Date(date)
+    while (date.getDay() !== targetDay) {
+        dateAdd(date, -1, true)
+    }
     return date
 }
 
@@ -25,12 +38,13 @@ export function dateToString(date) {
  * @returns {string[]}
  */
 export function dateFill(from, to) {
+    from = new Date(from)
     // 1e3*60*60*24 == 86,400,000 ms to days
     const count = ((+to - +from)/864e5 + 1) | 0
     const dates = new Array(count)
     for (let index = 0; index < count; index++) {
         dates[index] = dateToString(from)
-        dateAdd(from, 1)
+        dateAdd(from, 1, true)
     }
     return dates
 }

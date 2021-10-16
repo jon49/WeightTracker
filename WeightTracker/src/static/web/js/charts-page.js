@@ -2,7 +2,7 @@
 // @ts-check
 
 import { get, getMany } from "./db.js"
-import { dateAdd, dateFill, getById } from "./utils.js"
+import { dateAdd, dateFill, getById, getPreviousDay } from "./utils.js"
 import { action } from "./actions.js"
 import "./lib/chart.min.js"
 import h from "./h.js"
@@ -30,10 +30,7 @@ action.set("create-chart", async ({ element }) => {
 })
 
 async function weightAverageChartData() {
-    const startDate = dateAdd(new Date(), -274 /* 9 months */)
-    while (startDate.getDay() > 0) {
-        dateAdd(startDate, -1)
-    }
+    const startDate = getPreviousDay(dateAdd(new Date(), -274 /* 9 months */), 0 /* sunday */)
     const dates = dateFill(startDate, new Date())
     const rawValues = /** @type {[DB.WeightData?]} */(await getMany(dates))
     const results = reduceSlice(dates, 7, (acc, x, i) => {
@@ -170,10 +167,10 @@ async function setupStats() {
     /** @type {DB.UserSettings} */
     const userSettings = await get("user-settings")
     const now = new Date(),
-        startDate = getSunday(new Date()),
+        startDate = getPreviousDay(new Date(), 0),
         dates = dateFill(startDate, now),
         /** @type {DB.WeightData[]} */
-        previousData = await getMany(dateFill(dateAdd(new Date(startDate), -7), dateAdd(new Date(startDate), -1))),
+        previousData = await getMany(dateFill(dateAdd(startDate, -7), dateAdd(startDate, -1))),
         /** @type {DB.WeightData[]} */
         data = (await getMany(dates)).filter(x => x),
         weights = data.filter(x => x?.weight).map(x => x.weight),
@@ -220,16 +217,6 @@ function formatNumber(number, precision) {
     if (!number || Number.isNaN(number)) return
     let multiplier = Math.pow(10, precision)
     return (Math.round(number * multiplier) / multiplier).toFixed(precision)
-}
-
-/**
- * @param {Date} startDate
- */
-function getSunday(startDate) {
-    while (startDate.getDay() > 0) {
-        dateAdd(startDate, -1)
-    }
-    return startDate
 }
 
 /**
