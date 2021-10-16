@@ -61,3 +61,12 @@ export function fillForm(f, data) {
         }
     }
 }
+
+/**
+ * @param {number} number
+ * @param {number} precision
+ */
+export function round(number, precision) {
+    let p = Math.pow(10, precision)
+    return Math.round(number * p) / p
+}
