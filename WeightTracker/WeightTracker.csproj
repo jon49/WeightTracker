@@ -12,8 +12,4 @@
     <ProjectReference Include="..\WeightTracker.Data\WeightTracker.Data.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="src\static\web\node_modules\%40types\global.d.ts" />
-  </ItemGroup>
-
 </Project>
