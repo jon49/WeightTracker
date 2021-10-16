@@ -1,5 +1,5 @@
 // @ts-check
-const CACHE_NAME = "v2"
+const CACHE_NAME = "v3"
 
 // self.addEventListener("message", e => {
 //     if (e.data?.command === "getVersion") {
@@ -26,6 +26,7 @@ self.addEventListener("install", e => {
                         "charts-page.js",
                         "db.js",
                         "entry-page.js",
+                        "h.js",
                         "main.js",
                         "snack-bar.js",
                         "user-settings-page.js",
