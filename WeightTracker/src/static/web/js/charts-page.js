@@ -183,7 +183,7 @@ let weeklyData
  * @returns {Promise<WeeklyData>}
  */
 async function getWeeklyData() {
-    if (weeklyData) return
+    if (weeklyData) return weeklyData
     const startDate = getPreviousDay(dateAdd(new Date(), -274 /* 9 months */), 0 /* sunday */)
     const dates = dateFill(startDate, new Date())
     const rawValues = /** @type {[DB.WeightData?]} */(await getMany(dates))
