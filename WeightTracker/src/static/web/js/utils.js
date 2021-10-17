@@ -84,3 +84,47 @@ export function round(number, precision) {
     let p = Math.pow(10, precision)
     return Math.round(number * p) / p
 }
+
+/**
+ * @template T
+ * @param {string | any[]} data
+ * @param {number} step
+ * @param {(acc: T, val: any, index: number) => T} f
+ * @param {() => T} init
+ * @returns {T[]}
+ */
+export function reduceSlice(data, step, f, init) {
+  const length = data.length
+  const arr = new Array(Math.ceil(length/step))
+  for (let index = 0; index < length; index += step) {
+    let acc = init instanceof Function ? init() : init
+    for (let i = index; i < step + index && i < length; i++) {
+      acc = f(acc, data[i], i)
+    }
+    arr[(index/step)] = acc
+  }
+  return arr
+}
+
+/**
+ * @param {number[] | undefined} numbers
+ * @returns {number}
+ */
+export function avg(numbers) {
+    let filtered = numbers.filter(x => x)
+    return numbers?.length > 0
+        ? filtered
+          .reduce((acc, x) => acc + x, 0) / filtered.length
+    : 0
+}
+
+/**
+ * @param {number} number
+ * @param {number} precision
+ * @returns {string}
+ */
+export function formatNumber(number, precision) {
+    if (!number || Number.isNaN(number)) return
+    let multiplier = Math.pow(10, precision)
+    return (Math.round(number * multiplier) / multiplier).toFixed(precision)
+}

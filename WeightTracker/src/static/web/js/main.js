@@ -7,7 +7,7 @@ import { getById } from "./utils.js"
 import h from "./h.js"
 
 action.subscribe("error", async({ detail }) => {
-    console.error(detail.message)
+    console.warn(detail.message)
     console.log(detail.error)
 })
 

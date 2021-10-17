@@ -2,12 +2,13 @@
 // @ts-check
 
 import { get, getMany } from "./db.js"
-import { dateAdd, dateFill, getById, getPreviousDay } from "./utils.js"
+import { avg, dateAdd, dateFill, formatNumber, getById, getPreviousDay, reduceSlice } from "./utils.js"
 import { action } from "./actions.js"
 import "./lib/chart.min.js"
 import h from "./h.js"
 
 const red = "#ff6384", blue = "#6391ff", green = "#63ff83"
+
 const chartsLocation = getById("charts-location")
 
 const chartFunc = {
@@ -30,39 +31,7 @@ action.set("create-chart", async ({ element }) => {
 })
 
 async function weightAverageChartData() {
-    const startDate = getPreviousDay(dateAdd(new Date(), -274 /* 9 months */), 0 /* sunday */)
-    const dates = dateFill(startDate, new Date())
-    const rawValues = /** @type {[DB.WeightData?]} */(await getMany(dates))
-    const results = reduceSlice(dates, 7, (acc, x, i) => {
-        let weight
-        acc.date = acc.date ?? x
-        if ((weight = rawValues[i]?.weight) && !!weight) {
-            acc.min = 
-                acc.min === null
-                    ? weight
-                : Math.min(acc.min, weight)
-            acc.max =
-                acc.max === null
-                    ? weight
-                : Math.max(acc.max, weight)
-            acc.total += weight
-            acc.count++
-            return acc
-        }
-        return acc
-    }, () => /** @type {{min: null|number, max: null|number, total: number, count: number, date: string}} */({min: null, max: null, total: 0, count: 0, date: null}))
-
-    const labels = new Array(results.length)
-    const maxValues = new Array(results.length)
-    const minValues = new Array(results.length)
-    const avgValues = new Array(results.length)
-    for (let index = 0; index < results.length; index++) {
-        const r = results[index];
-        labels[index] = r.date
-        maxValues[index] = r.max
-        minValues[index] = r.min
-        avgValues[index] = r.count ? r.total/r.count : null
-    }
+    const { labels, maxValues, minValues, avgValues } = await getWeeklyData()
 
     const borderWidth = labels.length < 500 ? 2 : 1
     const pointRadius =
@@ -140,27 +109,6 @@ async function weightData() {
     return config
 }
 
-/**
- * @template T
- * @param {string | any[]} data
- * @param {number} step
- * @param {(acc: T, val: any, index: number) => T} f
- * @param {() => T} init
- * @returns {T[]}
- */
-function reduceSlice(data, step, f, init) {
-  const length = data.length
-  const arr = new Array(Math.ceil(length/step))
-  for (let index = 0; index < length; index += step) {
-    let acc = init instanceof Function ? init() : init
-    for (let i = index; i < step + index && i < length; i++) {
-      acc = f(acc, data[i], i)
-    }
-    arr[(index/step)] = acc
-  }
-  return arr
-}
-
 action.subscribe("start", setupStats)
 
 async function setupStats() {
@@ -182,13 +130,11 @@ async function setupStats() {
             : 0
 
     let bmiPrime
-    let goalWeight
+    let goalWeight = getGoalWeight(userSettings, averageWeight)
     if (userSettings?.height) {
         let heightSquared = Math.pow(userSettings.height, 2)
         bmiPrime = formatNumber(Math.round(averageWeight / heightSquared * 703 / 25), 3)
-        goalWeight = 25 * heightSquared / 703
     }
-    goalWeight = formatNumber(userSettings?.goalWeight ?? goalWeight, 2)
     let $stats = getById("stats")
     $stats.innerHTML = ""
     $stats.appendChild(
@@ -196,7 +142,7 @@ async function setupStats() {
             // BMI
             h("td", bmiPrime || ""),
             // Weeks to go
-            h("td", 0),
+            h("td", await weeksToGo()),
             // Deviation during week
             h("td", formatNumber(std, 2)),
             // Goal
@@ -208,24 +154,94 @@ async function setupStats() {
         ).el)
 }
 
+async function weeksToGo() {
+    /** @type {WeeklyData} */
+    const { avgValues } = await getWeeklyData(),
+        length = avgValues.length,
+        /** @type {DB.UserSettings} */
+        userSettings = await get("user-settings"),
+        currentWeight = avgValues[length - 1],
+        goalWeight = getGoalWeight(userSettings, currentWeight)
+    if (!goalWeight) return
+    let all = new Array(length - 1), neg = new Array(length - 1)
+    for (let index = 1; index < length; index++) {
+        let difference = avgValues[index] - avgValues[index - 1]
+        if (Number.isNaN(difference)) continue
+        all[index - 1] = difference
+        if (difference < 0) {
+            neg[index - 1] = difference
+        }
+    }
+    let avgAll = avg(all)
+    let avgNeg = -avg(neg)
+    let diff = currentWeight - +goalWeight
+    return `${formatNumber(diff/avgNeg, 1)} to ${formatNumber(diff/avgAll, 1)}`
+}
+
+let weeklyData
 /**
- * @param {number} number
- * @param {number} precision
- * @returns {string}
+ * @returns {Promise<WeeklyData>}
  */
-function formatNumber(number, precision) {
-    if (!number || Number.isNaN(number)) return
-    let multiplier = Math.pow(10, precision)
-    return (Math.round(number * multiplier) / multiplier).toFixed(precision)
+async function getWeeklyData() {
+    if (weeklyData) return
+    const startDate = getPreviousDay(dateAdd(new Date(), -274 /* 9 months */), 0 /* sunday */)
+    const dates = dateFill(startDate, new Date())
+    const rawValues = /** @type {[DB.WeightData?]} */(await getMany(dates))
+    const results = reduceSlice(dates, 7, (acc, x, i) => {
+        let weight
+        acc.date = acc.date ?? x
+        if ((weight = rawValues[i]?.weight) && !!weight) {
+            acc.min = 
+                acc.min === null
+                    ? weight
+                : Math.min(acc.min, weight)
+            acc.max =
+                acc.max === null
+                    ? weight
+                : Math.max(acc.max, weight)
+            acc.total += weight
+            acc.count++
+            return acc
+        }
+        return acc
+    }, () => /** @type {{min: null|number, max: null|number, total: number, count: number, date: string}} */({min: null, max: null, total: 0, count: 0, date: null}))
+
+    const labels = new Array(results.length)
+    const maxValues = new Array(results.length)
+    const minValues = new Array(results.length)
+    const avgValues = new Array(results.length)
+    for (let index = 0; index < results.length; index++) {
+        const r = results[index];
+        labels[index] = r.date
+        maxValues[index] = r.max
+        minValues[index] = r.min
+        avgValues[index] = r.count ? r.total/r.count : null
+    }
+
+    /** @type {WeeklyData} */
+    weeklyData = {labels, maxValues, minValues, avgValues}
+    return weeklyData
 }
 
 /**
- * @param {number[] | undefined} numbers
- * @returns {number}
+ * @typedef {Object} WeeklyData
+ * @property {string[]} labels
+ * @property {number[]} maxValues
+ * @property {number[]} avgValues
+ * @property {number[]} minValues
  */
-function avg(numbers) {
-    return numbers?.length > 0
-        ? numbers
-          .reduce((acc, x) => acc + x, 0) / numbers.length
-    : 0
+
+/**
+ * @param {DB.UserSettings} userSettings 
+ * @param {number} currentWeight
+ * @returns {string}
+ */
+function getGoalWeight(userSettings, currentWeight) {
+    let goalWeight
+    if (userSettings?.height) {
+        let heightSquared = Math.pow(userSettings.height, 2)
+        goalWeight = 25 * heightSquared / 703
+    }
+    goalWeight = formatNumber(userSettings?.goalWeight ?? goalWeight, 2)
+    return goalWeight
 }

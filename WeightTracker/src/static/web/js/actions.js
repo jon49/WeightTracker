@@ -177,7 +177,7 @@ const handleEventActions = (/** @type {string} */ type, /** @type {boolean} */ p
                 : null
             if (!key || debouncer.shouldSkip(key)) return
             Promise
-                .all(action.get(key).map(f => f({ element: target, event: e.type })))
+                .allSettled(action.get(key).map(f => f({ element: target, event: e.type })))
                 .catch((/** @type {any} */ error) => action.publish("error", { error, message: `An element was not properly handled for the event ${e.type}.`, target: e.target }))
             preventDefault && e.preventDefault()
         }
