@@ -1,5 +1,5 @@
 // @ts-check
-const CACHE_NAME = "v9"
+const CACHE_NAME = "v10"
 
 // self.addEventListener("message", e => {
 //     if (e.data?.command === "getVersion") {
@@ -47,15 +47,15 @@ self.addEventListener("fetch", e => {
 })
 
 self.addEventListener("activate", async e => {
-    // @ts-ignore
-    self.clients.claim()
     console.log(`Service worker activated. Cache version '${CACHE_NAME}'.`)
+    const keys = await caches.keys()
     // @ts-ignore
-    e.waitUntil(
-        Promise.all(
-            (await caches.keys())
-            .filter(x => x !== CACHE_NAME && x.startsWith("web-"))
-            .map(x => caches.delete(x))))
+    e.waitUntil(Promise.all(
+        keys
+        .map(x => {
+            if (CACHE_NAME !== x) return caches.delete(x)
+        })
+        .filter(x => x)))
 })
 
 /**
