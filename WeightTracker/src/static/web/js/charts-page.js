@@ -172,7 +172,7 @@ async function weeksToGo() {
             neg[index - 1] = difference
         }
     }
-    let avgAll = avg(all)
+    let avgAll = -avg(all)
     let avgNeg = -avg(neg)
     let diff = currentWeight - +goalWeight
     return `${formatNumber(diff/avgNeg, 1)} to ${formatNumber(diff/avgAll, 1)}`
