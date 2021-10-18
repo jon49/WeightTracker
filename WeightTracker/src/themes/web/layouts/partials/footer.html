@@ -1,4 +1,5 @@
 <footer></footer>
+{{ if isset .Params "js_file"}}<script src="{{.Params.js_file}}" defer type=module></script>{{ end }}
 <script src="/web/js/snack-bar.js" async></script>
 <script src="/web/sw.js" async></script>
 <script src="/web/js/main.js" defer type=module></script>
