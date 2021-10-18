@@ -74,7 +74,7 @@ action.set("save", async _ => {
 function showSnackBar(text) {
     getById("messages").append(
         h("snack-bar", { class: "show" },
-            h("p", { slot: "message", class: "message", text }) ).el)
+            h("p", { slot: "message", class: "message" }, text ) ).el)
 }
 
 action.subscribe("user-message", async ({ detail }) => {
