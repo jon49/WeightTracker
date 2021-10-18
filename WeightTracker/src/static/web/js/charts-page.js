@@ -134,7 +134,7 @@ async function setupStats() {
     let goalWeight = getGoalWeight(userSettings, averageWeight)
     if (userSettings?.height) {
         let heightSquared = Math.pow(userSettings.height, 2)
-        bmiPrime = formatNumber(Math.round(averageWeight / heightSquared * 703 / 25), 3)
+        bmiPrime = formatNumber(averageWeight / heightSquared * 703 / 25, 3)
     }
     let $stats = getById("stats")
     $stats.innerHTML = ""
