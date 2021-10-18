@@ -98,7 +98,8 @@ async function weightData() {
             borderColor: red,
             data: values,
             pointRadius,
-            borderWidth: 1
+            borderWidth: 1,
+            showLine: labels.length < 500
         }]
     }
     const config = {

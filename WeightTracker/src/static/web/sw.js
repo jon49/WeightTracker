@@ -1,5 +1,5 @@
 // @ts-check
-const CACHE_NAME = "v10"
+const CACHE_NAME = "v12"
 
 // self.addEventListener("message", e => {
 //     if (e.data?.command === "getVersion") {
