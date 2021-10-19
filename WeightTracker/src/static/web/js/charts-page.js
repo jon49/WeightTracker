@@ -152,7 +152,7 @@ async function setupStats() {
             h("td", formatNumber(averageWeight, 2)),
             // Weight change rate
             h("td", formatNumber(averageWeight - previousWeightAvg, 2))
-        ).el)
+        ))
 }
 
 async function weeksToGo() {
