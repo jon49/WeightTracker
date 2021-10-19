@@ -1,4 +1,5 @@
 // @ts-check
+
 function update(data = {}, refs) {
    Object.entries(data)
    .forEach(([key, val]) => {
@@ -45,21 +46,20 @@ export default (name, props, ...rest) => {
    const refs = { }
    const children = [];
    const nameType = typeof name;
-   const contains_attributes = typeof props === "object" && !(props instanceof Node || props.el);
+   const contains_attributes = typeof props === "object" && !(props instanceof Node || props.refs);
    let el;
    let template = false;
 
    if (nameType !== "string") {
       el = document.createDocumentFragment();
       template = true;
-      if (name.el) {
+      if (name.refs) {
          mergeRefs(refs, name.refs)
-         name = name.el
       }
       if (name instanceof Node) {
          children.push(name);
       }
-   } else    if (name === "svg") {
+   } else if (name === "svg") {
       el = document.createElementNS("http://www.w3.org/2000/svg", name);
    } else {
       el = document.createElement(name);
@@ -85,14 +85,16 @@ export default (name, props, ...rest) => {
       if (typeof child === "string") {
          el.appendChild(document.createTextNode(child))
       } else {
-         if (child.el) {
+         if (child.refs) {
             mergeRefs(refs, child.refs)
-            child = child.el
          }
-         el.appendChild(child instanceof Node ? child : document.createElement(child.el) )
+         el.appendChild(child instanceof Node ? child : document.createElement(child) )
       }
    });
 
-   return { el, refs, update: data => update(data, refs) };
-};
-
+   if (refs) {
+      el.refs = refs
+      el.update = data => update(data, refs)
+   }
+   return el
+}
