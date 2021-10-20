@@ -123,6 +123,14 @@ async function histogram() {
         }
     }
 
+    // Fill in missing values
+    const keys = Object.keys(values)
+    const length = +keys[keys.length - 1] - +keys[0] + 1
+    const start = +keys[0]
+    for (var i = 0; i < length; i++) {
+        values[i + start] = values[i + start] ?? 0
+    }
+
     const data = {
         normalized: true,
         parsing: false,
