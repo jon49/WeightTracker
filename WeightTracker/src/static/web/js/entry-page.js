@@ -56,7 +56,7 @@ action.subscribe("data-synced", async _ => {
     sendEvent(getById("entry-date"), "change")
 })
 
-action.subscribe("start", async () => {
+action.subscribe("start", async _ => {
     /** @type {HTMLInputElement} */
     // @ts-ignore
     const $date = getById("entry-date")

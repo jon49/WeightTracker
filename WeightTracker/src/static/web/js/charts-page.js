@@ -13,7 +13,8 @@ const chartsLocation = getById("charts-location")
 
 const chartFunc = {
     "chart-weight": weightData,
-    "chart-weight-average": weightAverageChartData
+    "chart-weight-average": weightAverageChartData,
+    "chart-histogram": histogram
 }
 
 const charts = new Map()
@@ -104,6 +105,38 @@ async function weightData() {
     }
     const config = {
         type: 'line',
+        data,
+        options: {}
+    }
+    return config
+}
+
+async function histogram() {
+    const startDate = (/** @type {?DB.UserSettings} */(await get("user-settings")))?.earliestDate
+    if (!startDate) return
+    const rawValues = /** @type {[DB.WeightData?]} */(await getMany(dateFill(new Date(startDate), new Date())))
+    const values = {}
+    for (let val of rawValues) {
+        let weight
+        if (weight = val?.weight | 0) {
+            values[weight] = (values[weight] | 0) + 1
+        }
+    }
+
+    const data = {
+        normalized: true,
+        parsing: false,
+        spanGaps: false,
+        datasets: [{
+            label: "Weight (Count)",
+            backgroundColor: red,
+            borderColor: red,
+            data: values,
+            borderWidth: 1,
+        }]
+    }
+    const config = {
+        type: 'bar',
         data,
         options: {}
     }

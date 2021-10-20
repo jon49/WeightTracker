@@ -11,8 +11,9 @@ js_file: /web/js/charts-page.js
     </table>
 </div>
 
-<button id=chart-weight-btn data-action=create-chart>Show Weight History</button>
-<button id=chart-weight-average-btn data-action=create-chart>Show Average</button>
+<button id=chart-weight-btn data-action=create-chart>Weight History</button>
+<button id=chart-weight-average-btn data-action=create-chart>Average</button>
+<button id=chart-histogram-btn data-action=create-chart>Histogram</button>
 <div id=charts-location></div>
 
 <template id=chart-weight-template>
@@ -21,4 +22,8 @@ js_file: /web/js/charts-page.js
 
 <template id=chart-weight-average-template>
     <div><canvas id=chart-weight-average></canvas></div>
+</template>
+
+<template id=chart-histogram-template>
+    <div><canvas id=chart-histogram></canvas></div>
 </template>
