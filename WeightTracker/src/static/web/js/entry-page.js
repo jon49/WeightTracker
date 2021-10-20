@@ -6,7 +6,6 @@ import { dateToString, fillForm, getById, getFormData } from "./utils.js"
 
 // @ts-ignore
 action.set(getById("entry-form"), async ({element: f}) => {
-    if (!(f instanceof HTMLFormElement)) return
     /** @type {Form.WeightData} */
     const raw = getFormData(f)
     if (!/\d{4}-[01]\d-[0123]\d/.test(raw.date)) {
