@@ -212,12 +212,10 @@ async function weeksToGo() {
     return `${formatNumber(diff/avgNeg, 1)} to ${formatNumber(diff/avgAll, 1)}`
 }
 
-let weeklyData
 /**
  * @returns {Promise<WeeklyData>}
  */
 async function getWeeklyData() {
-    if (weeklyData) return weeklyData
     const startDate = getPreviousDay(dateAdd(new Date(), -274 /* 9 months */), 0 /* sunday */)
     const dates = dateFill(startDate, new Date())
     const rawValues = /** @type {[DB.WeightData?]} */(await getMany(dates))
@@ -253,8 +251,7 @@ async function getWeeklyData() {
     }
 
     /** @type {WeeklyData} */
-    weeklyData = {labels, maxValues, minValues, avgValues}
-    return weeklyData
+    return {labels, maxValues, minValues, avgValues}
 }
 
 /**
