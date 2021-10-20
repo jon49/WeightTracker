@@ -175,10 +175,19 @@ const handleEventActions = (/** @type {string} */ type, /** @type {boolean} */ p
                 : action.has(target.dataset.action)
                     ? target.dataset.action
                 : null
+            if (!key) {
+                // @ts-ignore
+                key = target.closest("[data-action]")?.dataset?.action
+            }
             if (!key || debouncer.shouldSkip(key)) return
             Promise
                 .allSettled(action.get(key).map(f => f({ element: target, event: e.type })))
-                .catch((/** @type {any} */ error) => action.publish("error", { error, message: `An element was not properly handled for the event ${e.type}.`, target: e.target }))
+                .then(xs => {
+                    for (let fail of xs.filter(x => x.status === "rejected")) {
+                        // @ts-ignore
+                        action.publish("error", { error: fail.reason, message: `An element was not properly handled for the event ${e.type}.`, target, action: key })
+                    }
+                })
             preventDefault && e.preventDefault()
         }
     }
