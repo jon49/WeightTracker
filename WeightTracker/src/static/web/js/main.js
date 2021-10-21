@@ -21,7 +21,10 @@ async function updateSyncButton() {
 }
 
 action.subscribe("updated", updateSyncButton)
-action.subscribe("data-synced", updateSyncButton)
+action.subscribe("data-synced", async _ => {
+    action.publish("user-message", { message: "Data Synced!" })
+    updateSyncButton()
+})
 
 action.set("save", async _ => {
     let success = true
