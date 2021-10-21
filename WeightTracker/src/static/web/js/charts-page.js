@@ -178,7 +178,7 @@ async function rate() {
         let pos = null, neg = null
         if (first.avg && last.avg) {
             count++
-            const diff = first.avg - last.avg
+            const diff = last.avg - first.avg
             diff > 0 ? (pos = diff, allTotal += diff) : (neg = diff, allTotal += diff, negTotal += diff)
         }
         values[index - 1] = { pos, neg, x: last.date }
