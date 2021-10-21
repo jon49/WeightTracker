@@ -195,10 +195,12 @@ async function sleep() {
             scales: {
                 A: {
                     position: 'left',
+                    suggestedMin: 0,
                 },
                 B: {
                     position: 'right',
-                }
+                    suggestedMin: 0,
+                },
             }
         }
     }
