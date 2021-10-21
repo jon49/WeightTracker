@@ -86,12 +86,12 @@ export function round(number, precision) {
 }
 
 /**
- * @template T
- * @param {string | any[]} data
+ * @template T, S
+ * @param {T[]} data
  * @param {number} step
- * @param {(acc: T, val: any, index: number) => T} f
- * @param {() => T} init
- * @returns {T[]}
+ * @param {(acc: S, val: T, index: number) => S} f
+ * @param {() => S} init
+ * @returns {S[]}
  */
 export function reduceSlice(data, step, f, init) {
   const length = data.length
@@ -116,6 +116,16 @@ export function avg(numbers) {
         ? filtered
           .reduce((acc, x) => acc + x, 0) / filtered.length
     : 0
+}
+
+/**
+ * @param {number[] | undefined} numbers 
+ * @returns {number}
+ */
+export function stdev(numbers) {
+    if (!numbers) return 0
+    let average = avg(numbers)
+    return Math.sqrt(avg(numbers.map(x => Math.pow(average - x, 2))))
 }
 
 /**

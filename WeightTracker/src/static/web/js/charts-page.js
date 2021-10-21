@@ -2,7 +2,7 @@
 // @ts-check
 
 import { get, getMany } from "./db.js"
-import { avg, dateAdd, dateFill, formatNumber, getById, getPreviousDay, reduceSlice } from "./utils.js"
+import { avg, dateAdd, dateFill, formatNumber, getById, getPreviousDay, reduceSlice, stdev } from "./utils.js"
 import { action } from "./actions.js"
 import "./lib/chart.min.js"
 import h from "./h.js"
@@ -14,7 +14,8 @@ const chartsLocation = getById("charts-location")
 const chartFunc = {
     "chart-weight": weightData,
     "chart-weight-average": weightAverageChartData,
-    "chart-histogram": histogram
+    "chart-histogram": histogram,
+    "chart-sleep": sleep,
 }
 
 const charts = new Map()
@@ -151,7 +152,57 @@ async function histogram() {
     return config
 }
 
-action.subscribe("start", setupStats)
+async function sleep() {
+    const startDate = getPreviousDay(dateAdd(new Date(), -274 /* 9 months */), 0 /* sunday */)
+    const dates = dateFill(startDate, new Date())
+    const rawValues = /** @type {[DB.WeightData?]} */(await getMany(dates))
+    const values = reduceSlice(dates, 7, (acc, val, index) => {
+        if (acc.date) return acc
+        acc.date = val
+        const v = rawValues.slice(index, index + 7).filter(x => x?.sleep).map(x => x.sleep)
+        acc.avg = avg(v) || null
+        acc.std = stdev(v) || null
+        return acc
+    }, () => /** @type {{ date?: string, avg?: number, std?: number }} */({}))
+
+    const labels = values.map(x => x.date)
+    const data = {
+        labels: labels,
+        normalized: true,
+        parsing: false,
+        spanGaps: false,
+        datasets: [{
+            label: "Average Sleep for Week",
+            backgroundColor: red,
+            borderColor: red,
+            data: values.map(x => x.avg),
+            borderWidth: 1,
+            yAxisID: "A",
+        }, {
+            label: "Standard Deviation",
+            backgroundColor: green,
+            borderColor: green,
+            data: values.map(x => x.std),
+            borderWidth: 1,
+            yAxisID: "B",
+        }]
+    }
+
+    return {
+        type: "line",
+        data,
+        options: {
+            scales: {
+                A: {
+                    position: 'left',
+                },
+                B: {
+                    position: 'right',
+                }
+            }
+        }
+    }
+}
 
 async function setupStats() {
     /** @type {DB.UserSettings} */
@@ -166,10 +217,7 @@ async function setupStats() {
         weights = data.filter(x => x?.weight).map(x => x.weight),
         averageWeight = avg(weights),
         previousWeightAvg = avg(previousData.filter(x => x?.weight).map(x => x.weight)),
-        std =
-            weights.length > 0
-                ? Math.sqrt(avg(weights.map(x => Math.pow(averageWeight - x, 2))))
-            : 0
+        std = stdev(weights)
 
     let bmiPrime
     let goalWeight = getGoalWeight(userSettings, averageWeight)
@@ -284,3 +332,5 @@ function getGoalWeight(userSettings, currentWeight) {
     goalWeight = formatNumber(userSettings?.goalWeight ?? goalWeight, 2)
     return goalWeight
 }
+
+action.subscribe("start", setupStats)
