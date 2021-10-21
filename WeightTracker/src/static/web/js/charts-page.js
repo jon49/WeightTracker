@@ -16,6 +16,7 @@ const chartFunc = {
     "chart-weight-average": weightAverageChartData,
     "chart-histogram": histogram,
     "chart-sleep": sleep,
+    "chart-rate": rate,
 }
 
 const charts = new Map()
@@ -150,6 +151,78 @@ async function histogram() {
         options: {}
     }
     return config
+}
+
+async function rate() {
+    const startDate = getPreviousDay(dateAdd(new Date(), -274 - 7 /* 9 months */), 0 /* sunday */)
+    const dates = dateFill(startDate, new Date())
+    const rawValues = /** @type {[DB.WeightData?]} */(await getMany(dates))
+    const averages = reduceSlice(dates, 7, (acc, val, index) => {
+        if (acc.date) return acc
+        acc.date = val
+        const v = rawValues.slice(index, index + 7).filter(x => x?.weight).map(x => x.weight)
+        acc.avg = avg(v) || null
+        return acc
+    }, () => /** @type {{ date: string, avg: number | null }} */({}))
+    const length = averages.length
+    /** @type {{ x?: string, pos?: number|null, neg?: number|null, avgAll?: number, avgNeg?: number }[]} */
+    const values = new Array(length - 1)
+    /** @type {number|null} */
+    let allTotal = null
+    /** @type {number|null} */
+    let negTotal = null
+    let count = 0
+    for (let index = 1; index < length; index++) {
+        const first = averages[index - 1]
+        const last = averages[index]
+        let pos = null, neg = null
+        if (first.avg && last.avg) {
+            count++
+            const diff = first.avg - last.avg
+            diff > 0 ? (pos = diff, allTotal += diff) : (neg = diff, allTotal += diff, negTotal += diff)
+        }
+        values[index - 1] = { pos, neg, x: last.date }
+    }
+
+    const pointRadius = 0
+    const data = {
+        labels: values.map(x => x.x),
+        normalized: true,
+        parsing: false,
+        spanGaps: false,
+        datasets: [{
+            label: "Weight Gained",
+            backgroundColor: blue,
+            borderColor: blue,
+            data: values.map(x => x.pos),
+            borderWidth: 1,
+        }, {
+            label: "Weight Lost",
+            backgroundColor: red,
+            borderColor: red,
+            data: values.map(x => x.neg),
+            borderWidth: 1,
+        }, {
+            label: "Overall Weight Change",
+            backgroundColor: green,
+            borderColor: green,
+            data: new Array(length - 1).fill(allTotal/(count||1)),
+            borderWidth: 1,
+            pointRadius,
+        }, {
+            label: "Overall Weight Loss",
+            backgroundColor: red,
+            borderColor: red,
+            data: new Array(length - 1).fill(negTotal/(count||1)),
+            borderWidth: 1,
+            pointRadius,
+        }]
+    }
+    return {
+        type: "line",
+        data,
+        options: {}
+    }
 }
 
 async function sleep() {

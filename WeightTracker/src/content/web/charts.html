@@ -12,10 +12,11 @@ js_file: /web/js/charts-page.js
 </div>
 
 <div data-action=create-chart>
-    <button id=chart-weight-btn>Weight History</button>
+    <button id=chart-weight-btn>History</button>
     <button id=chart-weight-average-btn>Average</button>
     <button id=chart-histogram-btn>Histogram</button>
     <button id=chart-sleep-btn>Sleep</button>
+    <button id=chart-rate-btn>Rate</button>
 </div>
 <div id=charts-location></div>
 
@@ -33,4 +34,8 @@ js_file: /web/js/charts-page.js
 
 <template id=chart-sleep-template>
     <div><canvas id=chart-sleep></canvas></div>
+</template>
+
+<template id=chart-rate-template>
+    <div><canvas id=chart-rate></canvas></div>
 </template>
