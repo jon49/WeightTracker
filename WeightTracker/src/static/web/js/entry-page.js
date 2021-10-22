@@ -1,12 +1,13 @@
 // @ts-check
 
-import { action, sendEvent } from "./actions.js"
+import { publish, subscribe } from "./actions.js"
 import { get, set, update } from "./db.js"
 import { dateToString, fillForm, getById, getFormData } from "./utils.js"
 
 // @ts-ignore
-action.set(getById("entry-form"), async ({element: f}) => {
+subscribe(getById("entry-form"), async ({element: f}) => {
     /** @type {Form.WeightData} */
+    // @ts-ignore
     const raw = getFormData(f)
     if (!/\d{4}-[01]\d-[0123]\d/.test(raw.date)) {
         console.error("Date is required!")
@@ -32,11 +33,12 @@ action.set(getById("entry-form"), async ({element: f}) => {
         : (shouldSyncUserSettings.sync = true, { ...settings, earliestDate: data.date })
     }, shouldSyncUserSettings)
 
-    action.publish("user-message", { message: "Saved!" })
+    publish("user-message", { message: "Saved!" })
 })
 
-action.set(getById("entry-date"), async ({element}) => {
+subscribe(getById("entry-date"), async ({element}) => {
     /** @type {HTMLInputElement} */
+    // @ts-ignore
     let e = element
     if (e.value?.length !== 10) return
     /** @type {?DB.WeightData} */
@@ -51,15 +53,15 @@ action.set(getById("entry-date"), async ({element}) => {
     fillForm(e.form, data)
 })
 
-action.subscribe("data-synced", async _ => {
-    sendEvent(getById("entry-date"), "change")
+subscribe("data-synced", async _ => {
+    publish("change", getById("entry-date"))
 })
 
-action.subscribe("start", async _ => {
+subscribe("start", async _ => {
     /** @type {HTMLInputElement} */
     // @ts-ignore
     const $date = getById("entry-date")
     if ($date.value.length === 10) return
     $date.value = dateToString(new Date())
-    sendEvent($date, "change")
+    publish("change", $date)
 })

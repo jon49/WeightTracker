@@ -1,13 +1,13 @@
 /// <reference types="../node_modules/@types/global" />
 // @ts-check
 
-import { action } from "./actions.js";
+import { publish, subscribe } from "./actions.js";
 import { get, set } from "./db.js"
 import { fillForm, getFormData, round } from "./utils.js";
 
 const form = document.forms[0]
 
-action.set(form, async ({element: f}) => {
+subscribe(form, async ({element: f}) => {
     if (!(f instanceof HTMLFormElement)) return
     /** @type {Form.UserSettings} */
     const raw = getFormData(f)
@@ -18,10 +18,10 @@ action.set(form, async ({element: f}) => {
         goalWeight: +raw.goalWeight
     }
     await set("user-settings", data)
-    action.publish("user-message", { message: "Saved!" })
+    publish("user-message", { message: "Saved!" })
 })
 
-action.set(form.height, updateGoalWeight)
+subscribe(form.height, updateGoalWeight)
 
 async function fill() {
     fillForm(form, await get("user-settings"))
@@ -39,6 +39,6 @@ async function updateGoalWeight() {
     form.goalWeight.value = goalWeight
 }
 
-action.subscribe("data-synced", fill)
+subscribe("data-synced", fill)
 
-action.subscribe("start", fill)
+subscribe("start", fill)

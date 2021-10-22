@@ -3,7 +3,7 @@
 
 import { get, getMany } from "./db.js"
 import { avg, dateAdd, dateFill, formatNumber, getById, getPreviousDay, reduceSlice, stdev } from "./utils.js"
-import { action } from "./actions.js"
+import { subscribe } from "./actions.js"
 import "./lib/chart.min.js"
 import h from "./h.js"
 
@@ -20,8 +20,9 @@ const chartFunc = {
 }
 
 const charts = new Map()
-action.set("create-chart", async ({ element }) => {
+subscribe("create-chart", async ({ element }) => {
     /** @type {HTMLButtonElement} */
+    // @ts-ignore
     const e = element
     e.classList.add("hidden")
 
@@ -408,4 +409,4 @@ function getGoalWeight(userSettings, currentWeight) {
     return goalWeight
 }
 
-action.subscribe("start", setupStats)
+subscribe("start", setupStats)

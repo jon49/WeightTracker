@@ -1,14 +1,15 @@
 /// <reference types="../node_modules/@types/global" />
 // @ts-check
 
-import { action } from "./actions.js"
+import { publish, subscribe } from "./actions.js"
 import { get, getMany, setMany, update } from "./db.js"
 import { getById } from "./utils.js"
 import h from "./h.js"
 
-action.subscribe("error", async({ detail }) => {
-    console.warn(detail.message)
-    console.log(detail.error)
+// @ts-ignore
+subscribe("error", async ({ message, error }) => {
+    console.warn(message)
+    console.log(error)
 })
 
 async function updateSyncButton() {
@@ -20,13 +21,13 @@ async function updateSyncButton() {
     }
 }
 
-action.subscribe("updated", updateSyncButton)
-action.subscribe("data-synced", async _ => {
-    action.publish("user-message", { message: "Data Synced!" })
+subscribe("updated", updateSyncButton)
+subscribe("data-synced", async _ => {
+    publish("user-message", { message: "Data Synced!" })
     updateSyncButton()
 })
 
-action.set("save", async _ => {
+subscribe("save", async _ => {
     let success = true
     await fetch("/api/auth/logged-in")
     .then(response => {
@@ -35,8 +36,8 @@ action.set("save", async _ => {
         }
     })
     .catch(error => {
-        action.publish("error", { error, message: "Could not contact back end." })
-        action.publish("user-message", { message: "Could not sync. Are you online?" })
+        publish("error", { error, message: "Could not contact back end." })
+        publish("user-message", { message: "Could not sync. Are you online?" })
         success = false
     })
     if (!success) return
@@ -61,14 +62,14 @@ action.set("save", async _ => {
     if (res.status >= 200 && res.status <= 299) {
         newData = await res.json()
     } else {
-        action.publish("error", { error: res.statusText, message: "Could not sync data!" })
+        publish("error", { error: res.statusText, message: "Could not sync data!" })
         return
     }
 
     await setMany(newData.data)
     await update("settings", val => ({ ...val, lastSyncedId: newData.lastSyncedId }), { sync: false })
     await update("updated", (/** @type {DB.Updated} */val) => (val?.clear(), val), { sync: false })
-    action.publish("data-synced", {})
+    publish("data-synced", {})
 })
 
 /**
@@ -80,11 +81,12 @@ function showSnackBar(text) {
             h("p", { slot: "message", class: "message" }, text ) ))
 }
 
-action.subscribe("user-message", async ({ detail }) => {
-    detail.message && showSnackBar(detail.message)
+// @ts-ignore
+subscribe("user-message", async ({ message }) => {
+    message && showSnackBar(message)
 })
 
-action.subscribe("start", async () => {
+subscribe("start", async () => {
 
     updateSyncButton()
 
@@ -106,9 +108,9 @@ action.subscribe("start", async () => {
                         $.innerHTML = `<p>Version ${x.version}</p>`
                     }
                 })
-                .catch(error => action.publish("error", {error, message: "Couldn't get version from service worker."}))
+                .catch(error => publish("error", {error, message: "Couldn't get version from service worker."}))
             }, function(error) {
-                action.publish("error", { error, message: "Service worker registration failed!" })
+                publish("error", { error, message: "Service worker registration failed!" })
             });
         });
 
@@ -125,4 +127,4 @@ action.subscribe("start", async () => {
     }
 })
 
-action.publish("start", {})
+publish("start", {})
