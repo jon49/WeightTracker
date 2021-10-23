@@ -27,7 +27,7 @@ subscribe("data-synced", async _ => {
     updateSyncButton()
 })
 
-subscribe("save", async _ => {
+subscribe("sync", { lock: true }, async _ => {
     let success = true
     await fetch("/api/auth/logged-in")
     .then(response => {

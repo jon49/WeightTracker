@@ -4,20 +4,8 @@
 export const route = new Map()
 
 /**
- * @typedef Subscribe
- * @property {HTMLButtonElement|HTMLFormElement|HTMLInputElement|undefined} element
- * @property {string | undefined} event
- * @property {any | undefined} detail
- */
-
-/**
- * @typedef SubscribeFunction
- * @type {(d: Subscribe) => Promise<void>}
- */
-
-/**
  * @param {{has: (a: any) => boolean, get: (a: any) => any, set: (a: any, b: any) => void}} m
- * @param {SubscribeFunction} f
+ * @param {SubscribeOptions} f
  * @param {string | HTMLElement} a
  */
 function setFunction(m, f, a) {
@@ -29,26 +17,26 @@ function setFunction(m, f, a) {
 }
 
 class Action {
-    /** @type {WeakMap<HTMLElement, SubscribeFunction[]>} */
+    /** @type {WeakMap<HTMLElement, SubscribeOptions[]>} */
     ref = new WeakMap()
-    /** @type {Map<string, SubscribeFunction[]>} */
+    /** @type {Map<string, SubscribeOptions[]>} */
     action = new Map()
     /**
      * @param {string | HTMLElement} action
-     * @param {SubscribeFunction} f
+     * @param {SubscribeOptions} o
      */
-    set(action, f) {
+    set(action, o) {
         if (typeof action === "string")
         {
-            setFunction(this.action, f, action)
+            setFunction(this.action, o, action)
         } else {
-            setFunction(this.ref, f, action)
+            setFunction(this.ref, o, action)
         }
     }
 
     /**
      * @param {string | HTMLElement} action
-     * @returns {?SubscribeFunction[]}
+     * @returns {?SubscribeOptions[]}
      */
     get(action) {
         return typeof action === "string"
@@ -87,10 +75,17 @@ export const publish = (event, data, options) => {
 
 /**
  * @param {string|HTMLElement} event 
- * @param {SubscribeFunction} f 
+ * @param {{ lock: boolean }|SubscribeFunction} options
+ * @param {SubscribeFunction} [f]
  */
-export const subscribe = (event, f) => 
-    action.set(event, f)
+export const subscribe = (event, options, f) => {
+    if (typeof options === "function")
+    {
+        f = options
+        options = { lock: false }
+    }
+    action.set(event, { f, ...options })
+}
 
 window.addEventListener("hashchange", () =>
     route.has(location.hash)
@@ -98,19 +93,24 @@ window.addEventListener("hashchange", () =>
             .catch((/** @type {any} */ x) => publish("error", { error: x, message: `Routing handler failed - ${location.hash}` }))
 )
 
+const lock = new Map
 document.addEventListener("jfn", async e => {
     // @ts-ignore
     const event = e?.detail?.event
     if (action.has(event)) {
         Promise
-        // @ts-ignore
-        .allSettled(action.get(event).map(f => f(e.detail)))
-        .then(xs => {
-            for (let error of xs.filter(x => x.status === "rejected")) {
+        .allSettled(action.get(event).map(o => {
+            if (o.lock) {
+                if (lock.has(event)) return Promise.reject(`The event "${event}" is locked.`)
+                let symbol = Symbol()
+                lock.set(event, symbol)
                 // @ts-ignore
-                publish("error", { message: `Handling event "${event}" failed.`, error })
+                return o.f(e.detail).then(_ => ({symbol})).catch(error => ({error, symbol}))
             }
-        })
+            // @ts-ignore
+            return o.f(e.detail)
+        }))
+        .then(handleEventResults(event))
     } else {
         console.warn(`Unknown event send on the event bus. ${event}`)
         // @ts-ignore
@@ -124,6 +124,9 @@ class Debounce {
     /** @type {Map<string, number>} */
     map = new Map()
 
+    /**
+     * @param {string | HTMLButtonElement | HTMLFormElement} key
+     */
     shouldSkip(key) {
         if (!key) return false
         const isString = typeof key === "string"
@@ -162,14 +165,20 @@ const handleEventActions = (/** @type {string} */ type, /** @type {boolean} */ p
             }
             if (!key || debouncer.shouldSkip(key)) return
             Promise
-                // @ts-ignore
-                .allSettled(action.get(key).map(f => f({ element: target, event: e.type })))
-                .then(xs => {
-                    for (let fail of xs.filter(x => x.status === "rejected")) {
+                .allSettled(action.get(key).map(o => {
+                    if (o.lock) {
+                        if (lock.has(key)) return Promise.reject(`The event "${key}" is locked.`)
+                        let symbol = Symbol()
+                        lock.set(key, symbol)
                         // @ts-ignore
-                        publish("error", { error: fail.reason, message: `An element was not properly handled for the event ${e.type}.`, target, action: key })
+                        return o.f({ element: target, event: e.type })
+                        .then(_ => ({symbol}))
+                        .catch(error => ({error, symbol}))
                     }
-                })
+                    // @ts-ignore
+                    return o.f({ element: target, event: e.type })
+                }))
+                .then(handleEventResults(key))
             preventDefault && e.preventDefault()
         }
     }
@@ -191,3 +200,51 @@ function sendEvent(event, data) {
         document.dispatchEvent(new CustomEvent("jfn", { detail: { event, ...data } }))
     }
 }
+
+/**
+ * @param {string | HTMLButtonElement | HTMLFormElement} event
+ */
+function handleEventResults(event) {
+    return function handleEvent(/** @type {any} */ results) {
+        for (let result of results) {
+            if (result.status === "fulfilled") {
+                // @ts-ignore
+                removeLock(event, result.value?.symbol)
+            } else {
+                removeLock(event, result.reason?.symbol)
+                // @ts-ignore
+                delete result.reason.symbol
+                publish("error", { message: `Handling event "${event}" failed.`, error: result.reason })
+            }
+        }
+    }
+}
+
+/**
+ * @param {string|HTMLElement} event
+ * @param {Symbol|undefined} symbol
+ */
+function removeLock(event, symbol) {
+    if (symbol && lock.get(event) === symbol) {
+        lock.delete(event)
+    }
+}
+
+/**
+ * @typedef Subscribe
+ * @property {HTMLButtonElement|HTMLFormElement|HTMLInputElement|undefined} element
+ * @property {string | undefined} event
+ * @property {any | undefined} detail
+ */
+
+/**
+ * @typedef SubscribeFunction
+ * @type {(d: Subscribe) => Promise<void>}
+ */
+
+/**
+ * @typedef SubscribeOptions
+ * @property {SubscribeFunction} f
+ * @property {boolean} lock
+ */
+
