@@ -46,7 +46,11 @@ export default (name, props, ...rest) => {
    const refs = { }
    const children = [];
    const nameType = typeof name;
-   const contains_attributes = typeof props === "object" && !(props instanceof Node || props.refs);
+   // Handle undefined
+   props = props ?? ""
+   // Handle raw numbers
+   props = +props === props ? ""+props : props
+   const contains_attributes = typeof props === "object" && !(props instanceof Node);
    let el;
    let template = false;
 
@@ -82,6 +86,9 @@ export default (name, props, ...rest) => {
    children.push(...rest);
 
    children.forEach(child => {
+      if (+child === child) {
+         child = ""+child
+      }
       if (typeof child === "string") {
          el.appendChild(document.createTextNode(child))
       } else {
@@ -92,7 +99,7 @@ export default (name, props, ...rest) => {
       }
    });
 
-   if (refs) {
+   if (Object.keys(refs).length) {
       el.refs = refs
       el.update = data => update(data, refs)
    }
