@@ -130,11 +130,12 @@ export function stdev(numbers) {
 
 /**
  * @param {number} number
- * @param {number} precision
+ * @param {number} [precision]
  * @returns {string}
  */
 export function formatNumber(number, precision) {
     if (!number || Number.isNaN(number)) return
+    if (precision === undefined || precision === null) return ""+number
     let multiplier = Math.pow(10, precision)
     return (Math.round(number * multiplier) / multiplier).toFixed(precision)
 }
