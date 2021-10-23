@@ -12,7 +12,8 @@ $filePaths = @(
     "main.js"
     "user-settings-page.js"
     "charts-page.js"
-    "entry-page.js"
+    "entries-edit-page.js"
+    "entries-page.js"
 )
 
 $files = @{}

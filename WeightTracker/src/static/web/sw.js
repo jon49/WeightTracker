@@ -1,5 +1,5 @@
 // @ts-check
-const CACHE_NAME = "v21"
+const CACHE_NAME = "v22"
 
 // self.addEventListener("message", e => {
 //     if (e.data?.command === "getVersion") {
@@ -25,7 +25,8 @@ self.addEventListener("install", e => {
                         "actions.js",
                         "charts-page.js",
                         "db.js",
-                        "entry-page.js",
+                        "entries-edit-page.js",
+                        "entries-page.js",
                         "h.js",
                         "main.js",
                         "snack-bar.js",
@@ -33,7 +34,10 @@ self.addEventListener("install", e => {
                         "utils.js"],
                         lib: { _files: ["chart.min.js", "db-safari.js", "db.min.js"] }
                     },
-                    entries: { edit: { _files: ["index.html"] }},
+                    entries: {
+                        _files: ["index.html"],
+                        edit: { _files: ["index.html"] }
+                    },
                     "user-settings": { edit: { _files: ["index.html"] } },
                     charts: { _files: ["index.html"] }
                 } })
