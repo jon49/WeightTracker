@@ -1,21 +1,21 @@
 // @ts-check
-const CACHE_NAME = "v25"
+const version = "v25"
 
 // self.addEventListener("message", e => {
 //     if (e.data?.command === "getVersion") {
 //         if (e.ports[0]) {
-//             e.ports[0].postMessage({version: CACHE_NAME})
+//             e.ports[0].postMessage({version: version})
 //         } else if (self.postMessage) {
-//             self.postMessage({version: CACHE_NAME})
+//             self.postMessage({version: version})
 //         }
 //     }
 // })
 
 self.addEventListener("install", e => {
-    console.log(`Installing version '${CACHE_NAME}' service worker.`)
+    console.log(`Installing version '${version}' service worker.`)
     // @ts-ignore
     e.waitUntil(
-        caches.open(CACHE_NAME)
+        caches.open(version)
         .then(cache => {
             const links = createLinks("", {
                 web: {
@@ -51,13 +51,13 @@ self.addEventListener("fetch", e => {
 })
 
 self.addEventListener("activate", async e => {
-    console.log(`Service worker activated. Cache version '${CACHE_NAME}'.`)
+    console.log(`Service worker activated. Cache version '${version}'.`)
     const keys = await caches.keys()
     // @ts-ignore
     e.waitUntil(Promise.all(
         keys
         .map(x => {
-            if (CACHE_NAME !== x) return caches.delete(x)
+            if (version !== x) return caches.delete(x)
         })
         .filter(x => x)))
 })
@@ -74,7 +74,7 @@ function createLinks(root, links, files = []) {
         links._files.forEach(x => {
             if (!files) throw `Files must be an array but got '${files}'`
             if (x === "index.html") {
-                files.push(`${root}/?_=${CACHE_NAME}`)
+                files.push(`${root}/?_=${version}`)
             } else {
                 files.push(`${root}/${x}`)
             }
@@ -98,7 +98,7 @@ async function getResponse(event)  {
     const url = normalizeUrl(req.url)
     let command
     if (command = req.headers.get("sw-command")) {
-        if (command === "getVersion") return { url, res: new Response(JSON.stringify({version: CACHE_NAME}), { status: 200, headers: { "Content-Type": "application/json" } }) }
+        if (command === "getVersion") return { url, res: new Response(JSON.stringify({version: version}), { status: 200, headers: { "Content-Type": "application/json" } }) }
         return { url, res: new Response(null, {status: 400}) }
     }
     if (url.endsWith("sw.js") || req.method == "POST") return { url, res: await fetch(req) }
@@ -116,7 +116,7 @@ async function cacheResponse(url, event) {
     const res = await fetch(event?.request || url)
     if (!res || res.status !== 200 || res.type !== "basic") return { url, res }
     const responseToCache = res.clone()
-    const cache = await caches.open(CACHE_NAME)
+    const cache = await caches.open(version)
     cache.put(url, responseToCache)
     return { url, res }
 }
@@ -130,7 +130,7 @@ function normalizeUrl(url) {
     let path = new URL(url).pathname
     !path.endsWith("/") && (path = path.lastIndexOf("/") > path.lastIndexOf(".") ? path+"/" : path)
     if (path.endsWith("/")) {
-        path += `?_=${CACHE_NAME}`
+        path += `?_=${version}`
     }
     return path
 }
