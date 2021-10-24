@@ -42,7 +42,7 @@ function mergeRefs(ref1, ref2) {
    }
 }
 
-export default (name, props, ...rest) => {
+const h = (name, props, ...rest) => {
    const refs = { }
    const children = [];
    const nameType = typeof name;
@@ -105,3 +105,11 @@ export default (name, props, ...rest) => {
    }
    return el
 }
+
+h.span = function(s) {
+   var span = h("span")
+   span.innerHTML = s
+   return span
+}
+
+export default h
