@@ -1,5 +1,5 @@
 // @ts-check
-const CACHE_NAME = "v24"
+const CACHE_NAME = "v25"
 
 // self.addEventListener("message", e => {
 //     if (e.data?.command === "getVersion") {
@@ -74,7 +74,7 @@ function createLinks(root, links, files = []) {
         links._files.forEach(x => {
             if (!files) throw `Files must be an array but got '${files}'`
             if (x === "index.html") {
-                files.push(`${root}/`)
+                files.push(`${root}/?_=${CACHE_NAME}`)
             } else {
                 files.push(`${root}/${x}`)
             }
@@ -129,6 +129,9 @@ async function cacheResponse(url, event) {
 function normalizeUrl(url) {
     let path = new URL(url).pathname
     !path.endsWith("/") && (path = path.lastIndexOf("/") > path.lastIndexOf(".") ? path+"/" : path)
+    if (path.endsWith("/")) {
+        path += `?_=${CACHE_NAME}`
+    }
     return path
 }
 
