@@ -254,3 +254,8 @@ footer {
 textarea {
   width: 100%;
 }
+
+.back-to-top {
+  position: fixed;
+  bottom: 10px;
+}
