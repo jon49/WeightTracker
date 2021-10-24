@@ -2,7 +2,7 @@
 // @ts-check
 
 import { get, getMany } from "./db.js"
-import { avg, dateAdd, dateFill, formatNumber, getById, getPreviousDay, reduceSlice, stdev } from "./utils.js"
+import { avg, dateAdd, dateFill, formatNumber, getById, getPreviousDay, reduceSlice, setDefaults, stdev } from "./utils.js"
 import { subscribe } from "./actions.js"
 import "./lib/chart.min.js"
 import h from "./h.js"
@@ -155,7 +155,8 @@ async function histogram() {
 }
 
 async function rate() {
-    const startDate = getPreviousDay(dateAdd(new Date(), -274 - 7 /* 9 months */), 0 /* sunday */)
+    const chartSettings = await getChartSettings()
+    const startDate = getStartDate(chartSettings.duration, chartSettings.durationUnit)
     const dates = dateFill(startDate, new Date())
     const rawValues = /** @type {[DB.WeightData?]} */(await getMany(dates))
     const averages = reduceSlice(dates, 7, (acc, val, index) => {
@@ -227,7 +228,8 @@ async function rate() {
 }
 
 async function sleep() {
-    const startDate = getPreviousDay(dateAdd(new Date(), -274 /* 9 months */), 0 /* sunday */)
+    const chartSettings = await getChartSettings()
+    const startDate = getStartDate(chartSettings.duration, chartSettings.durationUnit)
     const dates = dateFill(startDate, new Date())
     const rawValues = /** @type {[DB.WeightData?]} */(await getMany(dates))
     const values = reduceSlice(dates, 7, (acc, val, index) => {
@@ -281,8 +283,9 @@ async function sleep() {
 }
 
 async function setupStats() {
-    /** @type {DB.UserSettings} */
-    const userSettings = await get("user-settings")
+    /** @type {[DB.ChartSettings, DB.UserSettings]} */
+    // @ts-ignore
+    const [chartSettings, userSettings] = [await getChartSettings(), await get("user-settings")]
     const now = new Date(),
         startDate = getPreviousDay(new Date(), 0),
         dates = dateFill(startDate, now),
@@ -301,7 +304,10 @@ async function setupStats() {
         let heightSquared = Math.pow(userSettings.height, 2)
         bmiPrime = formatNumber(averageWeight / heightSquared * 703 / 25, 3)
     }
-    let $stats = getById("stats")
+
+    const $stats = getById("stats")
+    const $header = getById("stats-header")
+    $header.textContent = `Stats for past ${chartSettings.duration} ${chartSettings.durationUnit}s`
     $stats.innerHTML = ""
     $stats.appendChild(
         h("tr",
@@ -348,7 +354,8 @@ async function weeksToGo() {
  * @returns {Promise<WeeklyData>}
  */
 async function getWeeklyData() {
-    const startDate = getPreviousDay(dateAdd(new Date(), -274 /* 9 months */), 0 /* sunday */)
+    const chartSettings = await getChartSettings()
+    const startDate = getStartDate(chartSettings.duration, chartSettings.durationUnit)
     const dates = dateFill(startDate, new Date())
     const rawValues = /** @type {[DB.WeightData?]} */(await getMany(dates))
     const results = reduceSlice(dates, 7, (acc, x, i) => {
@@ -395,7 +402,7 @@ async function getWeeklyData() {
  */
 
 /**
- * @param {DB.UserSettings} userSettings 
+ * @param {DB.UserSettings} userSettings
  * @param {number} currentWeight
  * @returns {string}
  */
@@ -407,6 +414,28 @@ function getGoalWeight(userSettings, currentWeight) {
     }
     goalWeight = formatNumber(userSettings?.goalWeight ?? goalWeight, 2)
     return goalWeight
+}
+
+async function getChartSettings() {
+    /** @type {DB.ChartSettings} */
+    const rawChartSettings = await get("chart-settings")
+    return setDefaults(rawChartSettings, [["duration", 9], ["durationUnit", "month"]])
+}
+
+/**
+ * @param {number} duration
+ * @param {"month"|"week"|"year"} unit
+ */
+function getStartDate(duration, unit) {
+    let days
+    if (unit === "year") {
+        days = duration * 365
+    } else if (unit === "month") {
+        days = duration / 12 * 365
+    } else if (unit === "week") {
+        days = duration * 7
+    }
+    return getPreviousDay(dateAdd(new Date(), -days - 7), 0 /* sunday */)
 }
 
 subscribe("start", setupStats)

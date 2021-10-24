@@ -139,3 +139,22 @@ export function formatNumber(number, precision) {
     let multiplier = Math.pow(10, precision)
     return (Math.round(number * multiplier) / multiplier).toFixed(precision)
 }
+
+/**
+ * @template T
+ * @param {T} o 
+ * @param {[keyof T, T[keyof T]][]} defaults 
+ * @returns T
+ */
+export function setDefaults(o, defaults) {
+    if (!o) {
+        // @ts-ignore
+        o = {}
+    }
+    for (const [key, value] of defaults) {
+        if (!o[key]) {
+            o[key] = value
+        }
+    }
+    return o
+}

@@ -1,5 +1,5 @@
 // @ts-check
-const version = "v25"
+const version = "v27"
 
 // self.addEventListener("message", e => {
 //     if (e.data?.command === "getVersion") {
@@ -24,6 +24,7 @@ self.addEventListener("install", e => {
                     js: { _files: [
                         "actions.js",
                         "charts-page.js",
+                        "charts-edit-page.js",
                         "db.js",
                         "entries-edit-page.js",
                         "entries-page.js",
@@ -39,7 +40,10 @@ self.addEventListener("install", e => {
                         edit: { _files: ["index.html"] }
                     },
                     "user-settings": { edit: { _files: ["index.html"] } },
-                    charts: { _files: ["index.html"] }
+                    charts: {
+                        _files: ["index.html"],
+                        edit: { _files: ["index.html"] }
+                    }
                 } })
             return cache.addAll(links)
         }))

@@ -125,7 +125,7 @@ class Debounce {
     map = new Map()
 
     /**
-     * @param {string | HTMLButtonElement | HTMLFormElement} key
+     * @param {string | HTMLButtonElement | HTMLFormElement | HTMLSelectElement} key
      */
     shouldSkip(key) {
         if (!key) return false
@@ -149,10 +149,13 @@ class Debounce {
 }
 
 const debouncer = new Debounce()
-const handleEventActions = (/** @type {string} */ type, /** @type {boolean} */ preventDefault = false) =>
+const handleEventActions = (/** @type {string[]} */ types, /** @type {boolean} */ preventDefault = false) =>
     async function (/** @type {MouseEvent} */ e) {
         let target = e.target
-        if (target && (target instanceof HTMLButtonElement || target instanceof HTMLInputElement || target instanceof HTMLFormElement) && target.constructor.name === type) {
+        if (target && ( target instanceof HTMLButtonElement
+                     || target instanceof HTMLInputElement
+                     || target instanceof HTMLFormElement
+                     || target instanceof HTMLSelectElement ) && types.includes(target.constructor.name)) {
             let key =
                 action.has(target)
                     ? target
@@ -184,10 +187,10 @@ const handleEventActions = (/** @type {string} */ type, /** @type {boolean} */ p
     }
 
 // @ts-ignore
-document.addEventListener("change", handleEventActions(HTMLInputElement.name))
-document.addEventListener("click", handleEventActions(HTMLButtonElement.name))
+document.addEventListener("change", handleEventActions([ HTMLInputElement.name, HTMLSelectElement.name ]))
+document.addEventListener("click", handleEventActions([HTMLButtonElement.name]))
 // @ts-ignore
-document.addEventListener("submit", handleEventActions(HTMLFormElement.name, true))
+document.addEventListener("submit", handleEventActions([HTMLFormElement.name], true))
 
 /**
  * @param {string} event 
@@ -202,7 +205,7 @@ function sendEvent(event, data) {
 }
 
 /**
- * @param {string | HTMLButtonElement | HTMLFormElement} event
+ * @param {string | HTMLButtonElement | HTMLFormElement | HTMLSelectElement} event
  */
 function handleEventResults(event) {
     return function handleEvent(/** @type {any} */ results) {
