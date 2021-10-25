@@ -28,7 +28,7 @@ subscribe("reset", async _ => {
 
 subscribe("show-year", async ({element}) => {
     const year = +element.dataset.year
-    const anchor = h(h("a", { href: `#_${year}` }, year), h.span("&nbsp;&nbsp;"))
+    const anchor = h("a", { href: `#_${year}`, class: "button" }, year)
     setRows(await getData(year))
     element.replaceWith(anchor)
     let id = setTimeout(_ => {
