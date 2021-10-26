@@ -1,5 +1,5 @@
 // @ts-check
-const version = "v29"
+const version = "v32"
 
 // self.addEventListener("message", e => {
 //     if (e.data?.command === "getVersion") {
@@ -29,6 +29,7 @@ self.addEventListener("install", e => {
                         "entries-edit-page.js",
                         "entries-page.js",
                         "h.js",
+                        "hash-template.js",
                         "main.js",
                         "snack-bar.js",
                         "user-settings-page.js",

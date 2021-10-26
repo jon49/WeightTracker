@@ -6,6 +6,7 @@ $filePaths = @(
     "/lib/db.min.js"
     "actions.js"
     "h.js"
+    "hash-template.js"
     "snack-bar.js"
     "utils.js"
     "db.js"

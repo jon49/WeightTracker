@@ -4,6 +4,10 @@ import { getMany, get } from "./db.js"
 import { subscribe } from "./actions.js"
 import { dateFill, getById } from "./utils.js"
 import h from "./h.js"
+import html from "./hash-template.js"
+
+// @ts-ignore
+const row = html(getById("row-template"))
 
 subscribe("start", async _ => {
     setRows(await getData(new Date().getFullYear()), true)
@@ -15,8 +19,9 @@ subscribe("start", async _ => {
     const startYearString = +userSettings?.earliestDate?.slice(0, 4)
     const startYear = Number.isNaN(startYearString) ? date.getFullYear() : startYearString
     const endYear = date.getFullYear() - 1
+    const button = html`<button #data-year,text=year></button>`
     for (var i = endYear; i >= startYear; i--) {
-        fragment.appendChild(h("button", { "data-year": i }, i))
+        fragment.appendChild(button().update({year: i}).root)
     }
     fragment.appendChild(h("button", { "data-action": "reset" }, "Reset"))
     getById("years").appendChild(fragment)
@@ -47,14 +52,14 @@ function setRows({data, dates}, clearData) {
     for (let index = dates.length - 1; index >= 0; index--) {
         let d = data[index]
         if (!d) continue
-        fragment.appendChild(h("tr",
-            h("td", idSet ? {} : {id: `_${d.date.slice(0, 4)}`}, d.date),
-            h("td", d.weight),
-            h("td", d.bedtime),
-            h("td", d.sleep),
-            h("td", d.waist),
-            h("td", d.comments)
-        ))
+        let newRow = row()
+        if (!idSet) {
+            // @ts-ignore
+            d.dateId = `_${d.date.slice(0, 4)}`
+            idSet = true
+        }
+        let temp = newRow.update(d)
+        fragment.appendChild(temp.root)
     }
     const $tbody = document.querySelector("tbody")
     if (clearData) {
