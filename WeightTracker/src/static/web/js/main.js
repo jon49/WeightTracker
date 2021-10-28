@@ -32,7 +32,7 @@ subscribe("sync", { lock: true }, async _ => {
     await fetch("/api/auth/logged-in")
     .then(response => {
         if (response.redirected) {
-            window.location.href = `${response.url}?ReturnUrl=${location.pathname}`
+            window.location.href = `${response.url}?returnUrl=${location.pathname}`
         }
     })
     .catch(error => {
