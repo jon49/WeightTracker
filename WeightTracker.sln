@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31220.234
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WeightTracker", "WeightTracker\WeightTracker.csproj", "{C2171ECF-7FFD-44F3-8294-DD883D58C122}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeightTracker.Data", "WeightTracker.Data\WeightTracker.Data.csproj", "{8F4C5ED5-C88D-4285-AA24-8E37C4CE0296}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WeightTracker.Data", "WeightTracker.Data\WeightTracker.Data.csproj", "{8F4C5ED5-C88D-4285-AA24-8E37C4CE0296}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
