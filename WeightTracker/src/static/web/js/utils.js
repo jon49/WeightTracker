@@ -158,3 +158,12 @@ export function setDefaults(o, defaults) {
     }
     return o
 }
+
+/**
+ * @param {string} s
+ */
+export function toHTML(s) {
+    let el = document.createElement("x")
+    el.innerHTML = s
+    return el.firstElementChild
+}
