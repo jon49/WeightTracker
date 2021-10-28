@@ -183,13 +183,18 @@ function h(strings, ...args) {
 
 /**
  * @template T
- * @param {HTMLTemplateElement|TemplateStringsArray} node
+ * @param {HTMLTemplateElement|Element|TemplateStringsArray} node
  * @param {any[]} args
  * @returns {(o?: Partial<T>) => Template<T>}
  */
 export default function template(node, ...args) {
   /** @type {Node} */
-  const n = node instanceof HTMLTemplateElement ? node.content.firstElementChild : h(node, ...args)
+  const n =
+    node instanceof HTMLTemplateElement
+      ? node.content.firstElementChild
+    : node instanceof Element
+      ? node
+    : h(node, ...args)
   const paths = genPath(n)
   return (o) => new Template(n, paths, o)
 }

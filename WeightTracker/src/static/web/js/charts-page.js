@@ -5,7 +5,7 @@ import { get, getMany } from "./db.js"
 import { avg, dateAdd, dateFill, formatNumber, getById, getPreviousDay, reduceSlice, setDefaults, stdev } from "./utils.js"
 import { subscribe } from "./actions.js"
 import "./lib/chart.min.js"
-import h from "./h.js"
+import html from "./hash-template.js"
 
 const red = "#ff6384", blue = "#6391ff", green = "#63ff83"
 
@@ -285,14 +285,18 @@ async function sleep() {
 async function setupStats() {
     /** @type {[DB.ChartSettings, DB.UserSettings]} */
     // @ts-ignore
-    const [chartSettings, userSettings] = [await getChartSettings(), await get("user-settings")]
+    const [chartSettings, userSettings] = await Promise.all([getChartSettings(), get("user-settings")])
     const now = new Date(),
         startDate = getPreviousDay(new Date(), 0),
         dates = dateFill(startDate, now),
+        /** @type {[DB.WeightData[], DB.WeightData[], string]} */
+        [previousData, dataUnfiltered, weeksToGoData] = await Promise.all([
+            getMany(dateFill(dateAdd(startDate, -7), dateAdd(startDate, -1))),
+            getMany(dates),
+            weeksToGo()
+        ]),
         /** @type {DB.WeightData[]} */
-        previousData = await getMany(dateFill(dateAdd(startDate, -7), dateAdd(startDate, -1))),
-        /** @type {DB.WeightData[]} */
-        data = (await getMany(dates)).filter(x => x),
+        data = dataUnfiltered.filter(x => x),
         weights = data.filter(x => x?.weight).map(x => x.weight),
         averageWeight = avg(weights),
         previousWeightAvg = avg(previousData.filter(x => x?.weight).map(x => x.weight)),
@@ -305,25 +309,17 @@ async function setupStats() {
         bmiPrime = formatNumber(averageWeight / heightSquared * 703 / 25, 3)
     }
 
-    const $stats = getById("stats")
-    const $header = getById("stats-header")
-    $header.textContent = `Stats for past ${chartSettings.duration} ${chartSettings.durationUnit}s`
-    $stats.innerHTML = ""
-    $stats.appendChild(
-        h("tr",
-            // BMI
-            h("td", bmiPrime || ""),
-            // Weeks to go
-            h("td", await weeksToGo()),
-            // Deviation during week
-            h("td", formatNumber(std, 2)),
-            // Goal
-            h("td",  goalWeight),
-            // Average weight
-            h("td", formatNumber(averageWeight, 2)),
-            // Weight change rate
-            h("td", formatNumber(averageWeight - previousWeightAvg, 2))
-        ))
+    getById("stats-header").textContent = `Stats for past ${chartSettings.duration} ${chartSettings.durationUnit}s`
+    const template = getById("stats")
+    template.replaceWith(
+        html(template)().update({
+            bmiPrime: bmiPrime || "",
+            weeksToGo: weeksToGoData,
+            std: formatNumber(std, 2),
+            goalWeight,
+            weight: formatNumber(averageWeight, 2),
+            rate: formatNumber(averageWeight - previousWeightAvg, 2)
+        }).root)
 }
 
 async function weeksToGo() {
