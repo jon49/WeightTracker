@@ -59,10 +59,15 @@ subscribe("sync", { lock: true }, async _ => {
             "Content-Type": "application/json"
         }
     })
-    if (res.status >= 200 && res.status <= 299) {
+    if (res.status >= 200 && res.status <= 299 && res.headers.get("Content-Type").startsWith("application/json")) {
         newData = await res.json()
     } else {
+        if (res.redirected) {
+            window.location.href = `${res.url}?returnUrl=${location.pathname}`
+            return
+        }
         publish("error", { error: res.statusText, message: "Could not sync data!" })
+        publish("user-message", { message: "Oops! Something happened and could not sync the data!" })
         return
     }
 
