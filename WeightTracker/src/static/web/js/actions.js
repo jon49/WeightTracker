@@ -105,7 +105,7 @@ document.addEventListener("jfn", async e => {
                 let symbol = Symbol()
                 lock.set(event, symbol)
                 // @ts-ignore
-                return o.f(e.detail).then(_ => ({symbol})).catch(error => ({error, symbol}))
+                return o.f(e.detail).then(_ => ({symbol})).catch(error => Promise.reject({error, symbol}))
             }
             // @ts-ignore
             return o.f(e.detail)
@@ -176,7 +176,7 @@ const handleEventActions = (/** @type {string[]} */ types, /** @type {boolean} *
                         // @ts-ignore
                         return o.f({ element: target, event: e.type })
                         .then(_ => ({symbol}))
-                        .catch(error => ({error, symbol}))
+                        .catch(error => Promise.reject({error, symbol}))
                     }
                     // @ts-ignore
                     return o.f({ element: target, event: e.type })

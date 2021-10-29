@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.IO;
 using WeightTracker.Data;
 using WeightTracker.Data.Database;
+using WeightTracker.Models;
 using static JFN.Utilities.Paths;
 
 namespace WeightTracker
@@ -54,6 +55,7 @@ namespace WeightTracker
             services.AddMemoryCache();
 
             services.Configure<UserSettings>(Configuration);
+            services.Configure<AdminSetting>(Configuration);
             services.AddSingleton<ActorSystem>();
 
             var appDir = "weight-tracker";
