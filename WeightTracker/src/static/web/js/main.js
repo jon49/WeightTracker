@@ -30,8 +30,12 @@ subscribe("data-synced", async _ => {
 subscribe("sync", { lock: true }, async _ => {
     let success = true
     await fetch("/api/auth/logged-in")
-    .then(response => {
-        if (response.redirected) {
+    .then(async response => {
+        let ok = true
+        if (response.headers.get("Content-Type").startsWith("application/json")) {
+            ok = await response.json()
+        }
+        if (response.redirected || !ok) {
             window.location.href = `${response.url}?returnUrl=${location.pathname}`
         }
     })

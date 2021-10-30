@@ -1,5 +1,5 @@
 // @ts-check
-const version = "v35"
+const version = "v37"
 
 // self.addEventListener("message", e => {
 //     if (e.data?.command === "getVersion") {
