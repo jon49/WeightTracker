@@ -22,11 +22,11 @@ namespace WeightTracker.Controllers
             var result = await action.SyncData(new SyncData
                 ( UserId: UserId
                 , LastId: syncData.LastSyncedId ?? 0
-                , Source: Session
+                , Source: Session ?? "Unknown"
                 , UploadedData:
-                    from xs in syncData.Data
-                    where xs.Length == 2 && !string.IsNullOrEmpty(xs[0].ToString())
-                    select new UploadedData(xs[0].ToString() ?? "", JsonSerializer.SerializeToUtf8Bytes(xs[1])) ));
+                    from x in syncData.Data
+                    where !string.IsNullOrEmpty(x.Key)
+                    select new UploadedData(x.Key ?? "", JsonSerializer.SerializeToUtf8Bytes(x.Data), x.Timestamp) ));
             return new(
                 LastSyncedId: result.LastSyncedId,
                 Data:
@@ -39,7 +39,14 @@ namespace WeightTracker.Controllers
     {
         [Required, Range(0, long.MaxValue, ErrorMessage = "Valid last ID required.")]
         public long? LastSyncedId { get; set; } = 0;
-        public object[][]? Data { get; set; }
+        public DataDto?[] Data { get; set; } = Array.Empty<DataDto?>();
+    }
+
+    public class DataDto
+    {
+        public string? Key { get; set; }
+        public object? Data { get; set; }
+        public long Timestamp { get; set; } = 0;
     }
 
     public record SyncDataReturnDto

@@ -1,5 +1,5 @@
 // @ts-check
-const version = "v37"
+const version = "v40"
 
 // self.addEventListener("message", e => {
 //     if (e.data?.command === "getVersion") {
@@ -103,7 +103,7 @@ async function getResponse(event)  {
     const url = normalizeUrl(req.url)
     let command
     if (command = req.headers.get("sw-command")) {
-        if (command === "getVersion") return { url, res: new Response(JSON.stringify({version: version}), { status: 200, headers: { "Content-Type": "application/json" } }) }
+        if (command === "getVersion") return { url, res: new Response(JSON.stringify({version}), { status: 200, headers: { "Content-Type": "application/json" } }) }
         return { url, res: new Response(null, {status: 400}) }
     }
     if (url.endsWith("sw.js") || req.method == "POST") return { url, res: await fetch(req) }

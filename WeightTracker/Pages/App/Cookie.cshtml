@@ -1,0 +1,12 @@
+﻿@page
+@model WeightTracker.Pages.App.CookieModel
+@{
+}
+
+<script>
+(function () {
+	let url = new URL(location.href),
+	    returnUrl = url.searchParams.get("returnUrl")
+	returnUrl && (location.href = returnUrl)
+})()
+</script>

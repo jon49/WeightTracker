@@ -10,7 +10,8 @@ namespace WeightTracker.Data.Actors
 {
     public record UploadedData
         ( string Key
-        , byte[] Value );
+        , byte[] Value
+        , long Timestamp );
     public record SyncData
         ( long UserId
         , long LastId
@@ -50,7 +51,8 @@ namespace WeightTracker.Data.Actors
                             , Key: x.Key
                             , UserId: d.UserId
                             , Value: x.Value
-                            , Source: d.Source )));
+                            , Source: d.Source
+                            , Timestamp: x.Timestamp )));
                 data = data.Where(x => !d.UploadedData.Any(y => y.Key == x.Key)).ToList();
             }
             lastSyncedId =

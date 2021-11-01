@@ -20,6 +20,9 @@
 
             public static string Source = nameof(Data.Source);
             public static string _Source = $"${nameof(Data.Source)}";
+
+            public static string Timestamp = nameof(Data.Timestamp);
+            public static string _Timestamp = $"${nameof(Data.Timestamp)}";
         }
     }
 }

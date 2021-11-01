@@ -6,7 +6,15 @@ import { publish } from "./actions.js"
 
 const _updated =
     async (/** @type {IDBValidKey} */ key) => {
-        await update1("updated", (/** @type {?Set} */ val) => (val || new Set()).add(key))
+        await update1("updated", (/** @type {?Map<string, number>} */ val) => {
+            if (val instanceof Set) {
+                /** @type {Map<string, number>} */
+                let temp = new Map()
+                Array.from(val).forEach(x => temp.set(x, 0))
+                val = temp
+            }
+            return (val || new Map()).set(key, Date.now())
+        })
         publish("updated", { key })
     }
 

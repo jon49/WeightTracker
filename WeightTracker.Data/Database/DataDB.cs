@@ -24,7 +24,8 @@ namespace WeightTracker.Data.Database
         public DataDB(string dbPath)
         {
             var connectionString = $"Data Source={dbPath}";
-            DB.ExecuteCommand($"{connectionString};Mode=ReadWriteCreate;", commandCreateDatabase);
+            var readWriteCreateConnection = new SqliteConnection($"{connectionString};Mode=ReadWriteCreate;");
+            UpdateDatabase(readWriteCreateConnection);
             _readWriteConnection = new SqliteConnection($"{connectionString};Mode=ReadWrite;");
             _readWriteConnection.Open();
 
@@ -32,9 +33,34 @@ namespace WeightTracker.Data.Database
             _readOnlyConnection.Open();
         }
 
+        private void UpdateDatabase(SqliteConnection readWriteCreateConnection)
+        {
+            readWriteCreateConnection.Open();
+            DB.ExecuteCommand(readWriteCreateConnection, commandCreateDatabase);
+            var lastMigration = (int)(DB.ExecuteCommand<long?>(readWriteCreateConnection, $@"SELECT LastMigration FROM Migration WHERE Id = 0;") ?? 0);
+            if (lastMigration == migrations.Length)
+            {
+                return;
+            }
+            foreach(var migration in migrations.Skip(lastMigration - 1))
+            {
+                DB.ExecuteCommand(readWriteCreateConnection, migration);
+            }
+            DB.ExecuteCommand(readWriteCreateConnection, $"INSERT INTO Migration (Id, LastMigration) VALUES (0, {migrations.Length});");
+            readWriteCreateConnection.Close();
+        }
+
         private static readonly string _createDataCommand = $@"
-INSERT INTO {D.Table} ({D.Key}, {D.Source}, {D.UserId}, {D.Value})
-VALUES ({D._Key}, {D._Source}, {D._UserId}, {D._Value});";
+INSERT INTO {D.Table} ({D.Key}, {D.Source}, {D.UserId}, {D.Value}, {D.Timestamp})
+SELECT {D._Key}, {D._Source}, {D._UserId}, {D._Value}, {D._Timestamp}
+FROM Data
+WHERE (
+    SELECT COUNT(*)
+    FROM Data
+    WHERE {D.UserId} = {D._UserId}
+      AND {D.Key} = {D._Key}
+      AND {D.Timestamp} > {D._Timestamp}) = 0
+LIMIT 1;";
         public long SaveData(IEnumerable<Data> data)
         {
             DB.BulkInsert(
@@ -46,6 +72,7 @@ VALUES ({D._Key}, {D._Source}, {D._UserId}, {D._Value});";
                     new(Name: D._Source, x.Source),
                     new(Name: D._UserId, x.UserId),
                     new(Name: D._Value, x.Value),
+                    new(Name: D._Timestamp, x.Timestamp),
                 }));
             return DB.ExecuteCommand<long>(_readOnlyConnection, $"SELECT MAX({D.Id}) FROM {D.Table};");
         }
@@ -79,6 +106,14 @@ CREATE TABLE IF NOT EXISTS {D.Table} (
     {D.Key} TEXT NOT NULL,
     {D.Source} TEXT NOT NULL,
     {D.Value} BLOB NULL );
-CREATE UNIQUE INDEX IF NOT EXISTS idx_fetch ON {D.Table} ({D.Id}, {D.UserId}, {D.Key});";
+CREATE TABLE IF NOT EXISTS Migration (Id INTEGER NOT NULL, LastMigration INTEGER NOT NULL);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_fetch ON {D.Table} ({D.Id}, {D.UserId}, {D.Key});
+CREATE INDEX IF NOT EXISTS idx_user_id ON {D.Table} ({D.UserId}, {D.Key});";
+
+        private static readonly string[] migrations = new[]
+        {
+            $@"ALTER TABLE {D.Table} ADD COLUMN {D.Timestamp} INTEGER DEFAULT 0;",
+        };
+
     }
 }

@@ -27,15 +27,18 @@ subscribe("data-synced", async _ => {
     updateSyncButton()
 })
 
+/**
+ * @typedef PostData
+ * @property {string} key
+ * @property {*} data
+ * @property {number} timestamp
+ */
+
 subscribe("sync", { lock: true }, async _ => {
     let success = true
     await fetch("/api/auth/logged-in")
     .then(async response => {
-        let ok = true
-        if (response.headers.get("Content-Type").startsWith("application/json")) {
-            ok = await response.json()
-        }
-        if (response.redirected || !ok) {
+        if (response.redirected) {
             window.location.href = `${response.url}?returnUrl=${location.pathname}`
         }
     })
@@ -46,11 +49,15 @@ subscribe("sync", { lock: true }, async _ => {
     })
     if (!success) return
     const updated = /** @type {DB.Updated|undefined} */ (await get("updated")) ?? new Set
+    /** @type {[string, number][]} */
     const keys = Array.from(updated)
-    const items = await getMany(keys)
+    const items = await getMany(keys.map(x => x[0]))
+    /** @type {PostData[]} */
     const data = new Array(updated.size)
     for (let index = 0; index < items.length; index++) {
-        data[index] = [keys[index], items[index]]
+        /** @type {[string, number]} */
+        let [key, timestamp] = keys[index]
+        data[index] = { key, data: items[index], timestamp }
     }
     const lastSyncedId = /** @type {DB.Settings} */ (await get("settings"))?.lastSyncedId ?? 0
 
@@ -63,13 +70,9 @@ subscribe("sync", { lock: true }, async _ => {
             "Content-Type": "application/json"
         }
     })
-    if (res.status >= 200 && res.status <= 299 && res.headers.get("Content-Type").startsWith("application/json")) {
+    if (res.status >= 200 && res.status <= 299 && res.headers.get("Content-Type")?.startsWith("application/json")) {
         newData = await res.json()
     } else {
-        if (res.redirected) {
-            window.location.href = `${res.url}?returnUrl=${location.pathname}`
-            return
-        }
         publish("error", { error: res.statusText, message: "Could not sync data!" })
         publish("user-message", { message: "Oops! Something happened and could not sync the data!" })
         return
