@@ -5,6 +5,5 @@
         , string Key
         , long UserId
         , byte[] Value
-        , string Source
-        , long? Timestamp );
+        , string Source );
 }
