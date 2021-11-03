@@ -116,21 +116,22 @@ class Template {
    * @param {Node} node
    * @param {Paths} paths
    * @param {Partial<T>} [o]
+   * @param {HTMLElement} [element]
    */
-  constructor(node, paths, o) {
+  constructor(node, paths, o, element) {
     this._refPaths = paths
-    this.root = node.cloneNode(true)
+    this.root = element ? element : node.cloneNode(true)
     this._nodes = walker(this.root, this._refPaths)
     if (o) this.update(o)
   }
 
   /**
-   * @param {string[]} o
+   * @param {string[]} keys
    * @returns {Partial<Nodes>}
    */
-  getNodes(o) {
+  getNodes(keys) {
     const nodes = {}
-    for (const key of o) {
+    for (const key of keys) {
       nodes[key] = this._nodes[this._refPaths.names[key][0]]
     }
     return nodes
@@ -166,19 +167,15 @@ class Template {
   }
 }
 
-const compilerTemplate = document.createElement('template')
+const compilerTemplate = document.createElement("x")
 /**
  * @param {TemplateStringsArray} strings
  * @param {any[]} args
  */
 function h(strings, ...args) {
   const template = String.raw(strings, ...args)
-    .replace(/>\n+/g, '>')
-    .replace(/\s+</g, '<')
-    .replace(/>\s+/g, '>')
-    .replace(/\n\s+/g, '<!-- -->')
   compilerTemplate.innerHTML = template
-  return compilerTemplate.content.firstChild
+  return compilerTemplate.firstElementChild
 }
 
 /**
@@ -196,5 +193,5 @@ export default function template(node, ...args) {
       ? node
     : h(node, ...args)
   const paths = genPath(n)
-  return (o) => new Template(n, paths, o)
+  return (/** @type {Partial<any>} */ o, /** @type {HTMLElement} */ element) => new Template(n, paths, o, element)
 }

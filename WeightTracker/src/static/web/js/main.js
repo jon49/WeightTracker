@@ -3,7 +3,7 @@
 
 import { publish, subscribe } from "./actions.js"
 import { get, getMany, setMany, update } from "./db.js"
-import { getById, toHTML } from "./utils.js"
+import { getById } from "./utils.js"
 import html from "./hash-template.js"
 
 // @ts-ignore
@@ -84,12 +84,12 @@ subscribe("sync", { lock: true }, async _ => {
     publish("data-synced", {})
 })
 
-const message = html(toHTML("<snack-bar class=show><p slot=message class=message>#text</snack-bar>"))
+const message = html`<snack-bar class=show><p slot=message class=message>#text</snack-bar>`
 /**
  * @param {string} text
  */
 function showSnackBar(text) {
-    getById("messages").appendChild(message().update({text}).root)
+    getById("messages").appendChild(message({text}).root)
 }
 
 // @ts-ignore

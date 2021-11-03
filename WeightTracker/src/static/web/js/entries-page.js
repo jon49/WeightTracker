@@ -2,7 +2,7 @@
 
 import { getMany, get } from "./db.js"
 import { subscribe } from "./actions.js"
-import { dateFill, getById, toHTML } from "./utils.js"
+import { dateFill, getById } from "./utils.js"
 import html from "./hash-template.js"
 
 // @ts-ignore
@@ -20,29 +20,23 @@ subscribe("start", async _ => {
     const endYear = date.getFullYear() - 1
     const button = html`<button #data-year,text=year></button>`
     for (var i = endYear; i >= startYear; i--) {
-        fragment.appendChild(button().update({year: i}).root)
+        fragment.appendChild(button({year: i}).root)
     }
-    fragment.appendChild(toHTML("<button data-action=reset>Reset</button>"))
     getById("years").appendChild(fragment)
 
     setRows(data, true)
 })
 
-subscribe("reset", async _ => {
-    window.location.reload()
-})
-
-const $anchor = html(toHTML("<a #href=href class=button>#year</a>"))
+const $anchor = html`<a #href=href class=button>#year</a>`
 subscribe("show-year", async ({element}) => {
     const year = +element.dataset.year
     const data = await getData(year)
-    const anchor = $anchor().update({ href: `#_${year}`, year }).root
     setRows(data)
-    element.replaceWith(anchor)
+    element.replaceWith($anchor({ href: `#_${year}`, year }).root)
     let id = setTimeout(_ => {
         location.hash = `_${year}`
         clearTimeout(id)
-    }, 1)
+    })
 })
 
 /**

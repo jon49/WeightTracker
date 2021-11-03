@@ -310,16 +310,15 @@ async function setupStats() {
     }
 
     getById("stats-header").textContent = `Stats for past ${chartSettings.duration} ${chartSettings.durationUnit}s`
-    const template = getById("stats")
-    template.replaceWith(
-        html(template)().update({
-            bmiPrime: bmiPrime || "",
-            weeksToGo: weeksToGoData,
-            std: formatNumber(std, 2),
-            goalWeight,
-            weight: formatNumber(averageWeight, 2),
-            rate: formatNumber(averageWeight - previousWeightAvg, 2)
-        }).root)
+    const $stats = getById("stats")
+    html($stats)({
+        bmiPrime: bmiPrime || "",
+        weeksToGo: weeksToGoData,
+        std: formatNumber(std, 2),
+        goalWeight,
+        weight: formatNumber(averageWeight, 2),
+        rate: previousWeightAvg && averageWeight ? formatNumber(averageWeight - previousWeightAvg, 2) : "N/A"
+    }, $stats)
 }
 
 async function weeksToGo() {

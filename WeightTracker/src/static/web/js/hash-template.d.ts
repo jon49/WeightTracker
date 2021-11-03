@@ -4,7 +4,9 @@
  * @param {any[]} args
  * @returns {(o?: Partial<T>) => Template<T>}
  */
-export default function template<T, S>(node: TemplateStringsArray | HTMLTemplateElement | Element, ...args: any[]): (o?: Partial<T>) => Template<T, S>;
+export default function template<T, S>(
+    node: TemplateStringsArray | HTMLTemplateElement | Element
+    , ...args: any[]): (o?: Partial<T>, element?: HTMLElement) => Template<T, S>;
 /**
  * @template T
  */
