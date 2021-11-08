@@ -3,6 +3,7 @@
         "debouncer",
         "isset",
         "keyval",
-        "stdev"
+        "stdev",
+        "substs"
     ]
 }
