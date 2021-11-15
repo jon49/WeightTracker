@@ -2,8 +2,8 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "ES2015",
-    // "module": "None",
-    "moduleResolution": "Node",
+    "moduleResolution": "Classic",
+    "lib": ["webworker", "ES2020", "DOM", "DOM.Iterable"],
 
     "strict": true,
     "noImplicitAny": true,
@@ -19,10 +19,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
-    "outDir": "./public/app",
+    "outDir": "./temp/sw",
     "skipLibCheck": true,
-    // "lib": ["WebWorker", "DOM"]
-
   },
   "compileOnSave": true,
   "include": ["src/**/*.ts", "src/**/*.js"],
