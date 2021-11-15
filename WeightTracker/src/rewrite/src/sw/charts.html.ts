@@ -1,6 +1,6 @@
 import { DB, Module, ModuleStart } from "globals"
-import { getChartSettings, weeksToGo, getGoalWeight } from "./shared/charts-shared"
-import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, stdev } from "./js/utils"
+import { getChartSettings, weeksToGo, getGoalWeight } from "./shared/charts-shared.js"
+import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, stdev } from "./js/utils.js"
 
 const { html, db: { get, getMany } } = app
 

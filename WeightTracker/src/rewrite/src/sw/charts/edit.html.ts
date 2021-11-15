@@ -1,5 +1,5 @@
 import { DB, Module, ModuleStart } from "globals"
-import { formatNumber, getFormData, isSelected, toNumber } from "../js/utils"
+import { formatNumber, getFormData, isSelected, toNumber } from "../js/utils.js"
 
 const { html, db: { get, set } } = app
 const units = ["month", "year", "week"] as const
@@ -7,6 +7,7 @@ export type DurationUnit = typeof units[number]
 
 let o : { duration?: string | undefined, durationUnit?: DurationUnit }
 
+// @ts-ignore
 const start : ModuleStart = async (req): Promise<Generator<unknown, any, unknown> | undefined> => {
     if (req.headers.get("method") === "POST") {
         return post(await req.formData())

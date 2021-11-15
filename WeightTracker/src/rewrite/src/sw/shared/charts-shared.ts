@@ -1,5 +1,5 @@
 import { DB } from "globals"
-import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, reduceSlice, setDefaults } from "../js/utils"
+import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, reduceSlice, setDefaults } from "../js/utils.js"
 
 const { db: { get, getMany } } = app
 

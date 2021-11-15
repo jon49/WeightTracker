@@ -1,5 +1,5 @@
 import { DB, Form, Module, ModuleStart } from "globals"
-import { dateToString, formatNumber, getFormData, toNumber } from "../js/utils"
+import { dateToString, formatNumber, getFormData, toNumber } from "../js/utils.js"
 
 const { html, db: { get, set } } = app
 

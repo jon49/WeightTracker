@@ -1,5 +1,5 @@
 import { DB, Module, ModuleStart } from "globals"
-import { formatNumber, getFormData, isSelected, toNumber } from "../js/utils"
+import { formatNumber, getFormData, isSelected, toNumber } from "../js/utils.js"
 
 const { html, db: { get, set } } = app
 

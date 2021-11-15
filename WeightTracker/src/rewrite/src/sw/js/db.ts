@@ -1,5 +1,5 @@
-import { get, getMany, setMany, set as set1, update as update1 } from "./lib/db.min"
-import { publish } from "./actions"
+import { get, getMany, setMany, set as set1, update as update1 } from "./lib/db.min.js"
+import { publish } from "./actions.js"
 import { DB } from "globals"
 
 const _updated =

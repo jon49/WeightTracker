@@ -1,5 +1,5 @@
 import { DB, Module } from "globals"
-import { dateFill } from "./js/utils"
+import { dateFill } from "./js/utils.js"
 
 const { html, db: { getMany, get } } = app
 

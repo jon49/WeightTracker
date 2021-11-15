@@ -1,9 +1,9 @@
-import { get, getMany } from "./db"
-import { avg, dateFill, getById, reduceSlice, stdev } from "./utils"
-import { subscribe } from "./actions"
-import "./lib/chart.min"
+import { get, getMany } from "./db.js"
+import { avg, dateFill, getById, reduceSlice, stdev } from "./utils.js"
+import { subscribe } from "./actions.js"
+import "./lib/chart.min.js"
 import { DB } from "globals"
-import { getWeeklyData, getStartDate, getChartSettings } from "../shared/charts-shared"
+import { getWeeklyData, getStartDate, getChartSettings } from "../shared/charts-shared.js"
 
 const red = "#ff6384", blue = "#6391ff", green = "#63ff83"
 

@@ -12,7 +12,7 @@ class Action {
         }
     }
 
-    get(action: string | HTMLElement): SubscribeOptions[] {
+    get(action: string | HTMLElement): SubscribeOptions[] | undefined {
         return typeof action === "string"
             ? this.action.get(action)
         : this.ref.get(action)
@@ -44,22 +44,25 @@ export const subscribe = (event: string|HTMLElement, options: { lock: boolean }|
         f = options
         options = { lock: false }
     }
+    if (!f) return
     action.set(event, { f, ...options })
 }
 
-window.addEventListener("hashchange", () =>
-    route.has(location.hash)
-        && route.get(location.hash)()
-            .catch((/** @type {any} */ x) => publish("error", { error: x, message: `Routing handler failed - ${location.hash}` }))
-)
+window.addEventListener("hashchange", () => {
+    let f
+    if (f = route.get(location.hash)) {
+        f().catch((x: any) => publish("error", { error: x, message: `Routing handler failed - ${location.hash}` }))
+    }
+})
 
 const lock = new Map
 document.addEventListener("jfn", async e => {
     // @ts-ignore
     const event = e?.detail?.event
-    if (action.has(event)) {
+    let f
+    if (f = action.get(event)) {
         Promise
-        .allSettled(action.get(event).map(o => {
+        .allSettled(f.map(o => {
             if (o.lock) {
                 if (lock.has(event)) return Promise.reject(`The event "${event}" is locked.`)
                 let symbol = Symbol()
@@ -81,15 +84,10 @@ document.addEventListener("jfn", async e => {
 })
 
 class Debounce {
-    /** @type {WeakMap<object, number>} */
-    weak = new WeakMap()
-    /** @type {Map<string, number>} */
-    map = new Map()
+    weak : WeakMap<object, number> = new WeakMap()
+    map : Map<string, number> = new Map()
 
-    /**
-     * @param {string | HTMLButtonElement | HTMLFormElement | HTMLSelectElement} key
-     */
-    shouldSkip(key) {
+    shouldSkip(key: string | HTMLButtonElement | HTMLFormElement | HTMLSelectElement) {
         if (!key) return false
         const isString = typeof key === "string"
         let lastUsed =
@@ -111,8 +109,8 @@ class Debounce {
 }
 
 const debouncer = new Debounce()
-const handleEventActions = (/** @type {string[]} */ types, /** @type {boolean} */ preventDefault = false) =>
-    async function (/** @type {MouseEvent} */ e) {
+const handleEventActions = (types: string[], preventDefault = false) =>
+    async function (e: MouseEvent) {
         let target = e.target
         if (target && ( target instanceof HTMLButtonElement
                      || target instanceof HTMLInputElement
@@ -121,6 +119,7 @@ const handleEventActions = (/** @type {string[]} */ types, /** @type {boolean} *
             let key =
                 action.has(target)
                     ? target
+                // @ts-ignore
                 : action.has(target.dataset.action)
                     ? target.dataset.action
                 : null
@@ -128,8 +127,10 @@ const handleEventActions = (/** @type {string[]} */ types, /** @type {boolean} *
                 // @ts-ignore
                 key = target.closest("[data-action]")?.dataset?.action
             }
+            // @ts-ignore
             if (!key || debouncer.shouldSkip(key)) return
             Promise
+                // @ts-ignore
                 .allSettled(action.get(key).map(o => {
                     if (o.lock) {
                         if (lock.has(key)) return Promise.reject(`The event "${key}" is locked.`)
@@ -143,6 +144,7 @@ const handleEventActions = (/** @type {string[]} */ types, /** @type {boolean} *
                     // @ts-ignore
                     return o.f({ element: target, event: e.type })
                 }))
+                // @ts-ignore
                 .then(handleEventResults(key))
             preventDefault && e.preventDefault()
         }
@@ -154,11 +156,7 @@ document.addEventListener("click", handleEventActions([HTMLButtonElement.name]))
 // @ts-ignore
 document.addEventListener("submit", handleEventActions([HTMLFormElement.name], true))
 
-/**
- * @param {string} event 
- * @param {HTMLElement|Object} data 
- */
-function sendEvent(event, data) {
+function sendEvent(event: string, data: HTMLElement|Object) {
     if (data instanceof HTMLElement) {
         data.dispatchEvent(new Event(event, { bubbles: true }))
     } else {
@@ -166,11 +164,8 @@ function sendEvent(event, data) {
     }
 }
 
-/**
- * @param {string | HTMLButtonElement | HTMLFormElement | HTMLSelectElement} event
- */
-function handleEventResults(event) {
-    return function handleEvent(/** @type {any} */ results) {
+function handleEventResults(event: string | HTMLButtonElement | HTMLFormElement | HTMLSelectElement) {
+    return function handleEvent(results: any) {
         for (let result of results) {
             if (result.status === "fulfilled") {
                 // @ts-ignore
@@ -185,11 +180,7 @@ function handleEventResults(event) {
     }
 }
 
-/**
- * @param {string|HTMLElement} event
- * @param {Symbol|undefined} symbol
- */
-function removeLock(event, symbol) {
+function removeLock(event: string|HTMLElement, symbol: Symbol|undefined) {
     if (symbol && lock.get(event) === symbol) {
         lock.delete(event)
     }
