@@ -22,8 +22,8 @@ const render : Render = o => {
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weight Tracker</title>
-    <link href="/web/css/index.css" rel=stylesheet>
-    <link href="/web/css/snack-bar.css" rel=stylesheet>
+    <link href="/app/css/index.css" rel=stylesheet>
+    <link href="/app/css/snack-bar.css" rel=stylesheet>
     ${head}
 </head>
 <body ${theme ? html`class=${theme}` : null}>
@@ -32,10 +32,10 @@ const render : Render = o => {
     <header>
         <h1>Weight Tracker</h1>
         <nav>
-            <a href="/web/entries">Entries</a>
-            | <a href="/web/entries/edit">Add/Edit</a>
-            | <a href="/web/charts">Charts</a>
-            | <a href="/web/user-settings/edit">User Settings</a>
+            <a href="/app/entries">Entries</a>
+            | <a href="/app/entries/edit">Add/Edit</a>
+            | <a href="/app/charts">Charts</a>
+            | <a href="/app/user-settings/edit">User Settings</a>
         </nav>
         <br><button id=sync data-action=sync>Sync - 0</button>
     </header>
@@ -44,9 +44,9 @@ const render : Render = o => {
     ${ script
          ? html`<script src="${script}" type=module></script>`
        : null }
-    <script src="/web/js/snack-bar.js" async></script>
-    <script src="/web/sw.js" async></script>
-    <script src="/web/js/main.js" defer type=module></script>
+    <script src="/app/js/snack-bar.js" async></script>
+    <script src="/app/sw.js" async></script>
+    <script src="/app/js/main.js"></script>
 </body>
 </html>`
 

@@ -16,7 +16,7 @@ const start : ModuleStart = async () => {
 const render : Module["render"] = () => html`
 <h2>Charts</h2>
 
-<a href="/web/charts/edit">Edit Chart Settings</a>
+<a href="/app/charts/edit">Edit Chart Settings</a>
 <div>
     <h3>${statsHeaderText}</h3>
     <table>
@@ -83,9 +83,9 @@ async function setupStats() {
             weeksToGo()
         ]),
         data = dataUnfiltered.filter(x => x),
-        weights = data.filter(x => x?.weight).map(x => x.weight),
+        weights = <number[]>data.filter(x => x?.weight).map(x => x.weight),
         averageWeight = avg(weights),
-        previousWeightAvg = avg(previousData.filter(x => x?.weight).map(x => x.weight)),
+        previousWeightAvg = avg(<number[]>previousData.filter(x => x?.weight).map(x => x.weight)),
         std = stdev(weights)
 
     let bmiPrime : string | undefined
