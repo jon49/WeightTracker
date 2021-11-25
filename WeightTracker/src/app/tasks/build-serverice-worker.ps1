@@ -1,5 +1,10 @@
-param([string] $Path, [string][Alias("sw")] $ServiceWorker, [string][Alias("o")] $Out, [switch]$Clear)
-# .\tasks\build-serverice-worker.ps1 -Path ./temp -sw ./temp/sw/sw.js -o ./public -Clear
+param(
+    [string] $Path,
+    [string][Alias("sw")] $ServiceWorker,
+    [string][Alias("o")] $Out,
+    [switch] $Clear,
+    [string[]][Alias("u")] $UpdateAllLines)
+# .\tasks\build-serverice-worker.ps1 -Path ./sw -sw ./sw/sw.js -o ./public -Clear -u ./sw/_layout.html.js
 
 # TODO: Files added to service worker need to be with the hash value.
 
