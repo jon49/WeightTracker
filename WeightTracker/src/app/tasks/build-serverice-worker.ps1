@@ -139,7 +139,7 @@ $files | % {
     $directory = Split-Path -Parent -Path $_.path
     ForEach ($f in Get-Content $_.path) {
         if (-not $f.StartsWith("import")) { return }
-        $dependency = if ($f -match '"([^"]+)"') { $matches[1] }
+        $dependency = if ($f -match "['""]([^""^']+)['""]") { $matches[1] }
         if ($dependency.EndsWith(".js")) {
             $dependencyItem = [Dependency]@{
                 value = $dependency
