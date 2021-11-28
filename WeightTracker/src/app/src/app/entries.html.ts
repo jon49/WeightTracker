@@ -1,5 +1,5 @@
 import { DB, Module } from "globals"
-import { dateFill } from "./js/utils.js"
+import { dateFill, dateToString } from "./js/utils.js"
 
 const { html, db: { getMany, get } } = app
 
@@ -65,7 +65,7 @@ async function getData(year: number) : Promise<TableData> {
 async function getYears() : Promise<number[]> {
     const thisYear = new Date().getFullYear()
     const settings = await get("user-settings")
-    const startYearString = +settings?.earliestDate?.slice(0, 4)
+    const startYearString = +(settings?.earliestDate?.slice(0, 4) ?? dateToString(new Date()))
     const startYear = Number.isNaN(startYearString) ? thisYear : startYearString
     return [...Array(thisYear - startYear + 1).keys()].map(x => x + startYear)
 }

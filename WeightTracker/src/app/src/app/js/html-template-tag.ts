@@ -40,7 +40,7 @@ function* typeChecker(sub: any, isRawHtml: boolean): any {
     }
 }
 
-function* html(literals: TemplateStringsArray, ...subs: (Generator|Promise<Generator|string|null|undefined>|string|null|undefined)[]|(Generator|Promise<Generator|string|null|undefined>|string|null|undefined)[][]) {
+function* html(literals: TemplateStringsArray, ...subs: (Generator|Promise<Generator|string|number|null|undefined>|string|number|null|undefined)[]|(Generator|Promise<Generator|string|null|undefined>|string|number|null|undefined)[][]) {
     const lits = literals.raw, length = lits.length
     let isRawHtml = true
     for (let i = 0; i < length; i++) {
