@@ -6,15 +6,14 @@ param(
     [string[]][Alias("u")] $UpdateAllLines)
 # .\tasks\build-serverice-worker.ps1 -Path ./sw -sw ./sw/sw.js -o ./public -Clear -u ./sw/_layout.html.js
 
-# TODO: Files added to service worker need to be with the hash value.
-
-if ($Clear) {
-    Remove-Item -Recurse $Out
-}
-
 $Out = if ($Out -eq $null) { "./public" } else { $Out }
 New-Item -Path $Out -ItemType Directory -Force > $null
 $Out = Resolve-Path -Path $Out
+
+if ($Clear -and (Test-Path $Out)) {
+    Remove-Item -Recurse $Out
+    New-Item -Path $Out -ItemType Directory -Force > $null
+}
 
 $cwd = Get-Location
 
