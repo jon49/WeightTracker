@@ -1,10 +1,11 @@
+import html from "./js/html-template-tag.js"
+import * as db from "./js/db.js"
+
 const version = "v0" as const
 const links : string[] = [] // File cache
 
 // @ts-ignore
-self.app = {
-    version
-}
+self.app = { version, html, db }
 
 self.addEventListener("install", (e: Event): void => {
     console.log(`Installing version '${version}' service worker.`)
