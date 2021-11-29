@@ -24,7 +24,7 @@ $hashed = @{}
 
 function Set-FileHash {
     param([FileData] $File)
-    if ($File.isServiceWorker -or $File.types.Contains([FileType]::HTML)) { return $File.newPath }
+    if ($File.isServiceWorker -or $File.types.Contains([FileType]::HTML)) { return (Split-Path $File.newPath -Leaf) }
     $fileInfo = Get-Item -Path $File.newPath
     $hash = Get-FileHash $File.newPath | % { $_.Hash.Substring($_.Hash.Length - 8).ToLower() }
     $newFileName = "$($fileInfo.BaseName).$hash$($fileInfo.Extension)"
