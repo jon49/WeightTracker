@@ -24,7 +24,7 @@ $hashed = @{}
 
 function Set-FileHash {
     param([FileData] $File)
-    if ($File.isServiceWorker) { return $File.newPath }
+    if ($File.isServiceWorker -or $File.types.Contains([FileType]::HTML)) { return $File.newPath }
     $fileInfo = Get-Item -Path $File.newPath
     $hash = Get-FileHash $File.newPath | % { $_.Hash.Substring($_.Hash.Length - 8).ToLower() }
     $newFileName = "$($fileInfo.BaseName).$hash$($fileInfo.Extension)"
@@ -42,7 +42,7 @@ function Set-FileHash {
 
 function Get-FileContent {
     param ([FileData] $File)
-    if ($File.type -eq [FileType]::TypeScript) {
+    if ($File.types.Contains([FileType]::TypeScript)) {
         esbuild.cmd $File.path --format=esm
     } else {
         Get-Content $File.path
@@ -92,7 +92,7 @@ function Set-FileHashAndDependencies {
         Write-File -File $File -Files $Files
         $File.hash = Set-FileHash -File $File
     } else {
-        if ($File.type -eq [FileType]::TypeScript) {
+        if ($File.types.Contains([FileType]::TypeScript)) {
             Get-FileContent -File $File | Set-Content -Path $File.newPath
         } else {
             Copy-Item -Path $File.path -Destination $File.newPath -Force
@@ -101,36 +101,65 @@ function Set-FileHashAndDependencies {
     }
 }
 
-$files = Get-ChildItem -Path . -Recurse -Include *.js,*.ts,*.css,*.html |
-% {
+function Get-FileTypes {
+    param ([System.IO.FileInfo] $Info)
+    $filename = $Info.Name
+    if ($filename.Length -gt 5 -and $filename.Substring($filename.Length - 5) -eq ".d.ts") {
+        [FileType]::TypeScriptDefinition
+    } elseif ($Info.Length -gt 8 -and $filename -match "\.html\.[jt]s$") {
+        if ($Info.Extension -eq ".ts") {
+            @([FileType]::HTMLScript, [FileType]::TypeScript)
+        } else {
+            @([FileType]::HTMLScript, [FileType]::JavaScript)
+        }
+    } elseif ($Info.Extension -eq ".ts") {
+        [FileType]::TypeScript
+    } elseif ($Info.Extension -eq ".js") {
+        [FileType]::JavaScript
+    } elseif ($Info.Extension -eq ".html") {
+        [FileType]::HTML
+    } elseif ($Info.Extension -eq ".css") {
+        [FileType]::CSS
+    } else {
+        [FileType]::Unknown
+    }
+}
+
+function Get-Filenames {
+    param ([System.IO.FileInfo]$Info, [FileType[]] $Types)
     $path = $_.FullName
     $normalized = $path
-    $filename = Split-Path -Path $path -Leaf
-    $fileType = if ($filename.Length -gt 5 -and $filename.Substring($filename.Length - 5) -eq ".d.ts") {
-            [FileType]::TypeScriptDefinition
-        } elseif ($_.Extension -eq ".ts") {
-            $filename = $filename -replace "ts$", "js"
-            $normalized = $normalized -replace "ts$", "js"
-            [FileType]::TypeScript
-        } elseif ($_.Extension -eq ".js") {
-            [FileType]::JavaScript
-        } elseif ($_.Extension -eq ".html") {
-            [FileType]::HTML
-        } elseif ($_.Extension -eq ".css") {
-            [FileType]::CSS
-        } else { [FileType]::Unknown }
-    if ($fileType -eq [FileType]::Unknown -or $fileType -eq [FileType]::TypeScriptDefinition) {
+    $filename = $Info.Name
+    if ($Types.Contains([FileType]::TypeScript)) {
+        $filename = $filename -replace "ts$", "js"
+        $normalized = $normalized -replace "ts$", "js"
+    }
+    @{
+        path = $path
+        normalized = $normalized
+        filename = $filename
+    }
+}
+
+$files = Get-ChildItem -Path . -Recurse -Include *.js,*.ts,*.css,*.html |
+% {
+    $types = Get-FileTypes -Info $_
+    if ($types.GetType().Name -eq "FileType") {
+        $types = ,$types
+    }
+    $info = Get-Filenames -Info $_ -Types $types
+    if ($types.Contains([FileType]::Unknown) -or $types.Contains([FileType]::TypeScriptDefinition)) {
         $null
     } else {
         [FileData]@{
-            path = $path
-            filename = $filename
-            normalized = $normalized
-            url = ((Resolve-Path -Relative $path) -replace "\\","/").Substring(1)
+            path = $info.path
+            filename = $info.filename
+            normalized = $info.normalized
+            url = ((Resolve-Path -Relative $info.path) -replace "\\","/").Substring(1)
             dependencies = [System.Collections.ArrayList]::new()
             hash = ""
-            isServiceWorker = $swFilename -eq $filename
-            type = $fileType
+            isServiceWorker = $swFilename -eq $info.filename
+            types = $types
         }
     }
 } | ? { $_ -ne $null }
@@ -183,12 +212,13 @@ class FileData {
     [System.Collections.ArrayList]$dependencies
     [string]$hash
     [bool]$isServiceWorker
-    [FileType]$type
+    [FileType[]]$types
 }
 
 enum FileType {
     TypeScript
     HTML
+    HTMLScript
     JavaScript
     CSS
     TypeScriptDefinition
