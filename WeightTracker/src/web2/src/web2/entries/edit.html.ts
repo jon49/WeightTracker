@@ -46,8 +46,15 @@ async function post(data: WeightData) {
     return
 }
 
-const $updatableForm = ({ bedtime, comments, sleep, waist, weight, date }: FormReturn<WeightData>) => html`
-<div id=partial-data>
+const render = ({ bedtime, comments, sleep, waist, weight, date }: FormReturn<WeightData>) => html`
+<h2>Add/Edit Entry</h2>
+<form id=date-change method=GET>
+    <label>Date<br>
+    <input autofocus name=date type=date required value="${date}"></label>
+    <button>Go</button>
+    <br><br>
+</form>
+<form id=entry-form method=POST>
     <input name=date type=hidden value=${date}>
 
     <label>Weight<br>
@@ -62,29 +69,15 @@ const $updatableForm = ({ bedtime, comments, sleep, waist, weight, date }: FormR
     </label><br><br>
 
     <label>Waist Size (cm)<br>
-        <input id=entry-waist name=waist type=number step=any values="${waist}">
+        <input id=entry-waist name=waist type=number step=any value="${waist}">
     </label><br><br>
 
     <label>Comment<br>
-        <textarea id=entry-comments name=comments values="${comments}"></textarea>
+        <textarea id=entry-comments name=comments>${comments}</textarea>
     </label><br><br>
-</div>`
-
-const $form = (o: FormReturn<WeightData>) => html`
-<form id=date-change method=GET>
-    <label>Date<br>
-    <input autofocus name=date type=date required value="${o.date}"></label>
-    <button>Go</button>
-    <br><br>
-</form>
-<form id=entry-form method=POST>
-    ${$updatableForm(o)}
 
     <button>Save</button>
 </form>`
-
-const render = (weightData: FormReturn<WeightData>) =>
-    html`<h2>Add/Edit Entry</h2>${$form(weightData)}`
 
 async function get(req: Request) {
     let data = await start(req)
