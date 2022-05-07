@@ -7,7 +7,7 @@ async function post({ data: body }: RoutePostArgs) {
         if (response.redirected) {
             let url = new URL(response.url)
             url.searchParams.append("returnUrl", body.url)
-            return Response.redirect(url.href, 307)
+            return Response.redirect(url.href, 302)
         }
     } catch (error) {
         console.error("/api/auth/logged-in", { error, message: "Could not contact back end." })
@@ -44,7 +44,7 @@ async function post({ data: body }: RoutePostArgs) {
     await Promise.all([
         update("settings", val => ({ ...val, lastSyncedId: newData.lastSyncedId }), { sync: false }),
         update("updated", (val: Updated) => (val?.clear(), val), { sync: false })])
-    return Response.redirect(body.url, 307)
+    return Response.redirect(body.url, 302)
 }
 
 interface PostData {
