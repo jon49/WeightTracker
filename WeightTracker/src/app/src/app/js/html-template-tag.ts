@@ -40,6 +40,8 @@ function* typeChecker(sub: any, isRawHtml: boolean): any {
     }
 }
 
+export type HTMLReturnType = ReturnType<typeof html>
+
 function* html(literals: TemplateStringsArray, ...subs: (Generator|Promise<Generator|string|number|null|undefined>|string|number|null|undefined)[]|(Generator|Promise<Generator|string|null|undefined>|string|number|null|undefined)[][]) {
     const lits = literals.raw, length = lits.length
     let isRawHtml = true

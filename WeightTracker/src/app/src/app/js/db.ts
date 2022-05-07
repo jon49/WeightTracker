@@ -1,5 +1,5 @@
 import { get, getMany, setMany, set as set1, update as update1 } from "./lib/db.min.js"
-import { publish } from "./actions.js"
+// import { publish } from "./actions.js"
 import { DB } from "globals"
 
 const _updated =
@@ -12,7 +12,7 @@ const _updated =
             }
             return (val || new Map()).set(key, Date.now())
         })
-        publish("updated", { key })
+        // publish("updated", { key })
     }
 
 function set<K extends keyof DBAccessors>(key: K, value: DBAccessors[K], sync?: boolean): Promise<void>

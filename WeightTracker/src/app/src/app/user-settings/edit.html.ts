@@ -1,28 +1,23 @@
-import { DB, Module, ModuleStart } from "globals"
-import { formatNumber, getFormData, isSelected, toNumber } from "../js/utils.js"
+import { DB, Module } from "globals"
+import { formatNumber, isSelected, toNumber } from "../js/utils.js"
 
 const { html, db: { get, set } } = app
 
 const themes = ["dark", "light", "none"] as const
 export type Theme = typeof themes[number]
 
-let o : DB.UserSettings
-
-const start : ModuleStart = async req => {
-    if (req.headers.get("method") === "POST") {
-        return post(await req.formData())
-    }
-
-    o = await get("user-settings") ?? <DB.UserSettings>{}
+const start = async () => {
+    let o = await get("user-settings") ?? <DB.UserSettings>{}
     o.theme = getTheme(o.theme)
+    return o
 }
 
-const render = () => {
+const render = (o: DB.UserSettings) => {
     const selected = isSelected<Theme>(o.theme)
     return {
     main: html`
 <h2>User Settings</h2>
-
+<p id=message></p>
 <form>
     <label>Earliest Recorded Date:<br><input name=earliestDate type=date value="${o.earliestDate}"></label><br><br>
     <label>Height (inches):<br><input name=height type=number step=any value="${formatNumber(o.height) || null}"></label><br><br>
@@ -37,13 +32,12 @@ const render = () => {
 </form>` }
 }
 
-function post(formData: FormData) {
-    const form = getFormData<DB.UserSettings>(formData)
+function post(data: DB.UserSettings) {
     const o : DB.UserSettings = {
-        earliestDate: form.earliestDate,
-        goalWeight: toNumber(form.goalWeight),
-        height: toNumber(form.height),
-        theme: getTheme(form.theme)
+        earliestDate: data.earliestDate,
+        goalWeight: toNumber(data.goalWeight),
+        height: toNumber(data.height),
+        theme: getTheme(data.theme)
     }
     return set("user-settings", o)
 }
@@ -53,5 +47,15 @@ function getTheme(s: unknown) {
 }
 
 export default {
-    start, render
+    get: async _ => {
+        let settings = await start()
+        return render(settings)
+    },
+    post: async (_, data, __) => {
+        await post(data)
+        return {
+            partial: () => Promise.resolve(html`<p id=message>Saved!</p>`),
+            redirect: "/app/user-settings/"
+        }
+    }
 } as Module

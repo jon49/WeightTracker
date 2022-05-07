@@ -1,18 +1,11 @@
-import { LayoutTemplate, ModuleRenderReturn } from "globals"
+import { PostHandler } from "globals"
 
 const { html, db } = app
 
-let theme : string | undefined
+const syncButton = (count: number) =>
+    html`<button id=sync data-action=sync>Sync - ${count}</button>`
 
-const start = async () => {
-    theme = (await db.get("user-settings"))?.theme
-}
-
-interface Render { (o: ModuleRenderReturn) : Generator }
-const render : Render = o => {
-    if (!("main" in o)) {
-        o = { main: o }
-    }
+const render = (theme: string | undefined, syncCount: number) => (o: LayoutTemplateArguments) => {
     const { main, head, script } = o
     return html`
 <!DOCTYPE html>
@@ -37,7 +30,7 @@ const render : Render = o => {
             | <a href="/app/charts">Charts</a>
             | <a href="/app/user-settings/edit">User Settings</a>
         </nav>
-        <br><button id=sync data-action=sync>Sync - 0</button>
+        <br>${syncButton(syncCount)}
     </header>
     <main>${main}</main>
     <footer></footer>
@@ -52,6 +45,29 @@ const render : Render = o => {
 
 }
 
+const getSyncCount = async () => (await db.get("updated"))?.size ?? 0
+
 export default {
-    start, render
+    get: async _ => {
+        let [theme, count] = await Promise.all([db.get("user-settings"), getSyncCount()])
+        return render(theme?.theme, count)
+    },
+    post: async () => {
+        let count = await getSyncCount()
+        return {
+            partial: () => Promise.resolve(syncButton(count)),
+            redirect: null
+        }
+    }
 } as LayoutTemplate
+
+export interface LayoutTemplateArguments {
+    head?: Generator|string
+    main?: Generator|string
+    script?: string
+}
+
+export interface LayoutTemplate {
+    get: (req: Request) => Promise<(o: LayoutTemplateArguments) => Generator>
+    post: PostHandler
+}

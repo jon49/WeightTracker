@@ -1,0 +1,1 @@
+& JSBuild.exe --path .\src\ --sw .\src\app\sw.ts --out ..\..\temp-public

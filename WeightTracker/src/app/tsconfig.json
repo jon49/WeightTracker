@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "ES2015",
+    "module": "es2022",
     "moduleResolution": "Classic",
-    "lib": ["webworker", "ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["webworker", "ES2020", "ES2021", "DOM", "DOM.Iterable"],
 
     "strict": true,
     "noImplicitAny": true,

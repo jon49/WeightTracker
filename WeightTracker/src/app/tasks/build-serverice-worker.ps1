@@ -164,17 +164,31 @@ $files = Get-ChildItem -Path . -Recurse -Include *.js,*.ts,*.css,*.html |
     }
 } | ? { $_ -ne $null }
 
+function Get-Import {
+    param ([string]$line, [FileData]$data, [string] $directory)
+    $dependency = if ($line -match "['""]([^""^']+)['""]") { $matches[1] }
+    if ($dependency.EndsWith(".js")) {
+        $dependencyItem = [Dependency]@{
+            value = $dependency
+            path = [System.IO.Path]::GetFullPath((Join-Path -Path $directory -ChildPath $dependency))
+        }
+        $data.dependencies.add($dependencyItem) > $null
+        $true
+    }
+    $false
+}
+
 $files | % {
-    $directory = Split-Path -Parent -Path $_.path
-    ForEach ($f in Get-Content $_.path) {
-        if (-not $f.StartsWith("import")) { return }
-        $dependency = if ($f -match "['""]([^""^']+)['""]") { $matches[1] }
-        if ($dependency.EndsWith(".js")) {
-            $dependencyItem = [Dependency]@{
-                value = $dependency
-                path = [System.IO.Path]::GetFullPath((Join-Path -Path $directory -ChildPath $dependency))
-            }
-            $_.dependencies.add($dependencyItem) > $null
+    [FileData]$data = $_
+    $directory = Split-Path -Parent -Path $data.path
+    $findingImports = $true
+    ForEach ($line in Get-Content $data.path) {
+        if ($data.types.Contains([FileData]::HTML) -or $data.types.Contains([FileData]::HTMLScript)) {
+        } elseif (-not $findingImports) { return }
+        if ($findingImports) {
+            $findingImports = Get-Import -line $line -data $data -directory $directory
+        } else {
+            # Get-Source
         }
     }
 }

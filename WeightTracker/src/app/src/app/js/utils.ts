@@ -85,17 +85,17 @@ export const isSelected =
     <T extends string>(currentValue: string|undefined) =>
     (value: T) => value === currentValue ? "selected" : null
 
-export function getFormData<T>(formData: FormData) : Record<keyof T, string> {
-    let o : any = {}
-    for (let [key, value] of formData.entries()) {
-        if (typeof value === "string") {
-            o[key] = value
-        }
-    }
-    return <any>o
-}
+// export function getFormData<T>(formData: FormData) : Record<keyof T, string> {
+//     let o : any = {}
+//     for (let [key, value] of formData.entries()) {
+//         if (typeof value === "string") {
+//             o[key] = value
+//         }
+//     }
+//     return <any>o
+// }
 
 export function toNumber(s: unknown) {
     // @ts-ignore
-    return !isNaN(s) ? +s : null
+    return !isNaN(s) ? +s : undefined
 }

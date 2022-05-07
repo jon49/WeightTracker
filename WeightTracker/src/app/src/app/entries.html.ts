@@ -4,26 +4,24 @@ import { dateFill, dateToString } from "./js/utils.js"
 const { html, db: { getMany, get } } = app
 
 interface WeightDataYear extends DB.WeightData { year: string }
-let data : WeightDataYear[]
-let years: string[]
 
-const start = async (req: Request) => {
-    data = []
-    years = []
+async function start(req: Request) {
+    let data : WeightDataYear[] = []
     const url = new URL(req.url)
     const year = +(url.searchParams.get("year") ?? new Date().getFullYear())
     const [ yearList, dataList ] = await Promise.all([getYears(), getData(year)])
-    years = yearList.map(x => ""+x)
+    const years = yearList.map(x => ""+x)
     for (let index = 0; index < dataList.data.length; index++) {
         let d = <WeightDataYear>dataList.data[index];
         if (!d) continue
         d.year = dataList.dates[index]
         data.push(d)
     }
+    return {data, years}
 }
 
-const $row = ({date, weight, bedtime, sleep, waist, comments}: WeightDataYear) => html`
-    <tr>
+const $row = ({date, weight, bedtime, sleep, waist, comments}: WeightDataYear) =>
+    html`<tr>
         <td>${date}</td>
         <td>${weight}</td>
         <td>${bedtime}</td>
@@ -34,7 +32,7 @@ const $row = ({date, weight, bedtime, sleep, waist, comments}: WeightDataYear) =
 
 const $link = (year: string) => html`<a href="?year=${year}">${year}</a>&nbsp;&nbsp;`
 
-const render = () => 
+const render = (years: string[], data: WeightDataYear[]) => 
     html`
 <h2 id=top>Entries</h2>
 
@@ -76,5 +74,8 @@ interface TableData {
 }
 
 export default {
-    start, render
+    get: async req => {
+        const result = await start(req)
+        return render(result.years, result.data)
+    }
 } as Module

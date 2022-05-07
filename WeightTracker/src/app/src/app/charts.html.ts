@@ -1,19 +1,10 @@
-import { DB, Module, ModuleStart } from "globals"
+import { DB, Module } from "globals"
 import { getChartSettings, weeksToGo, getGoalWeight } from "./shared/charts-shared.js"
 import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, stdev } from "./js/utils.js"
 
 const { html, db: { get, getMany } } = app
 
-let statsHeaderText : string
-let statsData : StatsData
-
-const start : ModuleStart = async () => {
-    let o = await setupStats()
-    statsData = o.statsData
-    statsHeaderText = o.statsHeaderText
-}
-
-const render : Module["render"] = () => html`
+const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, statsData: StatsData }) => html`
 <h2>Charts</h2>
 
 <a href="/app/charts/edit">Edit Chart Settings</a>
@@ -118,6 +109,6 @@ interface StatsData {
 }
 
 export default {
-    render, start
+    get: async () => render(await setupStats())
 } as Module
 

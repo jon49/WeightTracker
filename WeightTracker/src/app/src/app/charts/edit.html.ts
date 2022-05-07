@@ -1,28 +1,28 @@
-import { DB, Module, ModuleStart } from "globals"
-import { formatNumber, getFormData, isSelected, toNumber } from "../js/utils.js"
+import { DB, Module } from "globals"
+import { formatNumber, isSelected, toNumber } from "../js/utils.js"
 
-const { html, db: { get, set } } = app
+const { html, db: { get, set }, addRoute } = app
 const units = ["month", "year", "week"] as const
 export type DurationUnit = typeof units[number]
 
-let o : { duration?: string | undefined, durationUnit?: DurationUnit }
-
-// @ts-ignore
-const start : ModuleStart = async (req): Promise<Generator<unknown, any, unknown> | undefined> => {
-    if (req.headers.get("method") === "POST") {
-        return post(await req.formData())
-    }
-    let chartSettings = await get("chart-settings")
-    o = {}
-    o.duration = formatNumber(chartSettings?.duration)
-    o.durationUnit = chartSettings?.durationUnit
+interface ChartData {
+    duration?: string | undefined
+    durationUnit?: DurationUnit
 }
 
-const $form = () => {
-    const selected = isSelected<DurationUnit>(o.durationUnit)
+const getData = async (): Promise<ChartData> => {
+    let chartSettings = await get("chart-settings")
+    return {
+        duration: formatNumber(chartSettings?.duration),
+        durationUnit: chartSettings?.durationUnit
+    }
+}
+
+const $form = (data: ChartData) => {
+    const selected = isSelected<DurationUnit>(data.durationUnit)
     return html`
 <form id=chart-settings>
-    <input name=duration type=number placeholder="Number of months" required value="${o.duration}">
+    <input name=duration type=number placeholder="Number of months" required value="${data.duration}">
     <select name=durationUnit required>
         <option value=month ${selected("month")}>Month(s)</option>
         <option value=week ${selected("week")}>Week(s)</option>
@@ -32,20 +32,35 @@ const $form = () => {
 </form>`
 }
 
-const render = () => html`<h2>Chart Settings</h2>${$form()}`
+const render = (data: ChartData) => html`<h2>Chart Settings</h2>${$form(data)}`
 
-async function post(formData: FormData): Promise<Generator> {
-    const form = getFormData<DB.ChartSettings>(formData)
-    const duration = toNumber(form.duration) || 9
-    const maybeDurationUnit = form.durationUnit
+async function post(data: DB.ChartSettings) {
+    const duration = toNumber(data.duration) || 9
+    const maybeDurationUnit = data.durationUnit
     const durationUnit = units.find(x => x === maybeDurationUnit) ?? "month"
     const settings : DB.ChartSettings = { duration, durationUnit }
     await set("chart-settings", settings)
-    o.duration = formatNumber(duration)
-    o.durationUnit = durationUnit
-    return $form()
 }
 
 export default {
-    render, start
+    get: async () => {
+        let data = await getData()
+        return render(data)
+    },
+    post: async (_, data, __) => {
+        await post(data)
+        return {
+            partial: async () => {
+                var data = await getData()
+                return $form(data)
+            },
+            redirect: "/app/charts/edit/"
+        }
+    }
 } as Module
+
+addRoute({
+    route: /\/charts\/edit$/,
+    method: "GET",
+    func: () => {}
+})

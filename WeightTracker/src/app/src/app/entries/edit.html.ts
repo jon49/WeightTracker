@@ -1,20 +1,13 @@
-import { DB, Form, Module, ModuleStart } from "globals"
-import { dateToString, formatNumber, getFormData, toNumber } from "../js/utils.js"
+import { DB, Form, Module } from "globals"
+import { dateToString, formatNumber, toNumber } from "../js/utils.js"
 
 const { html, db: { get, set } } = app
 
-let weightData : Form.FormReturn<DB.WeightData>
-let partialData : boolean
-
-const start : ModuleStart = async req => {
-    if (req.headers.get("post") === "POST") {
-        return post(await req.formData())
-    }
-    partialData = req.headers.has("HF-Request")
+const start = async (req: Request) => {
     const url = new URL(req.url)
     let date = url.searchParams.get("date") ?? dateToString(new Date())
     let data = await get<DB.WeightData>(date)
-    weightData = {
+    let weightData : Form.FormReturn<DB.WeightData> = {
         bedtime: data?.bedtime,
         comments: data?.comments,
         date,
@@ -22,24 +15,23 @@ const start : ModuleStart = async req => {
         waist: formatNumber(data?.waist),
         weight: formatNumber(data?.weight)
     }
+    return weightData
 }
 
-async function post(formData: FormData) {
-    if (!/\d{4}-[01]\d-[0123]\d/.test(<string>formData.get("date"))) {
+async function post(data: DB.WeightData) {
+    if (!/\d{4}-[01]\d-[0123]\d/.test(data.date)) {
         return Promise.reject({ message: "Date is required!", error: new Error("post:/sw/entries/edit/")})
     }
 
-    const form = getFormData<DB.WeightData>(formData)
-
-    const data : DB.WeightData = {
-        bedtime: form.bedtime,
-        comments: form.comments,
-        date: form.date,
-        sleep: toNumber(form.sleep),
-        waist: toNumber(form.waist),
-        weight: toNumber(form.weight)
+    const cleanData : DB.WeightData = {
+        bedtime: data.bedtime,
+        comments: data.comments,
+        date: data.date,
+        sleep: toNumber(data.sleep),
+        waist: toNumber(data.waist),
+        weight: toNumber(data.weight)
     }
-    await set(data.date, data)
+    await set(cleanData.date, data)
 }
 
 const $updatableForm = ({ bedtime, comments, sleep, waist, weight }: Form.FormReturn<DB.WeightData>) => html`
@@ -74,13 +66,22 @@ const $form = (o: Form.FormReturn<DB.WeightData>) => html`
     <button>Submit</button>
 </form>`
 
-const $partialData = () => $updatableForm(weightData)
-
-const render = () =>
-    partialData
-        ? $partialData
-    : html`<h2>Add/Edit Entry</h2>${$form(weightData)}`
+const render = (weightData: Form.FormReturn<DB.WeightData>) =>
+    html`<h2>Add/Edit Entry</h2>${$form(weightData)}`
 
 export default {
-    render, start
+    get: async req => {
+        let data = await start(req)
+        return render(data)
+    },
+    post: async (_, data, req) => {
+        await post(data)
+        return {
+            partial: async () => {
+                let data = await start(req)
+                return $updatableForm(data)
+            },
+            redirect: "/app/entries/edit/"
+        }
+    }
 } as Module
