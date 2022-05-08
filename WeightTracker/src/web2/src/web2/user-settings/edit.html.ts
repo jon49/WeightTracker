@@ -18,7 +18,7 @@ const render = (o: UserSettings) => {
     const selected = isSelected<Theme>(o.theme)
     const option = (value: Theme, display: string) => html`<option value="${value}" ${selected(value)}>${display}</option>`
     return html`
-<h2>User Settings</h2>
+<h2 id=subtitle>User Settings</h2>
 <p id=message></p>
 <form method=POST>
     <label>Earliest Recorded Date:<br>

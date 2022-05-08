@@ -5,7 +5,7 @@ import layout from "./_layout.html.js"
 import { get, getMany } from "./js/db.js"
 
 const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, statsData: StatsData }) => html`
-<h2>Charts</h2>
+<h2 id=subtitle>Charts</h2>
 
 <a href="/web2/charts/edit">Edit Chart Settings</a>
 <div>

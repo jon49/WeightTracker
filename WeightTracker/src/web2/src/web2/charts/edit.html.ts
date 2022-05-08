@@ -22,7 +22,7 @@ async function getData() : Promise<Data> {
 
 const render = (data: Data) => {
     const selected = isSelected<DurationUnit>(data.durationUnit)
-    return html`<h2>Chart Settings</h2>
+    return html`<h2 id=subtitle>Chart Settings</h2>
 <form method=POST>
     <input autofocus name=duration type=number placeholder="Number of months" required value="${data.duration}">
     <select name=durationUnit required>

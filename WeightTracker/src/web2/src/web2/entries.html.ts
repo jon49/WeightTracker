@@ -34,7 +34,7 @@ const $link = (year: string) => html`<a href="?year=${year}#subtitle">${year}</a
 
 const render = (years: string[], data: WeightDataYear[]) => 
     html`
-<h2 id=top>Entries</h2>
+<h2 id=subtitle>Entries</h2>
 
 <div class=date-list>
     ${years.reverse().map($link)}
@@ -45,7 +45,7 @@ const render = (years: string[], data: WeightDataYear[]) =>
     <tbody>${data.reverse().map($row)}</tbody>
 </table>
 
-<a href="#top" class="back-to-top button">Back to Top</a>`
+<a href="#subtitle" class="back-to-top button">Back to Top</a>`
 
 async function getData(year: number) : Promise<TableData> {
     const start = new Date()

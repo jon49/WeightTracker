@@ -47,7 +47,7 @@ async function post(data: WeightData) {
 }
 
 const render = ({ bedtime, comments, sleep, waist, weight, date }: FormReturn<WeightData>) => html`
-<h2>Add/Edit Entry</h2>
+<h2 id=subtitle>Add/Edit Entry</h2>
 <form id=date-change method=GET>
     <label>Date<br>
     <input autofocus name=date type=date required value="${date}"></label>
