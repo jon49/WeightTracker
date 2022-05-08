@@ -30,13 +30,13 @@ const $row = ({date, weight, bedtime, sleep, waist, comments}: WeightDataYear) =
         <td>${comments}</td>
     </tr>`
 
-const $link = (year: string) => html`<a href="?year=${year}">${year}</a>&nbsp;&nbsp;`
+const $link = (year: string) => html`<a href="?year=${year}#subtitle">${year}</a>`
 
 const render = (years: string[], data: WeightDataYear[]) => 
     html`
 <h2 id=top>Entries</h2>
 
-<div>
+<div class=date-list>
     ${years.reverse().map($link)}
 </div>
 
@@ -77,6 +77,6 @@ export default {
     route: /\/entries\/$/,
     async get(req: Request) {
         const [result, template] = await Promise.all([start(req), layout(req)])
-        return template({ main: render(result.years, result.data) })
+        return template({ main: render(result.years, result.data), head: html`<style>.date-list > a { padding-right: 10px; }</style>` })
     }
 }
