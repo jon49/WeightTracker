@@ -77,6 +77,6 @@ export default {
     route: /\/entries\/$/,
     async get(req: Request) {
         const [result, template] = await Promise.all([start(req), layout(req)])
-        return template({ main: render(result.years, result.data), head: html`<style>.date-list > a { padding-right: 10px; }</style>` })
+        return template({ main: render(result.years, result.data), head: html`<style>.date-list > a { display: inline-block; padding-right: 10px; padding-top: 3px; }</style>` })
     }
 }
