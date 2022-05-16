@@ -21,10 +21,10 @@ const render = (theme: string | undefined, syncCount: number, url: string) => (o
     <header>
         <h1>Weight Tracker</h1>
         <nav>
-            <a href="/web2/entries#subtitle">Entries</a>
-            | <a href="/web2/entries/edit#subtitle">Add/Edit</a>
-            | <a href="/web2/charts#subtitle">Charts</a>
-            | <a href="/web2/user-settings/edit#subtitle">User Settings</a>
+            <a href="/web2/entries">Entries</a>
+            | <a href="/web2/entries/edit">Add/Edit</a>
+            | <a href="/web2/charts">Charts</a>
+            | <a href="/web2/user-settings/edit">User Settings</a>
         </nav>
         <br>
         <form method=POST action="/web2/sync/">
