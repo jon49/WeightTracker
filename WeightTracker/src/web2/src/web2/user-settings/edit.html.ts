@@ -65,6 +65,6 @@ export default {
     get,
     async post({data, req}: RoutePostArgs) {
         await post(data)
-        return get(req)
+        return Response.redirect(req.referrer, 302)
     }
 }
