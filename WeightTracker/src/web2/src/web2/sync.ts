@@ -19,7 +19,6 @@ async function post({ data: body }: RoutePostArgs) {
     const items = await getMany(keys.map(x => x[0]))
     const data : PostData[] = new Array(updated.size)
     for (let index = 0; index < items.length; index++) {
-        /** @type {[string, number]} */
         let [key, timestamp] = keys[index]
         data[index] = { key, data: items[index], timestamp }
     }
