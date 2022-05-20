@@ -50,7 +50,7 @@ const render = ({ bedtime, comments, sleep, waist, weight, date }: FormReturn<We
 <h2 id=subtitle>Add/Edit Entry</h2>
 <form>
     <label>Date<br>
-    <input id=date-change autofocus name=date type=date required value="${date}"></label>
+    <input id=date-change autofocus name=date type=date required value="${date}" onchange="this.form.submit()"></label>
     <br><br>
 </form>
 <form id=entry-form method=POST>
@@ -81,7 +81,7 @@ const render = ({ bedtime, comments, sleep, waist, weight, date }: FormReturn<We
 async function get(req: Request) {
     let data = await start(req)
     let template = await layout(req)
-    return template({ main: render(data), script: "/web2/js/entries-edit-page.v2.js" }) 
+    return template({ main: render(data) }) 
 }
 
 export default {
