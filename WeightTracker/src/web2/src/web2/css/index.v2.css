@@ -259,3 +259,22 @@ textarea {
   position: fixed;
   bottom: 10px;
 }
+
+/* Specific to the weight tracker app. */
+
+.sync {
+  display: flex;
+  align-items: center;
+}
+
+h1 {
+  margin-right: 0.25em;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+header {
+  padding-bottom: 0;
+}

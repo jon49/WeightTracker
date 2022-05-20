@@ -12,25 +12,26 @@ const render = (theme: string | undefined, syncCount: number, url: string) => (o
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weight Tracker</title>
-    <link href="/web2/css/index.css" rel=stylesheet>
+    <link href="/web2/css/index.v2.css" rel=stylesheet>
     ${head}
 </head>
 <body ${theme ? html`class=${theme}` : null}>
     <div id=messages></div>
     <a href="/login?handler=logout" style="position: absolute; top: 10px; right: 10px;">Logout</a>
     <header>
-        <h1>Weight Tracker</h1>
+        <div class=sync>
+            <h1 class=inline>Weight Tracker</h1>
+            <form class=inline method=POST action="/web2/sync/">
+                <input type=hidden name=url value="${url}">
+                <button>Sync - ${""+syncCount}</button>
+            </form>
+        </div>
         <nav>
             <a href="/web2/entries">Entries</a>
             | <a href="/web2/entries/edit">Add/Edit</a>
             | <a href="/web2/charts">Charts</a>
             | <a href="/web2/user-settings/edit">User Settings</a>
         </nav>
-        <br>
-        <form method=POST action="/web2/sync/">
-            <input type=hidden name=url value="${url}">
-            <button>Sync - ${""+syncCount}</button>
-        </form>
     </header>
     <main>${main}</main>
     <footer><p>${version}</p></footer>
