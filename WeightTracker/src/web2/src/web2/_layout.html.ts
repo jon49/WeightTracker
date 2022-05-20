@@ -23,7 +23,7 @@ const render = (theme: string | undefined, syncCount: number, url: string) => (o
             <h1 class=inline>Weight Tracker</h1>
             <form class=inline method=POST action="/web2/sync/">
                 <input type=hidden name=url value="${url}">
-                <button>Sync - ${""+syncCount}</button>
+                <button>Sync&nbsp;-&nbsp;${""+syncCount}</button>
             </form>
         </div>
         <nav>
