@@ -22,7 +22,7 @@ async function post({ data: body }: RoutePostArgs) {
         let [key, timestamp] = keys[index]
         data[index] = { key, data: items[index], timestamp }
     }
-    const lastSyncedId = /** @type {DB.Settings} */ (await get("settings"))?.lastSyncedId ?? 0
+    const lastSyncedId = (await get("settings"))?.lastSyncedId ?? 0
 
     let newData : {lastSyncedId: number, data: [string, any][]}
     const res = await fetch("/api/data", {

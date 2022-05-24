@@ -21,9 +21,7 @@ const render = (o: UserSettings) => {
 <h2 id=subtitle>User Settings</h2>
 <p id=message></p>
 <form method=POST>
-    <label>Earliest Recorded Date:<br>
-        <input autofocus name=earliestDate type=date value="${o.earliestDate}">
-    </label><br><br>
+    <input name=earliestDate type=hidden value="${o.earliestDate}">
     <label>Height (inches):<br>
         <input name=height type=number step=any value="${o.height ? formatNumber(o.height, 2) : null}">
     </label><br><br>
