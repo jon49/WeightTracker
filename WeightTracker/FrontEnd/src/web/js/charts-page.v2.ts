@@ -1,8 +1,8 @@
 import { get, getMany, WeightData } from "./db.js"
-import { avg, dateFill, reduceSlice, stdev } from "./utils.js"
+import { avg, dateFill, reduceSlice, stdev } from "./utils.v2.js"
 import { getById } from "./dom-utils.js"
 import "./lib/chart.min.js"
-import { getWeeklyData, getStartDate, getChartSettings } from "./charts-shared.js"
+import { getWeeklyData, getStartDate, getChartSettings } from "./charts-shared.v2.js"
 
 const red = "#ff6384", blue = "#6391ff", green = "#63ff83"
 
@@ -162,6 +162,7 @@ async function rate() {
         acc.date = val
         const v =
             <number[]>rawValues.slice(index, index + 7)
+            .filter(x => x?.weight)
             .map(x => x?.weight)
         acc.avg = avg(v) || null
         return acc

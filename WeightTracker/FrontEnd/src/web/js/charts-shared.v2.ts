@@ -1,4 +1,4 @@
-import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, reduceSlice, setDefaults } from "./utils.js"
+import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, isNil, reduceSlice, setDefaults } from "./utils.v2.js"
 import { get, getMany, UserSettings } from "./db.js"
 
 export async function getChartSettings() {
@@ -22,8 +22,11 @@ export async function weeksToGo() {
             neg[index - 1] = difference
         }
     }
-    let avgAll = -avg(all)
-    let avgNeg = -avg(neg)
+    let avgAll = avg(all)
+    let avgNeg = avg(neg)
+    if (isNil(avgAll) || isNil(avgNeg)) return
+    avgAll = -avgAll
+    avgNeg = -avgNeg
     let diff = currentWeight - +goalWeight
     return `${formatNumber(diff/avgNeg, 1)} to ${formatNumber(diff/avgAll, 1)}`
 }

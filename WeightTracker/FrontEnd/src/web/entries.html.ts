@@ -1,4 +1,4 @@
-import { dateFill, dateToString } from "./js/utils.js"
+import { dateFill, dateToString } from "./js/utils.v2.js"
 import html from "./js/html-template-tag.js"
 import layout from "./_layout.html.js"
 import { get, getMany, WeightData } from "./js/db.js"

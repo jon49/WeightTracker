@@ -46,32 +46,38 @@ export function reduceSlice<T, S>(data: T[], step: number, f: (acc: S, val: T, i
   return arr
 }
 
-export function avg(numbers: (number|undefined)[] | undefined): number {
-    if ((numbers?.length ?? 0) < 1) return 0
+export function avg(numbers: (number|undefined)[] | null | undefined): number | undefined {
+    if ((numbers?.length ?? 0) < 1) return undefined
 
     let sum = 0
     let count = 0
     for (let x of numbers!) {
-        if (x !== undefined) {
+        if (!isNil(x)) {
             sum += x
             count++
         }
     }
 
-    if (count === 0) return 0
+    if (count === 0) return undefined
 
     return sum / count
 }
 
-export function stdev(numbers: (number|undefined)[] | undefined): number {
-    if ((numbers?.length ?? 0) < 1) return 0
+export function stdev(numbers: (number|undefined)[] | undefined): number | undefined {
+    if ((numbers?.length ?? 0) < 1) return undefined
     let average = avg(numbers)
-    return Math.sqrt(avg(numbers!.map(x => x !== undefined ? Math.pow(average - x, 2) : undefined)))
+    if (isNil(average)) return undefined
+    let averages = avg(numbers!.map(x => !isNil(x) ? Math.pow(average! - x, 2) : undefined))
+    return averages ? Math.sqrt(averages) : undefined
+}
+
+export function isNil(value : unknown) : value is undefined | null {
+    return value === undefined || value === null
 }
 
 export function formatNumber(number: number | undefined, precision?: number): string | undefined {
     if (!number || Number.isNaN(number)) return
-    if (precision === undefined || precision === null) return ""+number
+    if (isNil(precision)) return ""+number
     let multiplier = Math.pow(10, precision)
     return (Math.round(number * multiplier) / multiplier).toFixed(precision)
 }

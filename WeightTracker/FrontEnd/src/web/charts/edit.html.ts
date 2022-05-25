@@ -1,4 +1,4 @@
-import { formatNumber, isSelected, toNumber } from "../js/utils.js"
+import { formatNumber, isSelected, toNumber } from "../js/utils.v2.js"
 import html from "../js/html-template-tag.js"
 import layout from "../_layout.html.js"
 import * as db from "../js/db.js"

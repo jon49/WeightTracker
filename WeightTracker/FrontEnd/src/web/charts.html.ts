@@ -1,5 +1,5 @@
-import { getChartSettings, weeksToGo, getGoalWeight } from "./js/charts-shared.js"
-import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, stdev } from "./js/utils.js"
+import { getChartSettings, weeksToGo, getGoalWeight } from "./js/charts-shared.v2.js"
+import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, isNil, stdev } from "./js/utils.v2.js"
 import html from "./js/html-template-tag.js"
 import layout from "./_layout.html.js"
 import { get, getMany } from "./js/db.js"
@@ -81,7 +81,7 @@ async function setupStats() : Promise<{statsHeaderText: string, statsData: Stats
 
     let bmiPrime
     let goalWeight = getGoalWeight(userSettings)
-    if (userSettings?.height) {
+    if (userSettings?.height && !isNil(averageWeight)) {
         let heightSquared = Math.pow(userSettings.height, 2)
         bmiPrime = formatNumber(averageWeight / heightSquared * 703 / 25, 3)
     }
@@ -113,6 +113,6 @@ export default {
     get: async (req: Request) => {
         let data = await setupStats()
         let template = await layout(req)
-        return template( { main: render(data), script: "/web/js/charts-page.js" })
+        return template( { main: render(data), script: "/web/js/charts-page.v2.js" })
     }
 }
