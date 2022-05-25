@@ -47,7 +47,7 @@ const getSyncCount = async () => (await db.get("updated"))?.size ?? 0
 
 export default
     async function layout(req: Request) {
-        let [theme, count] = await Promise.all([db.get("user-settings"), getSyncCount()])
+        let [theme, count] = await Promise.all([db.get("settings"), getSyncCount()])
         return render(theme?.theme, count, req.url)
     }
 

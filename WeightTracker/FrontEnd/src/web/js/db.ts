@@ -52,14 +52,14 @@ export interface WeightData {
 }
 
 export interface Settings {
-    lastSyncedId: number | undefined
+    lastSyncedId?: number | undefined
+    theme?: Theme
 }
 
 export interface UserSettings {
     earliestDate: string | undefined
     height: number | undefined
     goalWeight: number | undefined
-    theme: Theme
 }
 
 export type DurationUnit = "month" | "year" | "week"

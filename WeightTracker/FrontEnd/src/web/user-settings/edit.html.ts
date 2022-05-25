@@ -2,49 +2,62 @@ import { formatNumber, isSelected, toNumber } from "../js/utils.js"
 import html from "../js/html-template-tag.js"
 import layout from "../_layout.html.js"
 import * as db from "../js/db.js"
-import { UserSettings } from "../js/db.js"
+import { UserSettings, Settings } from "../js/db.js"
 import { RoutePostArgs } from "../js/route.js"
 
 const themes = ["dark", "light", "none"] as const
 export type Theme = typeof themes[number]
 
 const start = async () => {
-    let o = await db.get("user-settings") ?? <UserSettings>{}
-    o.theme = getTheme(o.theme)
-    return o
+    let [userSettings, settings] = await Promise.all([db.get("user-settings"), db.get("settings")])
+    userSettings = userSettings ?? <UserSettings>{}
+    settings = settings ?? <Settings>{}
+    return { ...userSettings, theme: getTheme(settings.theme) }
 }
 
-const render = (o: UserSettings) => {
+const render = (o: UserSettings & { theme: Theme }) => {
     const selected = isSelected<Theme>(o.theme)
     const option = (value: Theme, display: string) => html`<option value="${value}" ${selected(value)}>${display}</option>`
     return html`
 <h2 id=subtitle>User Settings</h2>
 <p id=message></p>
-<form method=POST>
-    <input name=earliestDate type=hidden value="${o.earliestDate}">
-    <label>Height (inches):<br>
-        <input name=height type=number step=any value="${o.height ? formatNumber(o.height, 2) : null}">
-    </label><br><br>
-    <label>Goal Weight:<br>
-        <input name=goalWeight type=number step=any value="${o.goalWeight ? formatNumber(o.goalWeight, 2) : null }">
-    </label><br><br>
+<form method=POST action="?handler=settings">
     <label>Theme:<br>
-        <select name=theme required>
+        <select name=theme required onchange="this.form.submit()">
             ${option("dark", "Dark")}
             ${option("light", "Light")}
             ${option("none", "Default")}
         </select>
+    </label>
+</form>
+<br>
+<form method=POST action="?handler=userSettings">
+    <input name=earliestDate type=hidden value="${o.earliestDate}">
+    <label>Height (inches):<br>
+        <input name=height type=number step=any value="${o.height ? formatNumber(o.height) : null}">
+    </label><br><br>
+    <label>Goal Weight:<br>
+        <input name=goalWeight type=number step=any value="${o.goalWeight ? formatNumber(o.goalWeight) : null }">
     </label><br><br>
     <button>Save</button>
 </form>`
 }
 
-function post(data: UserSettings) {
+function handleSetting(data: Settings) {
+    return db.update("settings", x => {
+        let theme = { theme: getTheme(data.theme) }
+        if (!x) {
+            return theme
+        }
+        return { ...x, ...theme }
+    }, { sync: false })
+}
+
+function handleUserSettings(data: UserSettings) {
     const o : UserSettings = {
         earliestDate: data.earliestDate,
         goalWeight: toNumber(data.goalWeight),
         height: toNumber(data.height),
-        theme: getTheme(data.theme)
     }
     return db.set("user-settings", o)
 }
@@ -58,11 +71,20 @@ async function get(req: Request) {
     return template({ main: render(settings) })
 }
 
+const handler = <any>{
+    settings: handleSetting,
+    userSettings: handleUserSettings,
+}
+
 export default {
     route: /\/user-settings\/edit\/$/,
     get,
     async post({data, req}: RoutePostArgs) {
-        await post(data)
+        let handlerType = new URL(req.url).searchParams.get("handler")
+        let handle
+        if (handlerType && (handle = handler[<any>handlerType])) {
+            await handle(data)
+        }
         return Response.redirect(req.referrer, 302)
     }
 }
