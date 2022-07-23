@@ -1,4 +1,4 @@
-import { dateToString, formatNumber, toNumber } from "../js/utils.v2.js"
+import { dateToString, formatNumber, round, toNumber } from "../js/utils.v2.js"
 import html from "../js/html-template-tag.js"
 import layout from "../_layout.html.js"
 import * as db from "../js/db.js"
@@ -20,9 +20,16 @@ const start = async (req: Request) => {
     return weightData
 }
 
-async function post(data: WeightData) {
+async function post(data: WeightData & { wakeUpTime?: string }) {
     if (!/\d{4}-[01]\d-[0123]\d/.test(data.date)) {
         return Promise.reject({ message: "Date is required!", error: new Error("post:/sw/entries/edit/")})
+    }
+
+    if (data.wakeUpTime && data.bedtime) {
+        let bedtime = new Date(`1970-01-01T${data.bedtime}`)
+        let wakeUpTime = new Date(`1970-01-0${+data.bedtime[0]+1}T${data.wakeUpTime}`)
+        // time slept / 1000 (milliseconds) / 60 (seconds) / 60 (hours)
+        data.sleep = round((+wakeUpTime - +bedtime)/36e5, 2)
     }
 
     const cleanData : WeightData = {
@@ -65,7 +72,12 @@ const render = ({ bedtime, comments, sleep, waist, weight, date }: FormReturn<We
 
     <label>Number of hours slept<br>
         <input name=sleep type=number step=any value="${sleep}">
-    </label><br><br>
+    </label> ${
+        sleep
+            ? null
+        : html`<label class=button onclick="this.firstElementChild.hidden = false">Calculate
+            <input name=wakeUpTime type=time hidden onchange="this.form.submit()">
+        </label>`}<br><br>
 
     <label>Waist Size (cm)<br>
         <input id=entry-waist name=waist type=number step=any value="${waist}">
