@@ -27,8 +27,8 @@ async function post(data: WeightData & { wakeUpTime?: string }) {
 
     if (data.wakeUpTime && data.bedtime) {
         let bedtime = new Date(`1970-01-01T${data.bedtime}`)
-        let wakeUpTime = new Date(`1970-01-0${+data.bedtime[0]+1}T${data.wakeUpTime}`)
-        // time slept / 1000 (milliseconds) / 60 (seconds) / 60 (hours)
+        let wakeUpTime = new Date(`1970-01-0${+(+data.bedtime.slice(0, 2) > +data.wakeUpTime.slice(0, 2)) + 1}T${data.wakeUpTime}`)
+        // time slept (milliseconds) / 1000 (milliseconds) / 60 (seconds) / 60 (hours)
         data.sleep = round((+wakeUpTime - +bedtime)/36e5, 2)
     }
 
