@@ -278,3 +278,7 @@ h2 {
 header {
   padding-bottom: 0;
 }
+
+.text-right {
+  text-align: right;
+}
