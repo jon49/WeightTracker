@@ -24,7 +24,7 @@ const $row = ({date, weight, bedtime, sleep, waist, comments}: WeightDataYear) =
     html`<tr>
         <td>${date}</td>
         <td>${weight}</td>
-        <td>${cleanBedtime(bedtime)}</td>
+        <td class=text-right>${cleanBedtime(bedtime)}</td>
         <td>${sleep}</td>
         <td>${waist}</td>
         <td>${comments}</td>
@@ -66,11 +66,11 @@ async function getYears() : Promise<number[]> {
     return [...Array(thisYear - startYear + 1).keys()].map(x => x + startYear)
 }
 
-function cleanBedtime(bedtime: string | undefined) : string | undefined {
-    if (!bedtime || bedtime.length !== 5) return bedtime
+function cleanBedtime(bedtime: string | undefined) {
+    if (!bedtime || bedtime.length !== 5 || bedtime[bedtime.length - 1] === "M") return bedtime
 
     let time = new Date(`1970-01-01T${bedtime}`).toLocaleTimeString()
-    return `${time.slice(0, time.lastIndexOf(":"))} ${time.slice(-2)}`
+    return html`${time.slice(0, time.lastIndexOf(":"))}&nbsp;${time.slice(-2)}`
 }
 
 interface TableData {
