@@ -19,19 +19,21 @@ const render = (o: UserSettings & { theme: Theme }) => {
     const selected = isSelected<Theme>(o.theme)
     const option = (value: Theme, display: string) => html`<option value="${value}" ${selected(value)}>${display}</option>`
     return html`
-<h2 id=subtitle>User Settings</h2>
+<h2>User Settings</h2>
 <p id=message></p>
-<form method=POST action="?handler=settings">
+<form method=POST action="?handler=settings" onchange="this.submit()">
     <label>Theme:<br>
-        <select name=theme required onchange="this.form.submit()">
+        <select name=theme required>
             ${option("dark", "Dark")}
             ${option("light", "Light")}
             ${option("none", "Default")}
         </select>
     </label>
 </form>
+
 <br>
-<form method=POST action="?handler=userSettings">
+
+<form method=POST action="?handler=userSettings" onchange="this.submit()">
     <input name=earliestDate type=hidden value="${o.earliestDate}">
     <label>Height (inches):<br>
         <input name=height type=number step=any value="${o.height ? formatNumber(o.height) : null}">
@@ -39,7 +41,6 @@ const render = (o: UserSettings & { theme: Theme }) => {
     <label>Goal Weight:<br>
         <input name=goalWeight type=number step=any value="${o.goalWeight ? formatNumber(o.goalWeight) : null }">
     </label><br><br>
-    <button>Save</button>
 </form>`
 }
 

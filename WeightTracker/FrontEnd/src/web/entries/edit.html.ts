@@ -54,13 +54,13 @@ async function post(data: WeightData & { wakeUpTime?: string }) {
 }
 
 const render = ({ bedtime, comments, sleep, waist, weight, date }: FormReturn<WeightData>) => html`
-<h2 id=subtitle>Add/Edit Entry</h2>
-<form>
+<h2>Add/Edit Entry</h2>
+<form onchange="this.submit()">
     <label>Date<br>
-    <input id=date-change autofocus name=date type=date required value="${date}" onchange="this.form.submit()"></label>
+    <input id=date-change autofocus name=date type=date required value="${date}"></label>
     <br><br>
 </form>
-<form id=entry-form method=POST>
+<form id=entry-form method=POST onchange="this.submit()">
     <input name=date type=hidden value=${date}>
 
     <label>Weight<br>
@@ -76,7 +76,7 @@ const render = ({ bedtime, comments, sleep, waist, weight, date }: FormReturn<We
         sleep
             ? null
         : html`<label class=button onclick="this.firstElementChild.hidden = false">Calculate
-            <input name=wakeUpTime type=time hidden onchange="this.form.submit()">
+            <input name=wakeUpTime type=time hidden>
         </label>`}<br><br>
 
     <label>Waist Size (cm)<br>
@@ -85,9 +85,7 @@ const render = ({ bedtime, comments, sleep, waist, weight, date }: FormReturn<We
 
     <label>Comment<br>
         <textarea id=entry-comments name=comments>${comments}</textarea>
-    </label><br><br>
-
-    <button>Save</button>
+    </label>
 </form>`
 
 async function get(req: Request) {
