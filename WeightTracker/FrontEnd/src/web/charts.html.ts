@@ -2,7 +2,7 @@ import { getChartSettings, weeksToGo, getGoalWeight } from "./js/charts-shared.v
 import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, isNil, stdev } from "./js/utils.v2.js"
 import html from "./js/html-template-tag.js"
 import layout from "./_layout.html.js"
-import { get, getMany } from "./js/db.js"
+import { get, getMany, WeightData } from "./js/db.js"
 
 const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, statsData: StatsData }) => html`
 <h2>Charts</h2>
@@ -19,6 +19,7 @@ const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, stats
                 <th>Goal</th>
                 <th>Weight</th>
                 <th>Rate</th>
+                <th>Sleep</th>
             </tr>
         </thead>
         <tbody>
@@ -29,6 +30,7 @@ const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, stats
                 <td>${statsData.goalWeight}</td>
                 <td>${statsData.weight}</td>
                 <td>${statsData.rate}</td> 
+                <td>${statsData.sleep}</td> 
             </tr>
         </tbody>
     </table>
@@ -69,14 +71,16 @@ async function setupStats() : Promise<{statsHeaderText: string, statsData: Stats
     const startDate = getPreviousDay(new Date(), 0)
     const dates = dateFill(startDate, now)
     const [previousData, dataUnfiltered, weeksToGoData] = await Promise.all([
-            getMany(dateFill(dateAdd(startDate, -7), dateAdd(startDate, -1))),
-            getMany(dates),
+            getMany<WeightData>(dateFill(dateAdd(startDate, -7), dateAdd(startDate, -1))),
+            getMany<WeightData>(dates),
             weeksToGo()
         ])
     const data = dataUnfiltered.filter(x => x)
-    const weights = data.filter(x => x?.weight).map(x => x.weight)
+    const weights = data.filter(x => x.weight).map(x => x.weight)
     const averageWeight = avg(weights)
     const previousWeightAvg = avg(previousData.filter(x => x?.weight).map(x => x.weight))
+    // @ts-ignore
+    const previousWeekSleepAvg = avg(data.filter(x => x.sleep > 0).map(x => x.sleep))
     const std = stdev(weights)
 
     let bmiPrime
@@ -94,18 +98,20 @@ async function setupStats() : Promise<{statsHeaderText: string, statsData: Stats
             std: formatNumber(std, 2),
             goalWeight,
             weight: formatNumber(averageWeight, 2),
-            rate: previousWeightAvg && averageWeight ? formatNumber(averageWeight - previousWeightAvg, 2) : "N/A"
+            rate: previousWeightAvg && averageWeight ? formatNumber(averageWeight - previousWeightAvg, 2) : "N/A",
+            sleep: formatNumber(previousWeekSleepAvg, 2),
         }
     }
 }
 
 interface StatsData {
     bmiPrime: string
-    weeksToGo: string | undefined
-    std: string | undefined
     goalWeight: string | undefined
-    weight: string | undefined
     rate: string | undefined
+    sleep: string | undefined
+    std: string | undefined
+    weeksToGo: string | undefined
+    weight: string | undefined
 }
 
 export default {
