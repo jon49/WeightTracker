@@ -32,7 +32,7 @@ const $row = ({date, weight, bedtime, sleep, waist, comments}: WeightDataYear) =
 
 const render = (years: string[], data: WeightDataYear[]) => 
     html`
-<h2 id=subtitle>Entries</h2>
+<h2>Entries</h2>
 
 <div class=date-list>
     ${years.reverse().map((year: string) => html`<a href="?year=${year}">${year}</a>`)}
