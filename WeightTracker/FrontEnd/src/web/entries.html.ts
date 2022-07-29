@@ -24,7 +24,7 @@ const $row = ({date, weight, bedtime, sleep, waist, comments}: WeightDataYear) =
     html`<tr>
         <td>${date}</td>
         <td>${weight}</td>
-        <td class=text-right>${cleanBedtime(bedtime)}</td>
+        <td>${cleanBedtime(bedtime)}</td>
         <td>${sleep}</td>
         <td>${waist}</td>
         <td>${comments}</td>
@@ -73,6 +73,18 @@ function cleanBedtime(bedtime: string | undefined) {
     return html`${time.slice(0, time.lastIndexOf(":"))}&nbsp;${time.slice(-2)}`
 }
 
+const head = html`
+    <style>
+        .date-list > a {
+            display: inline-block;
+            padding-right: 10px;
+            padding-top: 3px;
+        }
+        tr > td:nth-child(3) {
+            text-align: right;
+        }
+    </style>`
+
 interface TableData {
     dates: string[]
     data: WeightData[]
@@ -82,6 +94,6 @@ export default {
     route: /\/entries\/$/,
     async get(req: Request) {
         const [result, template] = await Promise.all([start(req), layout(req)])
-        return template({ main: render(result.years, result.data), head: html`<style>.date-list > a { display: inline-block; padding-right: 10px; padding-top: 3px; }</style>` })
+        return template({ main: render(result.years, result.data), head })
     }
 }
