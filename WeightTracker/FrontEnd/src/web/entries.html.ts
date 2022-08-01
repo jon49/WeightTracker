@@ -73,7 +73,7 @@ function cleanBedtime(bedtime: string | undefined) {
     return html`${time.slice(0, time.lastIndexOf(":"))}&nbsp;${time.slice(-2)}`
 }
 
-const head = html`
+const head = `
     <style>
         .date-list > a {
             display: inline-block;

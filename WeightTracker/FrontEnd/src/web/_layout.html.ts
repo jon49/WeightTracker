@@ -13,7 +13,7 @@ const render = (theme: string | undefined, syncCount: number, url: string) => (o
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weight Tracker</title>
     <link href="/web/css/index.v4.css" rel=stylesheet>
-    ${head}
+    $${head}
 </head>
 <body ${theme ? html`class=${theme}` : null}>
     <div id=messages></div>
@@ -54,7 +54,7 @@ export default
 export type Layout = typeof layout
 
 export interface LayoutTemplateArguments {
-    head?: Generator|string
+    head?: string
     main?: Generator|string
     script?: string
 }
