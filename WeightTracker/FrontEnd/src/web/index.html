@@ -8,18 +8,9 @@
     <link href="/web/css/index.v4.css" rel=stylesheet>
 </head>
 <body>
-    <p>Loading&hellip;</p>
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/web/sw.js').then(function(registration) {
-      console.log('ServiceWorker registration successful with scope: ', registration.scope);
-      document.location.href = document.location.href
-    }, function(err) {
-      console.log('ServiceWorker registration failed: ', err);
-    });
-  });
-}
-</script>
+
+<p>Loading&hellip;</p>
+<script src="/web/js/service-worker-loader.js"></script>
+
 </body>
 </html>
