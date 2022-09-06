@@ -13,7 +13,6 @@ using Proto;
 using System.Diagnostics;
 using System.IO;
 using WeightTracker.Data;
-using WeightTracker.Data.Database;
 using WeightTracker.Models;
 using static JFN.Utilities.Paths;
 
