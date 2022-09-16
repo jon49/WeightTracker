@@ -38,7 +38,7 @@ const render = (theme: string | undefined, syncCount: number, url: string) => (o
     ${ script
          ? html`<script src="${script}" type=module></script>`
        : null }
-    <script src="/web/js/service-worker-loader.js"></script>
+    <script src="/web/js/main.js"></script>
 </body>
 </html>`
 }

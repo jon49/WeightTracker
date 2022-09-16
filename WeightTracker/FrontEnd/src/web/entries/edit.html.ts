@@ -57,7 +57,7 @@ const render = ({ bedtime, comments, sleep, waist, weight, date }: FormReturn<We
 <h2>Add/Edit Entry</h2>
 <form onchange="this.submit()">
     <label>Date<br>
-    <input id=date-change autofocus name=date type=date required value="${date}"></label>
+    <input id=date-change name=date type=date required value="${date}"></label>
     <br><br>
 </form>
 <form id=entry-form method=POST onchange="this.submit()">

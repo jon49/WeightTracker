@@ -24,7 +24,7 @@ const render = (data: Data) => {
     const selected = isSelected<DurationUnit>(data.durationUnit)
     return html`<h2>Chart Settings</h2>
 <form method=POST onchange="this.submit()">
-    <input autofocus name=duration type=number placeholder="Number of months" required value="${data.duration}">
+    <input name=duration type=number placeholder="Number of months" required value="${data.duration}">
     <select name=durationUnit required>
         <option value=month ${selected("month")}>Month(s)</option>
         <option value=week ${selected("week")}>Week(s)</option>
