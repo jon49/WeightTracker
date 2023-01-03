@@ -20,15 +20,24 @@ async function start(req: Request) {
     return {data, years}
 }
 
-const $row = ({date, weight, bedtime, sleep, waist, comments}: WeightDataYear) =>
-    html`<tr>
+function $row({date, weight, bedtime, sleep, waist, comments}: WeightDataYear) {
+    let c : string[] = comments?.split('\n') ?? []
+    let comment =
+        c.length > 1
+            ? c.map(x => html`<p>${x}</p>`)
+        : c.length === 1
+            ? c[0]
+        : null
+
+    return html`<tr>
         <td>${date}</td>
         <td>${weight}</td>
         <td>${cleanBedtime(bedtime)}</td>
         <td>${sleep}</td>
         <td>${waist}</td>
-        <td>${comments}</td>
+        <td>${comment}</td>
     </tr>`
+}
 
 const render = (years: string[], data: WeightDataYear[]) => 
     html`
