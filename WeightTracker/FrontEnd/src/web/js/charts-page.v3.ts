@@ -1,7 +1,7 @@
 import { ChartSettings, UserSettings, WeightData } from "../server/db"
-import { avg, dateFill, dateToString, reduceSlice, stdev } from "./utils.v2.js"
+import { avg, dateFill, dateToString, reduceSlice, stdev } from "./utils.v3.js"
 import { getById } from "./dom-utils.js"
-import { getWeeklyData, getStartDate, setChartSettingDefaults } from "./charts-shared.v2.js"
+import { getWeeklyData, getStartDate, setChartSettingDefaults } from "./charts-shared.v3.js"
 import "./lib/chart.min.js"
 
 const red = "#ff6384", blue = "#6391ff", green = "#63ff83"

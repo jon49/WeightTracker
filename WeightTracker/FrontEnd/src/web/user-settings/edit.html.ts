@@ -1,4 +1,4 @@
-import { formatNumber, isSelected, toNumber } from "../js/utils.v2"
+import { formatNumber, isSelected, toNumber } from "../js/utils.v3"
 import html from "../server/html-template-tag"
 import layout from "../_layout.html"
 import * as db from "../server/db"
@@ -39,7 +39,7 @@ const render = (o: UserSettings & { theme: Theme }) => {
         <input name=height type=number step=any value="${o.height ? formatNumber(o.height) : null}">
     </label><br><br>
     <label>Goal Weight:<br>
-        <input name=goalWeight type=number step=any value="${o.goalWeight ? formatNumber(o.goalWeight) : null }">
+        <input name=goalWeight type=number step=any value="${o.goalWeight ? formatNumber(o.goalWeight) : null}">
     </label><br><br>
 </form>`
 }
@@ -55,7 +55,7 @@ function handleSetting(data: Settings) {
 }
 
 function handleUserSettings(data: UserSettings) {
-    const o : UserSettings = {
+    const o: UserSettings = {
         earliestDate: data.earliestDate,
         goalWeight: toNumber(data.goalWeight),
         height: toNumber(data.height),
@@ -80,7 +80,7 @@ const handler = <any>{
 export default {
     route: /\/user-settings\/edit\/$/,
     get,
-    async post({data, req}: RoutePostArgs) {
+    async post({ data, req }: RoutePostArgs) {
         let handlerType = new URL(req.url).searchParams.get("handler")
         let handle
         if (handlerType && (handle = handler[<any>handlerType])) {

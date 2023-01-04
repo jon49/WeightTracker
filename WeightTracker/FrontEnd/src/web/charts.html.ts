@@ -1,5 +1,5 @@
-import { getGoalWeight, getWeeklyData } from "./js/charts-shared.v2"
-import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, isNil, setDefaults, stdev } from "./js/utils.v2"
+import { getGoalWeight, getWeeklyData } from "./js/charts-shared.v3"
+import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, isNil, setDefaults, stdev } from "./js/utils.v3"
 import html from "./server/html-template-tag"
 import layout from "./_layout.html"
 import { ChartSettings, get, getMany, UserSettings, WeightData } from "./server/db"
@@ -154,6 +154,6 @@ export default {
     get: async (req: Request) => {
         let data = await setupStats()
         let template = await layout(req)
-        return template( { main: render(data), script: "/web/js/charts-page.v2.js" })
+        return template( { main: render(data), script: "/web/js/charts-page.v3.js" })
     }
 }

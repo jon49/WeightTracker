@@ -52,7 +52,7 @@ export function avg(numbers: (number|undefined)[] | null | undefined): number | 
     let sum = 0
     let count = 0
     for (let x of numbers!) {
-        if (!isNil(x)) {
+        if (x) {
             sum += x
             count++
         }
@@ -65,6 +65,7 @@ export function avg(numbers: (number|undefined)[] | null | undefined): number | 
 
 export function stdev(numbers: (number|undefined)[] | undefined): number | undefined {
     if ((numbers?.length ?? 0) < 1) return undefined
+    numbers = numbers!.filter(x => x)
     let average = avg(numbers)
     if (isNil(average)) return undefined
     let averages = avg(numbers!.map(x => !isNil(x) ? Math.pow(average! - x, 2) : undefined))
