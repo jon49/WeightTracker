@@ -1,10 +1,31 @@
-import { get, getMany, WeightData } from "./db.js"
-import { avg, dateFill, reduceSlice, stdev } from "./utils.v2.js"
+import { ChartSettings, UserSettings, WeightData } from "../server/db"
+import { avg, dateFill, dateToString, reduceSlice, stdev } from "./utils.v2.js"
 import { getById } from "./dom-utils.js"
+import { getWeeklyData, getStartDate, setChartSettingDefaults } from "./charts-shared.v2.js"
 import "./lib/chart.min.js"
-import { getWeeklyData, getStartDate, getChartSettings } from "./charts-shared.v2.js"
 
 const red = "#ff6384", blue = "#6391ff", green = "#63ff83"
+
+async function api<T>(url: string) : Promise<T> {
+    url = `/web/api/${url}`
+    let res = await fetch(url)
+    if (res.ok && res.headers.get("Content-Type") === "application/json") {
+        let obj = await res.json()
+        return <T>obj
+    }
+    console.error(res);
+    return Promise.reject(res.statusText)
+}
+
+function getWeightData(start: string | Date) {
+    let s = start instanceof Date ? dateToString(start) : start
+    return api<WeightData[] | undefined>(`data?start=${s}`)
+}
+
+async function getChartSettings() {
+    let chartSettings = await api<ChartSettings>("chart-settings")
+    return setChartSettingDefaults(chartSettings)
+}
 
 const chartsLocation = getById("charts-location")
 
@@ -30,7 +51,13 @@ chartButtons?.addEventListener("click", async ev => {
 })
 
 async function weightAverageChartData() {
-    const { labels, maxValues, minValues, avgValues } = await getWeeklyData()
+    let chartSettings = await getChartSettings()
+    const weeklyData =
+        await getWeeklyData(
+            chartSettings,
+            getWeightData)
+    if (!weeklyData) return
+    const { labels, maxValues, minValues, avgValues } = weeklyData
 
     const borderWidth = labels.length < 500 ? 2 : 1
     const pointRadius =
@@ -77,10 +104,11 @@ async function weightAverageChartData() {
 }
 
 async function weightData() {
-    const startDate = (await get("user-settings"))?.earliestDate
+    const startDate = (await api<UserSettings>("user-settings"))?.earliestDate
     if (!startDate) return
     const labels = dateFill(new Date(startDate), new Date())
-    const rawValues = await getMany<WeightData|undefined>(labels)
+    const rawValues = await getWeightData(startDate)
+    if (!rawValues) return
     const values = rawValues.map(x => x?.weight || null)
     const pointRadius =
         labels.length < 500
@@ -110,9 +138,10 @@ async function weightData() {
 }
 
 async function histogram() {
-    const startDate = (await get("user-settings"))?.earliestDate
+    const startDate = (await api<UserSettings>("user-settings"))?.earliestDate
     if (!startDate) return
-    const rawValues = await getMany<(WeightData|undefined)>(dateFill(new Date(startDate), new Date()))
+    const rawValues = await getWeightData(startDate)
+    if (!rawValues) return
     const values = {}
     for (let val of rawValues) {
         let weight
@@ -156,7 +185,8 @@ async function rate() {
     const chartSettings = await getChartSettings()
     const startDate = getStartDate(chartSettings.duration, chartSettings.durationUnit)
     const dates = dateFill(startDate, new Date())
-    const rawValues = await getMany<WeightData|undefined>(dates)
+    const rawValues = await getWeightData(startDate)
+    if (!rawValues) return
     const averages = reduceSlice(dates, 7, (acc, val, index) => {
         if (acc.date) return acc
         acc.date = val
@@ -229,7 +259,8 @@ async function sleep() {
     const chartSettings = await getChartSettings()
     const startDate = getStartDate(chartSettings.duration, chartSettings.durationUnit)
     const dates = dateFill(startDate, new Date())
-    const rawValues = await getMany<WeightData|undefined>(dates)
+    const rawValues = await getWeightData(startDate)
+    if (!rawValues) return
     const values = reduceSlice(dates, 7, (acc, val, index) => {
         if (acc.date) return acc
         acc.date = val

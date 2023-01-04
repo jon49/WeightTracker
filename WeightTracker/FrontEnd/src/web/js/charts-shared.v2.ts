@@ -1,41 +1,19 @@
-import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, isNil, reduceSlice, setDefaults } from "./utils.v2.js"
-import { get, getMany, UserSettings } from "./db.js"
+import { dateAdd, dateFill, formatNumber, getPreviousDay, reduceSlice, setDefaults } from "./utils.v2.js"
+import { ChartSettings, UserSettings, WeightData } from "../server/db"
 
-export async function getChartSettings() {
-    let rawChartSettings = await get("chart-settings")
+export async function setChartSettingDefaults(rawChartSettings: ChartSettings) {
     return setDefaults(rawChartSettings, [["duration", 9], ["durationUnit", "month"]])
 }
 
-export async function weeksToGo() {
-    const { avgValues } = await getWeeklyData(),
-        length = avgValues.length,
-        userSettings = await get("user-settings"),
-        currentWeight = avgValues[length - 1],
-        goalWeight = getGoalWeight(userSettings)
-    if (!goalWeight) return
-    let all = new Array(length - 1), neg = new Array(length - 1)
-    for (let index = 1; index < length; index++) {
-        let difference = avgValues[index] - avgValues[index - 1]
-        if (Number.isNaN(difference)) continue
-        all[index - 1] = difference
-        if (difference < 0) {
-            neg[index - 1] = difference
-        }
-    }
-    let avgAll = avg(all)
-    let avgNeg = avg(neg)
-    if (isNil(avgAll) || isNil(avgNeg)) return
-    avgAll = -avgAll
-    avgNeg = -avgNeg
-    let diff = currentWeight - +goalWeight
-    return `${formatNumber(diff/avgNeg, 1)} to ${formatNumber(diff/avgAll, 1)}`
-}
+export async function getWeeklyData(
+    chartSettings: ChartSettings,
+    weightDataGetter: (start: Date) => Promise<WeightData[] | undefined>)
+        : Promise<WeeklyData | undefined> {
 
-export async function getWeeklyData() : Promise<WeeklyData> {
-    const chartSettings = await getChartSettings()
     const startDate = getStartDate(chartSettings.duration, chartSettings.durationUnit)
     const dates = dateFill(startDate, new Date())
-    const rawValues = await getMany(dates)
+    const rawValues = await weightDataGetter(startDate)
+    if (!rawValues) return
     const results = reduceSlice(dates, 7, (acc, x, i) => {
         let weight
         acc.date = acc.date ?? x

@@ -1,9 +1,9 @@
-import { formatNumber, isSelected, toNumber } from "../js/utils.v2.js"
-import html from "../js/html-template-tag.js"
-import layout from "../_layout.html.js"
-import * as db from "../js/db.js"
-import { UserSettings, Settings } from "../js/db.js"
-import { RoutePostArgs } from "../js/route.js"
+import { formatNumber, isSelected, toNumber } from "../js/utils.v2"
+import html from "../server/html-template-tag"
+import layout from "../_layout.html"
+import * as db from "../server/db"
+import { UserSettings, Settings } from "../server/db"
+import { RoutePostArgs } from "../server/route"
 
 const themes = ["dark", "light", "none"] as const
 export type Theme = typeof themes[number]

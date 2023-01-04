@@ -1,8 +1,13 @@
-import { getChartSettings, weeksToGo, getGoalWeight } from "./js/charts-shared.v2.js"
-import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, isNil, stdev } from "./js/utils.v2.js"
-import html from "./js/html-template-tag.js"
-import layout from "./_layout.html.js"
-import { get, getMany, WeightData } from "./js/db.js"
+import { getGoalWeight, getWeeklyData } from "./js/charts-shared.v2"
+import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, isNil, setDefaults, stdev } from "./js/utils.v2"
+import html from "./server/html-template-tag"
+import layout from "./_layout.html"
+import { ChartSettings, get, getMany, UserSettings, WeightData } from "./server/db"
+
+async function getChartSettings() {
+    let rawChartSettings = await get("chart-settings")
+    return setDefaults(rawChartSettings, [["duration", 9], ["durationUnit", "month"]])
+}
 
 const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, statsData: StatsData }) => html`
 <h2>Charts</h2>
@@ -65,16 +70,46 @@ const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, stats
     <div><canvas id=chart-rate></canvas></div>
 </template>`
 
+async function weeksToGo(
+    userSettings: UserSettings | undefined,
+    chartSettings: ChartSettings,
+    weightDataGetter: (start: Date) => Promise<WeightData[]>) {
+
+    const { avgValues } = await getWeeklyData(chartSettings, weightDataGetter),
+        length = avgValues.length,
+        currentWeight = avgValues[length - 1],
+        goalWeight = getGoalWeight(userSettings)
+    if (!goalWeight) return
+    let all = new Array(length - 1), neg = new Array(length - 1)
+    for (let index = 1; index < length; index++) {
+        let difference = avgValues[index] - avgValues[index - 1]
+        if (Number.isNaN(difference)) continue
+        all[index - 1] = difference
+        if (difference < 0) {
+            neg[index - 1] = difference
+        }
+    }
+    let avgAll = avg(all)
+    let avgNeg = avg(neg)
+    if (isNil(avgAll) || isNil(avgNeg)) return
+    avgAll = -avgAll
+    avgNeg = -avgNeg
+    let diff = currentWeight - +goalWeight
+    return `${formatNumber(diff/avgNeg, 1)} to ${formatNumber(diff/avgAll, 1)}`
+}
+
 async function setupStats() : Promise<{statsHeaderText: string, statsData: StatsData}> {
-    const [chartSettings, userSettings] = await Promise.all([getChartSettings(), get("user-settings")])
+    const [chartSettings, userSettings] =
+        await Promise.all([getChartSettings(), get("user-settings")])
     const now = new Date()
     const startDate = getPreviousDay(new Date(), 0)
     const dates = dateFill(startDate, now)
-    const [previousData, dataUnfiltered, weeksToGoData] = await Promise.all([
+    const [previousData, dataUnfiltered] = await Promise.all([
             getMany<WeightData>(dateFill(dateAdd(startDate, -7), dateAdd(startDate, -1))),
             getMany<WeightData>(dates),
-            weeksToGo()
         ])
+    const weeksToGoData = await weeksToGo(
+        userSettings, chartSettings, (startDate: Date) => getMany(dateFill(startDate, new Date())))
     const data = dataUnfiltered.filter(x => x)
     const weights = data.filter(x => x.weight).map(x => x.weight)
     const averageWeight = avg(weights)

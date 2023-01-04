@@ -1,8 +1,8 @@
-import { formatNumber, isSelected, toNumber } from "../js/utils.v2.js"
-import html from "../js/html-template-tag.js"
-import layout from "../_layout.html.js"
-import * as db from "../js/db.js"
-import { RoutePostArgs } from "../js/route.js"
+import { formatNumber, isSelected, toNumber } from "../js/utils.v2"
+import html from "../server/html-template-tag"
+import layout from "../_layout.html"
+import * as db from "../server/db"
+import { RoutePostArgs } from "../server/route"
 
 const units = ["month", "year", "week"] as const
 export type DurationUnit = typeof units[number]
@@ -54,3 +54,4 @@ export default {
         return Response.redirect(req.referrer, 302)
     }
 }
+

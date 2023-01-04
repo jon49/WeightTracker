@@ -1,5 +1,5 @@
-import { get, getMany, setMany, update, Updated } from "./js/db.js"
-import { RoutePostArgs } from "./js/route.js"
+import { get, getMany, setMany, update, Updated } from "./server/db"
+import { RoutePostArgs } from "./server/route"
 
 async function post({ data: body }: RoutePostArgs) {
     try {

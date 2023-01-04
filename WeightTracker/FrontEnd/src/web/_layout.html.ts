@@ -1,6 +1,6 @@
-import html from "./js/html-template-tag.js"
-import * as db from "./js/db.js"
-import { version } from "./settings.js"
+import html from "./server/html-template-tag"
+import * as db from "./server/db"
+import { version } from "./settings"
 
 const render = (theme: string | undefined, syncCount: number, url: string) => (o: LayoutTemplateArguments) => {
     const { main, head, script } = o

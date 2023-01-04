@@ -1,15 +1,21 @@
-import { addRoutes, findRoute, RoutePost } from "./js/route.js"
-import chartEditHandler from "./charts/edit.html.js"
-import entriesEditHandler from "./entries/edit.html.js"
-import userSettingsEditHandler from "./user-settings/edit.html.js"
-import chartsHandler from "./charts.html.js"
-import entriesHandler from "./entries.html.js"
+import { addRoutes, findRoute, handleGet, handlePost, options, PostHandlers, RouteGet, RouteGetHandler, RoutePost } from "./server/route"
+import chartEditHandler from "./charts/edit.html"
+import entriesEditHandler from "./entries/edit.html"
+import userSettingsEditHandler from "./user-settings/edit.html"
+import chartsHandler from "./charts.html"
+import entriesHandler from "./entries.html"
 import indexHandler from "./index.html.js"
-import syncHandler from "./sync.js"
-import { version } from "./settings.js"
-import layout from "./_layout.html.js"
+import syncHandler from "./sync"
+import { version } from "./settings"
+import { searchParams, reject } from "./server/utils"
+import apis from "./api/apis"
+
+options.searchParams = searchParams
+options.reject = reject
+options.redirect = (req: Request) => Response.redirect(req.referrer, 303)
 
 addRoutes([
+    ...apis,
     chartEditHandler,
     entriesEditHandler,
     userSettingsEditHandler,
@@ -48,49 +54,63 @@ async function getResponse(event: FetchEvent): Promise<Response>  {
     try {
         const req : Request = event.request
         const url = normalizeUrl(req.url)
-        if (url.endsWith("sw.js") || !url.startsWith("/web/")) return fetch(req)
-        if (req.method === "POST") return post(url, req)
-        return get(url, req, event)
+        return (
+            url.pathname.endsWith("sw.js") || !url.pathname.startsWith("/web/")
+                ? fetch(req)
+            : req.method === "POST"
+                ? post(url, req)
+            : get(url, req, event))
     } catch(error) {
         console.error("Get Response Error", error)
         return new Response("Oops something happened which shouldn't have!")
     }
 }
 
-async function get(url: string, req: Request, event: FetchEvent) : Promise<Response> {
-    if (!url.endsWith("/") || isFile(url)) return cacheResponse(url, event)
-    let handler = <(req: Request) => Promise<Generator<any, void, unknown>>|null>findRoute(url, req.method.toLowerCase())
-    if (handler) {
-        let result = await handler(req)
-        if (result) {
-            return streamResponse(url, result)
+async function get(url: URL, req: Request, event: FetchEvent) : Promise<Response> {
+    if (!url.pathname.endsWith("/")) return cacheResponse(url.pathname, event)
+    let handler =
+        <RouteGet | RouteGetHandler | undefined>
+        findRoute(url, req.method.toLowerCase())
+    let resultTask = handleGet(handler, req)
+    if (resultTask) {
+        let result =
+            await resultTask
+            .catch(async (error: any) => {
+                console.error("GET page error:", error, "\nURL:", url.toString())
+                return new Response("Oops! Something happened which shouldn't have!")
+            })
+
+        if (result instanceof Response) {
+            return result
+        } else if (result) {
+            return streamResponse(url.pathname, result)
         }
     }
     return new Response("Not Found!")
 }
 
-async function post(url: string, req: Request) : Promise<Response> {
-    let handler = <RoutePost|null>findRoute(url, req.method.toLowerCase())
+async function post(url: URL, req: Request) : Promise<Response> {
+    let handler =
+        <RoutePost | PostHandlers |null>
+        findRoute(url, req.method.toLowerCase())
     // @ts-ignore
     if (handler) {
         try {
             const data = await getData(req)
-            let result = await handler({ req, data })
+            let result = await
+                (handler instanceof Function
+                    ? handler
+                : handlePost(handler))({ req, data })
+
             if (result instanceof Response) {
                 return result
             }
             if (result) {
-                return streamResponse(url, result)
+                return streamResponse(url.pathname, result)
             }
-            // return new Response("<meta http-equiv='refresh' content='0'>", { headers: htmlHeader()})
         } catch (error) {
-            if (error && typeof error === "object" && error.hasOwnProperty("message")) {
-                let template = await layout(req)
-                // @ts-ignore
-                streamResponse(url, template({ main: html`<p class=error>${error.message}</p>` }))
-            } else {
-                console.error("Unknown error during post.", error)
-            }
+            console.error("Post error:", error, "\nURL:", url);
+            return new Response(`Unknown error "${error}".`)
         }
     }
     return new Response("Not Found!")
@@ -119,11 +139,12 @@ async function cacheResponse(url: string, event: { request: string | Request } |
 }
 
 const encoder = new TextEncoder()
-function streamResponse(url: string, gen: Generator) : Response {
+function streamResponse(url: string, generator: Generator | { body: Generator, headers?: any }) : Response {
     console.log(`Loading ${url}`)
+    let { body, headers } = "body" in generator ? generator : { body: generator, headers: {} }
     const stream = new ReadableStream({
         start(controller : ReadableStreamDefaultController<any>) {
-            for (let x of gen) {
+            for (let x of body) {
                 if (typeof x === "string")
                     controller.enqueue(encoder.encode(x))
             }
@@ -131,17 +152,18 @@ function streamResponse(url: string, gen: Generator) : Response {
         }
     })
 
-    return new Response(stream, { headers: htmlHeader()})
+    return new Response(stream, { headers: { ...htmlHeader(), ...headers }})
 }
 
 /**
 *  /my/url -> /my/url/
 *  /my/script.js -> /my/script.js
 */
-function normalizeUrl(url: string) : string {
-    let path = new URL(url).pathname
-    !path.endsWith("/") && (path = isFile(path) ? path : path+"/")
-    return path
+function normalizeUrl(url: string) : URL {
+    let uri = new URL(url)
+    let path = uri.pathname
+    !uri.pathname.endsWith("/") && (uri.pathname = isFile(path) ? path : path+"/")
+    return uri
 }
 
 function isFile(s: string) {
