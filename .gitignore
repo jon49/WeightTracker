@@ -9,6 +9,7 @@ public
 bin
 wwwroot
 !WeightTracker/src/static/web/node_modules/@types/global.d.ts
+out
 
 # Logs
 logs
