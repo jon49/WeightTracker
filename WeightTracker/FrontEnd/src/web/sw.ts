@@ -1,11 +1,9 @@
 import { version } from "./settings"
 import { getResponse } from "./service-worker/route-handling"
 import "./service-worker/routes"
+import links from "./entry-points"
 
-const links : string[] = [] // File cache
-
-self.addEventListener("install", (e: Event): void => {
-    console.log(`Installing version '${version}' service worker.`)
+self.addEventListener("install", (e: Event) => {
     // @ts-ignore
     e.waitUntil(
         caches.open(version)
@@ -17,7 +15,6 @@ self.addEventListener("fetch", (e: FetchEvent) => e.respondWith(getResponse(e)))
 
 // @ts-ignore
 self.addEventListener("activate", async (e: ExtendableEvent) => {
-    console.log(`Service worker activated. Cache version '${version}'.`)
     const keys = await caches.keys()
     // @ts-ignore
     e.waitUntil(Promise.all(
