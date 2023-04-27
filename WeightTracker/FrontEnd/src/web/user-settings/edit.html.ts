@@ -1,9 +1,13 @@
-import { formatNumber, isSelected, toNumber } from "../js/utils.v3"
-import html from "../server/html-template-tag"
-import layout from "../_layout.html"
-import * as db from "../server/db"
 import { UserSettings, Settings } from "../server/db"
-import { RoutePostArgs } from "../server/route"
+import { Route, RoutePostArgs } from "../server/route"
+import type { Self } from "../server/global.d.ts"
+
+const {
+    html,
+    layout,
+    db,
+    math: { formatNumber, isSelected, toNumber }
+} = (<Self><any>self).app
 
 const themes = ["dark", "light", "none"] as const
 export type Theme = typeof themes[number]
@@ -77,8 +81,8 @@ const handler = <any>{
     userSettings: handleUserSettings,
 }
 
-export default {
-    route: /\/user-settings\/edit\/$/,
+// @ts-ignore
+const page : Route = {
     get,
     async post({ data, req }: RoutePostArgs) {
         let handlerType = new URL(req.url).searchParams.get("handler")

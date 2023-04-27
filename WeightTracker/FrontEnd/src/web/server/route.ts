@@ -1,6 +1,45 @@
-import { HTMLReturnType } from "./html-template-tag"
+import { HTML, HTMLReturnType } from "./html-template-tag"
+import links from "../entry-points"
 
-let routes : Route[] = []
+interface RouteLocation {
+    name: string
+    filename: string
+    route?: Route
+}
+const routes : RouteLocation[] =
+    links
+    .filter(x => x.endsWith('.html.js') || x.endsWith('.api.js'))
+    .map(x => {
+        let i = x.lastIndexOf('.', x.length - 4)
+        return {
+            name: x.slice(0, i) + '/',
+            filename: x
+        }
+    })
+
+const methodTypes = ['get', 'post'] as const
+type MethodTypes = typeof methodTypes[number] | null
+
+function isMethod(method: unknown) {
+    if (typeof method === "string" && methodTypes.includes(<any>method)) {
+        return method as MethodTypes
+    }
+    return null
+}
+
+export function findRoute(url: URL, method: unknown) {
+    let validMethod : MethodTypes = isMethod(method)
+    if (validMethod) {
+        let route = routes.find(x => x.name === url.pathname)
+        if (route) {
+            return {
+                route: route,
+                method: validMethod
+            }
+        }
+    }
+    return null
+}
 
 export interface RouteOptions {
     reject: (s: string | string[]) => Promise<void>
@@ -17,37 +56,6 @@ export const options : RouteOptions = {
 }
 
 const o = options
-
-export function addRoutes(routesList: Route[]) {
-    routes = routesList
-}
-
-export type AddRoutes = typeof addRoutes
-
-const methodTypes = ['get', 'post'] as const
-type MethodTypes = typeof methodTypes[number] | null
-
-function isMethod(method: unknown) {
-    if (typeof method === "string" && methodTypes.includes(<any>method)) {
-        return method as MethodTypes
-    }
-    return null
-}
-
-export function findRoute(url: URL, method: unknown) {
-    let validMethod : MethodTypes = isMethod(method)
-    if (validMethod) {
-        for (const r of routes) {
-            if (r[validMethod]
-                && (r.route instanceof RegExp && r.route.test(url.pathname)
-                    || (r.route instanceof Function && r.route(url)))) {
-                return r[validMethod]
-            }
-        }
-    }
-    return null
-}
-
 export interface RoutePostArgsWithQuery extends RoutePostArgs {
     query: any
 }
@@ -74,7 +82,7 @@ export function handlePost(handlers: PostHandlers) {
     }
 }
 
-export function handleGet(handlers: RouteGetHandler | RouteGet | undefined, req: Request) {
+export function handleGet(handlers: RouteGetHandler | RouteGet | undefined | null, req: Request) {
     if (handlers == null) return
     if (handlers instanceof Function) {
         return handlers(req)
@@ -101,11 +109,12 @@ export interface RoutePostArgs {
     data: any
     req: Request 
 }
+
 export interface RoutePost {
     (options: RoutePostArgs): Promise<HTMLReturnType> | Promise<Response>
 }
+
 export interface Route {
-    route: RegExp | ((a: URL) => boolean)
     get?: RouteGet | RouteGetHandler
     post?: RoutePost | PostHandlers
 }

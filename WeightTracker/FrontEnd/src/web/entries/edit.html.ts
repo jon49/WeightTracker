@@ -1,9 +1,13 @@
-import { dateToString, formatNumber, round, toNumber } from "../js/utils.v3"
-import html from "../server/html-template-tag"
-import layout from "../_layout.html"
-import * as db from "../server/db"
 import { FormReturn, WeightData } from "../server/db"
-import { RoutePostArgs } from "../server/route"
+import { Route, RoutePostArgs } from "../server/route"
+import type { Self } from "../server/global.d.ts"
+
+const {
+    layout,
+    db,
+    html,
+    math: { dateToString, formatNumber, round, toNumber }
+} = (<Self><any>self).app
 
 const start = async (req: Request) => {
     const url = new URL(req.url)
@@ -98,8 +102,8 @@ async function get(req: Request) {
     return template({ main: render(data) })
 }
 
-export default {
-    route: /\/entries\/edit\/$/,
+// @ts-ignore
+const page : Route = {
     get,
     async post({ data, req }: RoutePostArgs) {
         await post(data)

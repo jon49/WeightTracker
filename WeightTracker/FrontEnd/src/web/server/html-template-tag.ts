@@ -44,6 +44,7 @@ export type HTMLReturnType = ReturnType<typeof html>
 
 type Sub = Generator[]|Generator|Promise<Generator|string|number|null|undefined>|string|number|null|undefined
 
+export type HTML = typeof html
 function* html(literals: TemplateStringsArray, ...subs: Sub[]|Sub[][]) {
     const lits = literals.raw, length = lits.length
     let isRawHtml = true

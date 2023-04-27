@@ -1,5 +1,10 @@
-import { get, getMany, setMany, update, Updated } from "./server/db"
-import { RoutePostArgs } from "./server/route"
+import { Updated } from "../server/db"
+import { Route, RoutePostArgs } from "../server/route"
+import type { Self } from "../server/global.d.ts"
+
+const {
+    db: { get, getMany, setMany, update }
+} = (<Self><any>self).app
 
 async function post({ data: body }: RoutePostArgs) {
     try {
@@ -52,7 +57,7 @@ interface PostData {
     timestamp: number
 }
 
-export default {
-    route: /\/sync\/$/,
+// @ts-ignore
+const page : Route = {
     post
 }

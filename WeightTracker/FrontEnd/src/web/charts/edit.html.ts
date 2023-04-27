@@ -1,8 +1,13 @@
-import { formatNumber, isSelected, toNumber } from "../js/utils.v3"
-import html from "../server/html-template-tag"
-import layout from "../_layout.html"
-import * as db from "../server/db"
-import { RoutePostArgs } from "../server/route"
+import { Route, RoutePostArgs } from "../server/route"
+import type { Self } from "../server/global.d.ts"
+import { ChartSettings } from "../server/db"
+
+const {
+    html,
+    layout,
+    db,
+    math: { formatNumber, isSelected, toNumber }
+} = (<Self><any>self).app
 
 const units = ["month", "year", "week"] as const
 export type DurationUnit = typeof units[number]
@@ -33,11 +38,11 @@ const render = (data: Data) => {
 </form>`
 }
 
-function post(data: db.ChartSettings) {
+function post(data: ChartSettings) {
     const duration = toNumber(data.duration) || 9
     const maybeDurationUnit = data.durationUnit
     const durationUnit = units.find(x => x === maybeDurationUnit) ?? "month"
-    const settings : db.ChartSettings = { duration, durationUnit }
+    const settings : ChartSettings = { duration, durationUnit }
     return db.set("chart-settings", settings)
 }
 
@@ -46,8 +51,8 @@ let getHandler = async (req: Request) => {
     return template({ main: render(data) })
 }
 
-export default {
-    route: /\/charts\/edit\/$/,
+// @ts-ignore
+const page : Route = {
     get: getHandler,
     async post({data, req}: RoutePostArgs) {
         await post(data)

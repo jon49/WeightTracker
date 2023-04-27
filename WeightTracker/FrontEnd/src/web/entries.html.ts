@@ -1,7 +1,13 @@
-import { dateFill, dateToString } from "./js/utils.v3"
-import html from "./server/html-template-tag"
-import layout from "./_layout.html"
-import { get, getMany, WeightData } from "./server/db"
+import { WeightData } from "./server/db"
+import { Route } from "./server/route"
+import type { Self } from "./server/global.d.ts"
+
+const {
+    html,
+    layout,
+    db: { get, getMany },
+    math: { dateFill, dateToString }
+} = (<Self><any>self).app
 
 interface WeightDataYear extends WeightData { year: string }
 
@@ -99,10 +105,11 @@ interface TableData {
     data: WeightData[]
 }
 
-export default {
-    route: /\/entries\/$/,
+// @ts-ignore
+const page : Route = {
     async get(req: Request) {
         const [result, template] = await Promise.all([start(req), layout(req)])
         return template({ main: render(result.years, result.data), head })
     }
 }
+

@@ -1,7 +1,8 @@
 import { findRoute, handleGet, handlePost, PostHandlers, RouteGet, RouteGetHandler, RoutePost } from "../server/route"
 import { version } from "../settings"
 import { options } from "../server/route"
-import { reject, searchParams } from "../server/utils"
+import { reject } from "../server/utils"
+import { searchParams } from "../server/http"
 
 options.searchParams = searchParams
 options.reject = reject
@@ -12,7 +13,7 @@ export async function getResponse(event: FetchEvent): Promise<Response>  {
         const req : Request = event.request
         const url = normalizeUrl(req.url)
         return (
-            url.pathname.endsWith("sw.js") || !url.pathname.startsWith("/web/")
+            !url.pathname.startsWith("/web/")
                 ? fetch(req)
             : req.method === "POST"
                 ? post(url, req)
@@ -23,11 +24,19 @@ export async function getResponse(event: FetchEvent): Promise<Response>  {
     }
 }
 
+function notFound() {
+    return new Response("Not Found!")
+}
+
 async function get(url: URL, req: Request, event: FetchEvent) : Promise<Response> {
     if (!url.pathname.endsWith("/")) return cacheResponse(url.pathname, event)
-    let handler =
-        <RouteGet | RouteGetHandler | undefined>
-        findRoute(url, req.method.toLowerCase())
+
+    let handler : RouteGet | RouteGetHandler | undefined | null = <any>
+        await getHandler(url, req.method)
+        .catch(e => {
+            console.error(e)
+            return null
+        })
     let resultTask = handleGet(handler, req)
     if (resultTask) {
         let result =
@@ -43,34 +52,39 @@ async function get(url: URL, req: Request, event: FetchEvent) : Promise<Response
             return streamResponse(url.pathname, result)
         }
     }
-    return new Response("Not Found!")
+    return notFound()
 }
 
 async function post(url: URL, req: Request) : Promise<Response> {
     let handler =
-        <RoutePost | PostHandlers |null>
-        findRoute(url, req.method.toLowerCase())
+        <RoutePost | PostHandlers | null | undefined>
+        await getHandler(url, req.method.toLowerCase())
+        .catch(e => {
+            console.error(e)
+            return null
+        })
     // @ts-ignore
-    if (handler) {
-        try {
-            const data = await getData(req)
-            let result = await
-                (handler instanceof Function
-                    ? handler
-                : handlePost(handler))({ req, data })
-
-            if (result instanceof Response) {
-                return result
-            }
-            if (result) {
-                return streamResponse(url.pathname, result)
-            }
-        } catch (error) {
-            console.error("Post error:", error, "\nURL:", url);
-            return new Response(`Unknown error "${error}".`)
-        }
+    if (!handler) {
+        return notFound()
     }
-    return new Response("Not Found!")
+    try {
+        const data = await getData(req)
+        let result = await
+            (handler instanceof Function
+                ? handler
+            : handlePost(handler))({ req, data })
+
+        if (result instanceof Response) {
+            return result
+        }
+        if (result) {
+            return streamResponse(url.pathname, result)
+        }
+    } catch (error) {
+        console.error("Post error:", error, "\nURL:", url);
+        return new Response(`Unknown error "${error}".`)
+    }
+    return notFound()
 }
 
 async function getData(req: Request) {
@@ -110,6 +124,25 @@ function streamResponse(url: string, generator: Generator | { body: Generator, h
     })
 
     return new Response(stream, { headers: { ...htmlHeader(), ...headers }})
+}
+
+function failNotFound() {
+    return Promise.reject('Not found')
+}
+async function getHandler(url: URL, method: string) {
+    let route = findRoute(url, method.toLowerCase())
+    if (!route) return failNotFound()
+    if (!route.route?.route) {
+        let cache = await caches.open(version)
+        let resp = await cache.match(route.route.filename)
+        if (!resp) return failNotFound()
+        let text = await resp.text()
+        text = text.trim()
+        if (!text) return failNotFound()
+        let page = new Function(text+';return page;')
+        route.route.route = page()
+    }
+    return route.route.route
 }
 
 /**

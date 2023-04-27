@@ -2,20 +2,6 @@ export const isSelected =
     <T extends string>(currentValue: string|undefined) =>
     (value: T) => value === currentValue ? "selected" : null
 
-const searchParamsHandler = {
-  get(obj: any, prop: string) {
-    if (prop === "_url") {
-      return obj
-    }
-    return obj.searchParams.get(prop)
-  }
-}
-
-export function searchParams<TReturn>(req: Request) : TReturn & {_url: URL} {
-  let url = new URL(req.url)
-  return new Proxy(url, searchParamsHandler)
-}
-
 export function cleanHtmlId(s: string) {
   return s.replace(/[\W_-]/g,'-');
 }
@@ -34,28 +20,6 @@ export const reject = (s: string | string[]) : Promise<any> =>
             ? Promise.reject([s])
         : Promise.reject(s)
 
-export function jsonResponse(o: any) {
-    return new Response(
-        JSON.stringify(o),
-        { status: 200
-        , headers: {
-            "Content-Type": "application/json"
-        } },
-    )
-}
-
-export function redirect(req: Request) {
-  if (req.headers.get("HF-Request")) {
-    let res = new Response(null, {
-      status: 205,
-      headers: {
-        location: req.referrer,
-      },
-    })
-    return res
-  }
-  return Response.redirect(req.referrer, 303)
-}
 
 export function equals(a: string, b: string) {
   return a.localeCompare(b, void 0, {sensitivity: "base"}) === 0
