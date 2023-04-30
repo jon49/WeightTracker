@@ -3,10 +3,10 @@ import { Route } from "./server/route"
 
 const { layout, html } = (<Self><any>self).app
 
-// @ts-ignore
-const page : Route = {
+export const route : Route = {
     get: async (req: Request) => {
         let template = await layout(req)
         return template({ main: html`<p>Welcome to weight tracking!</p>` })
     }
 }
+

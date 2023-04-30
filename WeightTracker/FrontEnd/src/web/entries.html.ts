@@ -105,8 +105,7 @@ interface TableData {
     data: WeightData[]
 }
 
-// @ts-ignore
-const page : Route = {
+export const route : Route = {
     async get(req: Request) {
         const [result, template] = await Promise.all([start(req), layout(req)])
         return template({ main: render(result.years, result.data), head })

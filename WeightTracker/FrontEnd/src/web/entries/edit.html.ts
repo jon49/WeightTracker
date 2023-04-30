@@ -102,8 +102,7 @@ async function get(req: Request) {
     return template({ main: render(data) })
 }
 
-// @ts-ignore
-const page : Route = {
+export const route : Route = {
     get,
     async post({ data, req }: RoutePostArgs) {
         await post(data)

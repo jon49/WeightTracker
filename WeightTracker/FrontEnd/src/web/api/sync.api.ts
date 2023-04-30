@@ -57,7 +57,6 @@ interface PostData {
     timestamp: number
 }
 
-// @ts-ignore
-const page : Route = {
+export const route : Route = {
     post
 }

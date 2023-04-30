@@ -81,8 +81,7 @@ const handler = <any>{
     userSettings: handleUserSettings,
 }
 
-// @ts-ignore
-const page : Route = {
+export const route : Route = {
     get,
     async post({ data, req }: RoutePostArgs) {
         let handlerType = new URL(req.url).searchParams.get("handler")

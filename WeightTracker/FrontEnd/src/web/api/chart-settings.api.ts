@@ -6,8 +6,7 @@ const {
     http: { jsonResponse }
 } = (<Self><any>self).app
 
-// @ts-ignore
-const page : Route = {
+export const route : Route = {
     async get() {
         let chartSettings = await get("chart-settings")
         return jsonResponse(chartSettings ?? null)

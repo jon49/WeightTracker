@@ -6,8 +6,7 @@ const {
     http: { jsonResponse }
 } = (<Self><any>self).app
 
-// @ts-ignore
-const page : Route = {
+export const route : Route = {
     async get() {
         let userSettings = await get("user-settings")
         return jsonResponse(userSettings ?? null)

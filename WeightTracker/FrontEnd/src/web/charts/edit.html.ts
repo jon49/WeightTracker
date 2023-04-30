@@ -51,8 +51,7 @@ let getHandler = async (req: Request) => {
     return template({ main: render(data) })
 }
 
-// @ts-ignore
-const page : Route = {
+export const route : Route = {
     get: getHandler,
     async post({data, req}: RoutePostArgs) {
         await post(data)

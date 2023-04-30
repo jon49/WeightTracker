@@ -155,8 +155,7 @@ interface StatsData {
     weight: string | undefined
 }
 
-// @ts-ignore
-const page : Route = {
+export const route : Route = {
     get: async (req: Request) => {
         let data = await setupStats()
         let template = await layout(req)

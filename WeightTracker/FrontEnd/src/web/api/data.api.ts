@@ -13,8 +13,7 @@ const startQuery = {
     start: createDateString("Query Start")
 }
 
-// @ts-ignore
-const page : Route = {
+export const route : Route = {
     async get(req: Request) {
         let query = searchParams(req)
         let { start } = await validateObject(query, startQuery)
