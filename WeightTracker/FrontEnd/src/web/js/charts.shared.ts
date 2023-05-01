@@ -1,5 +1,12 @@
-import { dateAdd, dateFill, formatNumber, getPreviousDay, reduceSlice, setDefaults } from "./utils.v3.js"
+import {
+    dateAdd,
+    dateFill,
+    formatNumber,
+    getPreviousDay,
+    reduceSlice,
+    setDefaults } from "./charts.shared"
 import { ChartSettings, UserSettings, WeightData } from "../server/db"
+export * from "./_utils"
 
 export async function setChartSettingDefaults(rawChartSettings: ChartSettings) {
     return setDefaults(rawChartSettings, [["duration", 9], ["durationUnit", "month"]])

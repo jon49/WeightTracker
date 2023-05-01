@@ -3,6 +3,7 @@ import { version } from "../settings"
 import { options } from "../server/route"
 import { reject } from "../server/utils"
 import { searchParams } from "../server/http"
+import load from "./js-loader"
 
 options.searchParams = searchParams
 options.reject = reject
@@ -132,17 +133,7 @@ function failNotFound() {
 async function getHandler(url: URL, method: string) {
     let route = findRoute(url, method.toLowerCase())
     if (!route) return failNotFound()
-    if (!route.route?.route) {
-        let cache = await caches.open(version)
-        let resp = await cache.match(route.route.filename)
-        if (!resp) return failNotFound()
-        let text = await resp.text()
-        text = text.trim()
-        if (!text) return failNotFound()
-        let page = new Function(text+';return page;')
-        route.route.route = page()
-    }
-    return route.route.route
+    return load(route.route.pathname)
 }
 
 /**

@@ -1,14 +1,27 @@
 import { ChartSettings, UserSettings, WeightData } from "./server/db"
 import type { Self } from "./server/global.d.ts"
 import { Route } from "./server/route"
+import * as chart from "./js/charts.shared"
 
 const {
     layout,
     html,
-    math: { avg, dateAdd, dateFill, formatNumber, getPreviousDay, isNil, setDefaults, stdev },
     db: { get, getMany },
-    chart: { getGoalWeight, getWeeklyData }
+    load
 } = (<Self><any>self).app
+
+const {
+    getGoalWeight,
+    getWeeklyData ,
+    avg,
+    dateAdd,
+    dateFill,
+    formatNumber,
+    getPreviousDay,
+    isNil,
+    setDefaults,
+    stdev 
+} = <typeof chart>(await load('/web/js/charts.shared.js'))
 
 async function getChartSettings() {
     let rawChartSettings = await get("chart-settings")
@@ -159,6 +172,6 @@ export const route : Route = {
     get: async (req: Request) => {
         let data = await setupStats()
         let template = await layout(req)
-        return template( { main: render(data), script: "/web/js/charts-page.v3.js" })
+        return template( { main: render(data), script: "/web/js/charts-page.js" })
     }
 }

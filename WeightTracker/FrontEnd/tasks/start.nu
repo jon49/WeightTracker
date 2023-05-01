@@ -1,60 +1,28 @@
 #!/usr/bin/env nu
 
-let ignoredFiles = { |x| $x.name !~ "/_[^/]+$" }
+source ./get-files.nu
 
-let pages = (
-    ls src/**/*.html.ts
-    | filter $ignoredFiles
-)
+rm -r -f out
 
-let api = (
-    ls src/**/*.api.ts
-    | filter $ignoredFiles
-)
+mkdir "./out"
 
-let js = (
-    ls src/**/js/**/*
-    | where type == "file" and name !~ "/lib/"
-    | filter $ignoredFiles
-)
+cp src/**/*.html ./out
+cp src/**/*.css ./out
 
-let css = (ls src/**/css/**/*.css)
+let all = (
+    getPages | from nuon | get name
+    | append (getJs | from nuon | get name)
+    | append (getApis | from nuon | get name)
+    | append ('[[name];[src/web/sw.ts]]' | from nuon | get name))
 
-let html = (ls src/**/*.html)
+let e = ($all | append [
+    '--bundle',
+    '--outdir=out',
+    '--outbase=src',
+    '--format=esm',
+    '--watch',
+    '--tree-shaking=false',
+])
 
-def main [
-    debug: bool = false
-    prod: bool = false
-] {
-
-    let css = (
-        ls **/src/**/css/**/*.css
-        | where type == "file"
-# webpack uses sha256 with 8 characters so I guess I will too!
-        | insert hash { |x| open $x.name | hash sha256 | str substring 56..64 }
-        | select name hash
-        | insert hash-filename { |x| ($x.name | str replace '\.css$' $".($x.hash).css") }
-        | select name hash-filename
-    )
-
-# $file | hash sha256 | str substring 56..64 
-
-    let all = (
-        $pages
-        | append $js
-        | append $api
-        | append "src/web/sw.ts")
-
-    let e = ($all | append [
-        '--bundle',
-        '--outdir=out',
-        '--outbase=src',
-        '--format=esm',
-        '--watch',
-        '--tree-shaking=false',
-    ])
-
-    exec npx esbuild $e
-}
-
+exec npx esbuild $e
 

@@ -1,19 +1,27 @@
-import { HTML, HTMLReturnType } from "./html-template-tag"
 import links from "../entry-points"
+import { env } from "../settings"
 
 interface RouteLocation {
+    // Friendly name, e.g., `/web/my-page/` or `/web/css/main.css`
     name: string
-    filename: string
-    route?: Route
+    // Actual name, e.g., `/web/my-page.html.b3rs134c.js`
+    pathname: string
 }
+
+const isPage = /\.(html|api)\./
+
 const routes : RouteLocation[] =
     links
-    .filter(x => x.endsWith('.html.js') || x.endsWith('.api.js'))
     .map(x => {
-        let i = x.lastIndexOf('.', x.length - 4)
+        let name : string
+        if (isPage.test(x)) {
+            name = x.slice(0, isPage.exec(x)?.index) + '/'
+        } else {
+            name = x
+        }
         return {
-            name: x.slice(0, i) + '/',
-            filename: x
+            name,
+            pathname: x
         }
     })
 
@@ -27,10 +35,10 @@ function isMethod(method: unknown) {
     return null
 }
 
-export function findRoute(url: URL, method: unknown) {
+export function findRoute(name: string, method: unknown) {
     let validMethod : MethodTypes = isMethod(method)
     if (validMethod) {
-        let route = routes.find(x => x.name === url.pathname)
+        let route = routes.find(x => x.name === name)
         if (route) {
             return {
                 route: route,
