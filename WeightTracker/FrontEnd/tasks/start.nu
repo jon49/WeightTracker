@@ -1,13 +1,22 @@
 #!/usr/bin/env nu
 
 source ./get-files.nu
+source ./set-cache-files.nu
 
 rm -r -f out
 
-mkdir "./out"
-
-cp src/**/*.html ./out
-cp src/**/*.css ./out
+ls src/**/*
+| where name =~ '\.(html|css)$'
+| insert target { |x|
+    $x.name
+    | str replace 'src/' 'out/'
+}
+| par-each { |x|
+    if (not ($x.target | path dirname | path exists)) {
+        mkdir ($x.target | path dirname)
+    }
+    cp $x.name $x.target
+} | ignore
 
 let all = (
     getPages | from nuon | get name
@@ -21,8 +30,15 @@ let e = ($all | append [
     '--outbase=src',
     '--format=esm',
     '--watch',
-    '--tree-shaking=false',
+    '--tree-shaking=false'
 ])
+
+# ^npx esbuild $e
+
+# ^npx esbuild [
+#     '--servedir=out',
+#     '--serve=9000'
+# ]
 
 exec npx esbuild $e
 
