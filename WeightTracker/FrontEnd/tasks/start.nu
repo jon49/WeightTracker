@@ -25,6 +25,7 @@ let e = ($all | append [
     '--format=esm',
     '--watch',
     '--tree-shaking=false',
+    '--servedir=out',
 ])
 
 exec npx esbuild $e
