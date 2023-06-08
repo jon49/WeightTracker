@@ -154,6 +154,6 @@ export default {
     get: async (req: Request) => {
         let data = await setupStats()
         let template = await layout(req)
-        return template( { main: render(data), script: "/web/js/charts-page.v3.js" })
+        return template( { main: render(data), scripts: ["/web/js/charts-page.v3.js"] })
     }
 }
