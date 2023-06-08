@@ -3,6 +3,7 @@ import html from "../server/html-template-tag"
 import layout from "../_layout.html"
 import * as db from "../server/db"
 import { RoutePostArgs } from "../server/route"
+import { redirect } from "../server/utils"
 
 const units = ["month", "year", "week"] as const
 export type DurationUnit = typeof units[number]
@@ -49,9 +50,9 @@ let getHandler = async (req: Request) => {
 export default {
     route: /\/charts\/edit\/$/,
     get: getHandler,
-    async post({data, req}: RoutePostArgs) {
+    async post({ data, req }: RoutePostArgs) {
         await post(data)
-        return Response.redirect(req.referrer, 302)
+        return redirect(req)
     }
 }
 
