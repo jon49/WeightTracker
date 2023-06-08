@@ -75,7 +75,7 @@ async function post(url: URL, req: Request) : Promise<Response> {
 
 async function getData(req: Request) {
     let o : any = {}
-    if (req.headers.get("content-type") === "application/x-www-form-urlencoded") {
+    if (req.headers.get("content-type")?.includes("application/x-www-form-urlencoded")) {
         const formData = await req.formData()
         formData.forEach((val, key) => o[key] = val)
     } else if (req.headers.get("Content-Type")?.includes("json")) {
