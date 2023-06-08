@@ -45,16 +45,7 @@ export function jsonResponse(o: any) {
 }
 
 export function redirect(req: Request) {
-  if (req.headers.get("HF-Request")) {
-    let res = new Response(null, {
-      status: 205,
-      headers: {
-        location: req.referrer,
-      },
-    })
-    return res
-  }
-  return Response.redirect(req.referrer, 303)
+  return Response.redirect(req.referrer, 302)
 }
 
 export function equals(a: string, b: string) {
