@@ -1,20 +1,26 @@
 (() => {
+
+    function createMessage(message: string, duration: number | null = null) {
+        const messages = document.getElementById('messages')
+        if (!messages) return
+        const snackBar = document.createElement("snack-bar")
+        snackBar.innerHTML = `<div class=snack-bar>${message}</div>`
+        if (duration != null) {
+            snackBar.style.setProperty("--snack-bar-duration", `${duration}`)
+        }
+        messages.appendChild(snackBar)
+    }
+
     // https://deanhume.com/displaying-a-new-version-available-progressive-web-app/
     function shouldUpdateServiceWorker(this: ServiceWorker) {
         if (this.state === 'installed' && navigator.serviceWorker.controller) {
             console.log("State installed, initiate ask user.")
-            const messages = document.getElementById('messages')
-            if (!messages) return
-            const template = document.createElement("template")
-            template.innerHTML = `
-                <snack-bar style="--snack-bar-duration: 20;">
-                    <div class="snack-bar">
-                    <p>A new version the app has been loaded. <button data-action=refresh-service-worker>Refresh</button></p>
-                    </div>
-                </snack-bar>`
+            createMessage(
+                `<p>A new version the app has been loaded.
+                    <button data-action=refresh-service-worker>Refresh</button>
+                </p>`,
+                20)
             listenToUserResponse(this)
-            messages.appendChild(template.content.children[0])
-
             return true
         } else if (this.state === "activated") {
             document.location.reload()
@@ -64,32 +70,53 @@
         })
     }
 
-    function getCleanUrl() {
+    function getCleanUrlPath() {
         let url = new URL(document.location.href)
-        url.hash = ""
-        return url.toString()
+        return url.pathname.replace(/\/$/, "")
     }
 
     window.addEventListener('beforeunload', () => {
         let active = document.activeElement
-        if (!active?.id) {
-            active = null
-        }
-        let y = window.scrollY
-        let height = document.body.scrollHeight
-        localStorage.pageLocation = JSON.stringify({ href: getCleanUrl(), y, height, active })
+        localStorage.pageLocation = JSON.stringify({
+            href: getCleanUrlPath(),
+            y: window.scrollY,
+            height: document.body.scrollHeight,
+            active: {
+                id: active?.id,
+                name: active?.getAttribute('name')
+            }
+        })
     })
 
     function onLoad() {
         if (document.querySelector('[autofocus]')) return
         let location = localStorage.pageLocation
         if (!location) return
-        let { y, height, href } = JSON.parse(location)
-        if (y && href === getCleanUrl()) {
+        let { y, height, href, active: { id, name } } = JSON.parse(location)
+        if (y && href === getCleanUrlPath()) {
             window.scrollTo({ top: y + document.body.scrollHeight - height })
+        }
+        let active =
+            document.getElementById(id) ||
+            document.querySelector(`[name="${name}"]`)
+        let isSelect = active instanceof HTMLSelectElement
+        if (active
+           && (active instanceof HTMLInputElement
+               || active instanceof HTMLTextAreaElement
+               || isSelect)) {
+            active.focus()
+            if (!isSelect) {
+                // @ts-ignore
+                active.select()
+            }
         }
     }
 
     onLoad()
+
+    // @ts-ignore
+    self.app = self.app || {}
+    // @ts-ignore
+    self.app.createMessage = createMessage
 
 })()
