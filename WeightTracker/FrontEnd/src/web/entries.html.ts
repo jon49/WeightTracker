@@ -24,13 +24,13 @@ function $row({date, weight, bedtime, sleep, waist, comments}: WeightDataYear) {
     let c : string[] = comments?.split('\n') ?? []
     let comment =
         c.length > 1
-            ? c.map(x => html`<p>${x}</p>`)
+            ? c.map(x => html`${x}<br>`)
         : c.length === 1
             ? c[0]
         : null
 
     return html`<tr>
-        <td>${date}</td>
+        <td><a href="/web/entries/edit?date=$${date}">$${date}</a></td>
         <td>${weight}</td>
         <td>${cleanBedtime(bedtime)}</td>
         <td>${sleep}</td>
