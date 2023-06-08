@@ -1,5 +1,6 @@
 import { get, getMany, setMany, update, Updated } from "./server/db"
 import { RoutePostArgs } from "./server/route"
+import { redirect } from "./server/utils"
 
 async function post({ data: body }: RoutePostArgs) {
     try {
@@ -7,7 +8,7 @@ async function post({ data: body }: RoutePostArgs) {
         if (response.redirected) {
             let url = new URL(response.url)
             url.searchParams.append("returnUrl", body.url)
-            return Response.redirect(url.href, 302)
+            return redirect(url)
         }
     } catch (error) {
         console.error("/api/auth/logged-in", { error, message: "Could not contact back end." })
