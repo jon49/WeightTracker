@@ -4,6 +4,7 @@ import layout from "../_layout.html"
 import * as db from "../server/db"
 import { UserSettings, Settings } from "../server/db"
 import { RoutePostArgs } from "../server/route"
+import { redirect } from "../server/utils"
 
 const themes = ["dark", "light", "none"] as const
 export type Theme = typeof themes[number]
@@ -86,6 +87,6 @@ export default {
         if (handlerType && (handle = handler[<any>handlerType])) {
             await handle(data)
         }
-        return Response.redirect(req.referrer, 302)
+        return redirect(req)
     }
 }
