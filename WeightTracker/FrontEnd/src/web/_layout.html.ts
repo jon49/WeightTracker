@@ -3,7 +3,7 @@ import * as db from "./server/db"
 import { version } from "./settings"
 
 const render = (theme: string | undefined, syncCount: number, url: string) => (o: LayoutTemplateArguments) => {
-    const { main, head, script } = o
+    const { main, head, scripts } = o
     return html`
 <!DOCTYPE html>
 <html>
@@ -35,8 +35,8 @@ const render = (theme: string | undefined, syncCount: number, url: string) => (o
     </header>
     <main>${main}</main>
     <footer><p>${version}</p></footer>
-    ${ script
-         ? html`<script src="${script}" type=module></script>`
+    ${ scripts
+         ? scripts.map(x => html`<script src="${x}" type=module></script>`)
        : null }
     <script src="/web/js/main.js"></script>
 </body>
@@ -56,5 +56,5 @@ export type Layout = typeof layout
 export interface LayoutTemplateArguments {
     head?: string
     main?: Generator|string
-    script?: string
+    scripts?: string[]
 }
