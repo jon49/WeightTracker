@@ -4,6 +4,7 @@ import layout from "../_layout.html"
 import * as db from "../server/db"
 import { FormReturn, WeightData } from "../server/db"
 import { RoutePostArgs } from "../server/route"
+import { redirect } from "../server/utils"
 
 const start = async (req: Request) => {
     const url = new URL(req.url)
@@ -57,7 +58,7 @@ const render = ({ bedtime, comments, sleep, waist, weight, date }: FormReturn<We
 <h2>Add/Edit Entry</h2>
 <form onchange="this.submit()">
     <label>Date<br>
-    <input id=date-change name=date type=date required value="${date}"></label>
+    <input name=date type=date required value="${date}"></label>
     <br><br>
 </form>
 <form id=entry-form method=POST onchange="this.submit()">
@@ -79,12 +80,12 @@ const render = ({ bedtime, comments, sleep, waist, weight, date }: FormReturn<We
         </label>`}<br><br>
 
     <label>Waist Size (cm)<br>
-        <input id=entry-waist name=waist type=number step=any value="${waist}">
+        <input name=waist type=number step=any value="${waist}">
     </label><br><br>
 
     <label>Comment
         <elastic-textarea>
-            <textarea id=entry-comments name=comments>${comments}</textarea>
+            <textarea name=comments>${comments}</textarea>
         </elastic-textarea>
     </label>
 </form>
@@ -103,7 +104,7 @@ export default {
     get,
     async post({ data, req }: RoutePostArgs) {
         await post(data)
-        return Response.redirect(req.referrer, 302)
+        return redirect(req)
     }
 }
 
