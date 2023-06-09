@@ -99,16 +99,10 @@
         let active =
             document.getElementById(id) ||
             document.querySelector(`[name="${name}"]`)
-        let isSelect = active instanceof HTMLSelectElement
-        if (active
-           && (active instanceof HTMLInputElement
-               || active instanceof HTMLTextAreaElement
-               || isSelect)) {
+        if (active) {
             active.focus()
-            if (!isSelect) {
-                // @ts-ignore
-                active.select()
-            }
+            // @ts-ignore
+            active.select instanceof  Function && active.select()
         }
     }
 

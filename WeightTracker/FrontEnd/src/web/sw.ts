@@ -7,7 +7,7 @@ self.addEventListener("install", (e: Event) => {
     // @ts-ignore
     e.waitUntil(
         caches.open(version)
-        .then((cache: any) => cache.addAll(links)))
+        .then((cache: any) => cache.addAll(links.map(x => x.file))))
 })
 
 // @ts-ignore

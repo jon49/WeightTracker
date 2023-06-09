@@ -1,4 +1,4 @@
-import { dateFill } from "../js/utils.v3"
+import { dateFill } from "../js/utils"
 import * as db from "../server/db"
 import { jsonResponse, searchParams } from "../server/utils"
 import { validateObject, createDateString } from "../server/validation"

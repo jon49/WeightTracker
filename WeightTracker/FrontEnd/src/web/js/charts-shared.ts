@@ -1,4 +1,11 @@
-import { dateAdd, dateFill, formatNumber, getPreviousDay, reduceSlice, setDefaults } from "./utils.v3.js"
+import {
+    dateAdd,
+    dateFill,
+    formatNumber,
+    getPreviousDay,
+    reduceSlice,
+    setDefaults
+} from "./utils.js"
 import { ChartSettings, UserSettings, WeightData } from "../server/db"
 
 export async function setChartSettingDefaults(rawChartSettings: ChartSettings) {

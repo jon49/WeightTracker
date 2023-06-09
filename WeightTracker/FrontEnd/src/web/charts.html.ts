@@ -1,5 +1,5 @@
-import { getGoalWeight, getWeeklyData } from "./js/charts-shared.v3"
-import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, isNil, setDefaults, stdev } from "./js/utils.v3"
+import { getGoalWeight, getWeeklyData } from "./js/charts-shared"
+import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, isNil, setDefaults, stdev } from "./js/utils"
 import html from "./server/html-template-tag"
 import layout from "./_layout.html"
 import { ChartSettings, get, getMany, UserSettings, WeightData } from "./server/db"
@@ -95,19 +95,19 @@ async function weeksToGo(
     avgAll = -avgAll
     avgNeg = -avgNeg
     let diff = currentWeight - +goalWeight
-    return `${formatNumber(diff/avgNeg, 1)} to ${formatNumber(diff/avgAll, 1)}`
+    return `${formatNumber(diff / avgNeg, 1)} to ${formatNumber(diff / avgAll, 1)}`
 }
 
-async function setupStats() : Promise<{statsHeaderText: string, statsData: StatsData}> {
+async function setupStats(): Promise<{ statsHeaderText: string, statsData: StatsData }> {
     const [chartSettings, userSettings] =
         await Promise.all([getChartSettings(), get("user-settings")])
     const now = new Date()
     const startDate = getPreviousDay(new Date(), 0)
     const dates = dateFill(startDate, now)
     const [previousData, dataUnfiltered] = await Promise.all([
-            getMany<WeightData>(dateFill(dateAdd(startDate, -7), dateAdd(startDate, -1))),
-            getMany<WeightData>(dates),
-        ])
+        getMany<WeightData>(dateFill(dateAdd(startDate, -7), dateAdd(startDate, -1))),
+        getMany<WeightData>(dates),
+    ])
     const weeksToGoData = await weeksToGo(
         userSettings, chartSettings, (startDate: Date) => getMany(dateFill(startDate, new Date())))
     const data = dataUnfiltered.filter(x => x)
@@ -154,6 +154,6 @@ export default {
     get: async (req: Request) => {
         let data = await setupStats()
         let template = await layout(req)
-        return template( { main: render(data), scripts: ["/web/js/charts-page.v3.js"] })
+        return template({ main: render(data), scripts: ["/web/js/charts-page.js"] })
     }
 }

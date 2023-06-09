@@ -2,6 +2,7 @@ import { findRoute, handleGet, handlePost, PostHandlers, RouteGet, RouteGetHandl
 import { version } from "../settings"
 import { options } from "../server/route"
 import { reject, searchParams } from "../server/utils"
+import links from "../entry-points"
 
 options.searchParams = searchParams
 options.reject = reject
@@ -85,6 +86,7 @@ async function getData(req: Request) {
 }
 
 async function cacheResponse(url: string, event: { request: string | Request } | undefined) : Promise<Response> {
+    url = links.find(x => x.url === url)?.file || url
     const match = await caches.match(url)
     if (match) return match
     const res = await fetch(event?.request || url)
