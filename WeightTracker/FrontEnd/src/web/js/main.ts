@@ -70,17 +70,22 @@
         })
     }
 
+    // Progressively enhance the page. https://github.com/jon49/mpa-enhancer
+    let doc = document,
+        w = window,
+        query = doc.querySelector.bind(doc)
+
     function getCleanUrlPath() {
-        let url = new URL(document.location.href)
+        let url = new URL(doc.location.href)
         return url.pathname.replace(/\/$/, "")
     }
 
-    window.addEventListener('beforeunload', () => {
-        let active = document.activeElement
+    w.addEventListener('beforeunload', () => {
+        let active = doc.activeElement
         localStorage.pageLocation = JSON.stringify({
             href: getCleanUrlPath(),
-            y: window.scrollY,
-            height: document.body.scrollHeight,
+            y: w.scrollY,
+            height: doc.body.scrollHeight,
             active: {
                 id: active?.id,
                 name: active?.getAttribute('name')
@@ -88,25 +93,36 @@
         })
     })
 
-    function onLoad() {
-        if (document.querySelector('[autofocus]')) return
+    function load() {
+        if (query('[autofocus]')) return
         let location = localStorage.pageLocation
         if (!location) return
         let { y, height, href, active: { id, name } } = JSON.parse(location)
-        if (y && href === getCleanUrlPath()) {
-            window.scrollTo({ top: y + document.body.scrollHeight - height })
+        let target = doc.body.dataset.mpaScrollTo
+        if (href === getCleanUrlPath() && (target || y)) {
+            if (target) {
+                let el = query(target)
+                el?.scrollIntoView()
+            } else {
+                w.scrollTo({ top: y + doc.body.scrollHeight - height })
+            }
         }
         let active =
-            document.getElementById(id) ||
-            document.querySelector(`[name="${name}"]`)
-        if (active) {
-            active.focus()
-            // @ts-ignore
-            active.select instanceof  Function && active.select()
-        }
+            doc.getElementById(id)
+            || query(`[name="${name}"]`)
+        run('focus', active)
+        run('select', active)
     }
 
-    onLoad()
+    /**
+    * @param {string} method
+    * @param {HTMLElement} el
+    * */
+    function run(method, el) {
+        el[method] && el[method]()
+    }
+
+    load()
 
     // @ts-ignore
     self.app = self.app || {}

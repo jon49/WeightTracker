@@ -3,7 +3,7 @@ import * as db from "./server/db"
 import { version } from "./settings"
 
 const render = (theme: string | undefined, syncCount: number, url: string) => (o: LayoutTemplateArguments) => {
-    const { main, head, scripts } = o
+    const { main, head, scripts, bodyAttr } = o
     return html`
 <!DOCTYPE html>
 <html>
@@ -15,7 +15,7 @@ const render = (theme: string | undefined, syncCount: number, url: string) => (o
     <link href="/web/css/index.css" rel=stylesheet>
     $${head}
 </head>
-<body ${theme ? html`class=${theme}` : null}>
+<body ${theme ? html`class=${theme}` : null} $${bodyAttr}>
     <div id=messages></div>
     <a href="/login?handler=logout" style="position: absolute; top: 10px; right: 10px;">Logout</a>
     <header>
@@ -57,4 +57,5 @@ export interface LayoutTemplateArguments {
     head?: string
     main?: Generator|string
     scripts?: string[]
+    bodyAttr?: string
 }

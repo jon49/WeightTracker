@@ -25,7 +25,7 @@ export default [
   },
   {
     "url": "/web/js/main.js",
-    "file": "/web/js/main.AFFR4FZU.js"
+    "file": "/web/js/main.3K4RWXJM.js"
   },
   {
     "url": "/web/js/snack-bar.js",

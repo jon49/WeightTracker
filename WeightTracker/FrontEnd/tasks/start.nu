@@ -74,7 +74,7 @@ def main [build: bool = false] {
     # copy html files
     cp src/index.html $"($targetDir)/index.html"
 
-    let mainjs = (ls bin/**/*main*.js | get name | first | str replace "bin" "")
+    let mainjs = (ls out/**/*main*.js | get name | first | str replace "out" "")
     open src/web/index.html
     | str replace '{{mainjs}}' $mainjs
     | save -f $"($targetDir)/web/index.html"

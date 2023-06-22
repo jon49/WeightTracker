@@ -41,7 +41,7 @@ function $row({date, weight, bedtime, sleep, waist, comments}: WeightDataYear) {
 
 const render = (years: string[], data: WeightDataYear[]) => 
     html`
-<h2>Entries</h2>
+<h2 id="top">Entries</h2>
 
 <div class=date-list>
     ${years.reverse().map((year: string) => html`<a href="?year=${year}">${year}</a>`)}
@@ -103,6 +103,10 @@ export default {
     route: /\/entries\/$/,
     async get(req: Request) {
         const [result, template] = await Promise.all([start(req), layout(req)])
-        return template({ main: render(result.years, result.data), head })
+        return template({
+            main: render(result.years, result.data),
+            head,
+            bodyAttr: `data-mpa-scroll-to="#top"`
+        })
     }
 }
