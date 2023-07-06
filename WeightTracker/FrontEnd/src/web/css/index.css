@@ -278,3 +278,22 @@ h2 {
 header {
   padding-bottom: 0;
 }
+
+.edit {
+    position: absolute;
+    right: 100%;
+}
+
+.edit:focus {
+    position: inherit;
+}
+
+.edit + label {
+    cursor: pointer;
+}
+
+.edit:focus + label {
+    display: none;
+}
+
+

@@ -67,17 +67,31 @@ const render = ({ bedtime, comments, sleep, waist, weight, date }: FormReturn<We
     <label>Weight<br>
     <input name=weight type=number step=any value="${weight}"></label><br><br>
 
-    <label>Bedtime${bedtime?.endsWith("M") ? ` (${bedtime})` : ""}<br>
-        <input style="min-width:214px" name=bedtime type=time value="${bedtime}">
-    </label><br><br>
+    ${(() => {
+        if (!bedtime) {
+            return html`<div>
+            <input id=bedtime class=edit name=bedtime type=time>
+            <label for=bedtime class=button>Start Sleeping</label>
+            </div>`
+        }
+        return html`<label>Bedtime${bedtime?.endsWith("M") ? ` (${bedtime})` : ""}<br>
+            <input style="min-width:214px" name=bedtime type=time value="${bedtime}">
+        </label>`
+    })()}
+    <br><br>
 
-    <label>Number of hours slept<br>
-        <input name=sleep type=number step=any value="${sleep}">
-    </label> ${sleep
-        ? null
-        : html`<label class=button onclick="this.firstElementChild.hidden = false">Calculate
-            <input name=wakeUpTime type=time hidden>
-        </label>`}<br><br>
+    ${(() => {
+        if (!bedtime) {
+            return null
+        } else if (!sleep) {
+            return html`<input id=wake-up-time class=edit name=wakeUpTime type=time>
+            <label for=wake-up-time class=button>Wake Up Time</label><br><br>`
+        }
+        return html`
+            <label>Number of hours slept<br>
+                <input id=wake-up-time name=sleep type=number step=any value="${sleep}">
+            </label><br><br>`
+    })()}
 
     <label>Waist Size (cm)<br>
         <input name=waist type=number step=any value="${waist}">

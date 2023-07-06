@@ -1,7 +1,7 @@
 export default [
   {
     "url": "/web/css/index.css",
-    "file": "/web/css/index.abcf4183.css"
+    "file": "/web/css/index.9d47cc78.css"
   },
   {
     "url": "/web/js/charts-page.js",
@@ -21,7 +21,7 @@ export default [
   },
   {
     "url": "/web/js/lib/chart.min.js",
-    "file": "/web/js/lib/chart.min.HMFF4CKZ.js"
+    "file": "/web/js/lib/chart.min.CBBTIVV5.js"
   },
   {
     "url": "/web/js/main.js",
