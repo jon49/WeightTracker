@@ -26,22 +26,12 @@ async function post(data: WeightData & { wakeUpTime?: string }) {
         return Promise.reject({ message: "Date is required!", error: new Error("post:/sw/entries/edit/") })
     }
 
-    if (data.wakeUpTime && data.bedtime) {
-        let bedtime = new Date(`1970-01-01T${data.bedtime}`)
-        let wakeUpTime = new Date(`1970-01-0${+(+data.bedtime.slice(0, 2) > +data.wakeUpTime.slice(0, 2)) + 1}T${data.wakeUpTime}`)
-        // time slept (milliseconds) / 1000 (milliseconds) / 60 (seconds) / 60 (hours)
-        data.sleep = round((+wakeUpTime - +bedtime) / 36e5, 2)
+    if (!data.bedtime) {
+        data.sleep = undefined
     }
 
-    const cleanData: WeightData = {
-        bedtime: data.bedtime,
-        comments: data.comments,
-        date: data.date,
-        sleep: toNumber(data.sleep),
-        waist: toNumber(data.waist),
-        weight: toNumber(data.weight)
-    }
-    await db.set(cleanData.date, cleanData)
+    const cleanedData = cleanData(data)
+    await db.set(cleanedData.date, cleanedData)
     let shouldSyncUserSettings = { sync: false }
     await db.update("user-settings", settings => {
         const earliestDate = settings?.earliestDate
@@ -69,10 +59,7 @@ const render = ({ bedtime, comments, sleep, waist, weight, date }: FormReturn<We
 
     ${(() => {
         if (!bedtime) {
-            return html`<div>
-            <input id=bedtime class=edit name=bedtime type=time>
-            <label for=bedtime class=button>Start Sleeping</label>
-            </div>`
+            return html`<button formaction="?handler=startSleep">Bedtime</button>`
         }
         return html`<label>Bedtime${bedtime?.endsWith("M") ? ` (${bedtime})` : ""}<br>
             <input style="min-width:214px" name=bedtime type=time value="${bedtime}">
@@ -84,8 +71,7 @@ const render = ({ bedtime, comments, sleep, waist, weight, date }: FormReturn<We
         if (!bedtime) {
             return null
         } else if (!sleep) {
-            return html`<input id=wake-up-time class=edit name=wakeUpTime type=time>
-            <label for=wake-up-time class=button>Wake Up Time</label><br><br>`
+            return html`<button formaction="?handler=wakeUp">Wake Up</button><br><br>`
         }
         return html`
             <label>Number of hours slept<br>
@@ -116,9 +102,41 @@ async function get(req: Request) {
 export default {
     route: /\/entries\/edit\/$/,
     get,
-    async post({ data, req }: RoutePostArgs) {
-        await post(data)
-        return redirect(req)
+    post: {
+        async post({ data, req }: RoutePostArgs) {
+            await post(data)
+            return redirect(req)
+        },
+        async startSleep({ data, req }: RoutePostArgs) {
+            let now = new Date().toTimeString().slice(0, 5)
+            data.bedtime = now
+            let cleanedData = cleanData(data)
+            await db.set(cleanedData.date, cleanedData)
+            return redirect(req)
+        },
+        async wakeUp({ data, req }: RoutePostArgs) {
+            data.wakeUpTime = new Date().toTimeString().slice(0, 5)
+            if (data.wakeUpTime && data.bedtime) {
+                let bedtime = new Date(`1970-01-01T${data.bedtime}`)
+                let wakeUpTime = new Date(`1970-01-0${+(+data.bedtime.slice(0, 2) > +data.wakeUpTime.slice(0, 2)) + 1}T${data.wakeUpTime}`)
+                // time slept (milliseconds) / 1000 (milliseconds) / 60 (seconds) / 60 (hours)
+                data.sleep = round((+wakeUpTime - +bedtime) / 36e5, 2)
+            }
+            let cleanedData = cleanData(data)
+            await db.set(cleanedData.date, cleanedData)
+            return redirect(req)
+        }
+    }
+}
+
+function cleanData(data: any): WeightData {
+    return {
+        bedtime: data.bedtime,
+        comments: data.comments,
+        date: data.date,
+        sleep: toNumber(data.sleep),
+        waist: toNumber(data.waist),
+        weight: toNumber(data.weight)
     }
 }
 
