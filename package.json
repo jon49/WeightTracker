@@ -1,1 +1,28 @@
-{}
+{
+  "name": "weight",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "./tasks/start.nu dev",
+    "build": "./tasks/start.nu prod",
+    "start-game-play": "npx esbuild --watch --outdir=public --outbase=src --format=iife --bundle --tree-shaking=true ./src/web/js/game-play2.bundle.ts"
+  },
+  "author": "Jon Nyman",
+  "license": "ISC",
+  "dependencies": {
+    "@cloudfour/elastic-textarea": "^1.0.7",
+    "@jon49/sw": "^0.1.0",
+    "@jon49/web": "^0.2.0",
+    "@ungap/custom-elements": "^1.3.0",
+    "form-subscribe": "^0.1.0",
+    "html-form": "^0.7.8",
+    "html-template-tag-stream": "^2.1.1",
+    "idb-keyval": "^6.2.1",
+    "promise-validation": "^4.0.1",
+    "simple-input-formatter": "^0.3.6"
+  },
+  "devDependencies": {
+    "esbuild": "^0.19.5"
+  }
+}

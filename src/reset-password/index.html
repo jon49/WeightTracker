@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Reset Password</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="{{indexCss}}" rel="stylesheet">
+        <link href="{{appCss}}" rel="stylesheet">
+    </head>
+    <body>
+
+        <h1>Reset Password</h1>
+        <main>
+            <p>A token is required to reset the password. Invalid URL.</p>
+        </main>
+
+<script>
+(() => {
+    let token = new URL(location.href).searchParams.get('token')
+    if (!token) return
+    document.querySelector('main').innerHTML = `
+<form method="post" action="/api/authentication/reset-password">
+    <input type=hidden name=token value="${token}">
+    <div>
+        <label for="password">New Password</label>
+        <input type="password" name="password" id="password" required>
+    </div>
+    <div>
+        <label for="passwordConfirm">Confirm New Password</label>
+        <input type="password" name="passwordConfirm" id="passwordConfirm" required>
+    </div>
+    <button type="submit">Reset Password</button>
+</form>`
+})()
+</script>
+    
+    <script src="{{appJs}}"></script>
+    </body>
+</html>
+

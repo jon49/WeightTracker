@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Register</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="{{indexCss}}" rel="stylesheet">
+        <link href="{{appCss}}" rel="stylesheet">
+    </head>
+    <body>
+        <h1>Register</h1>
+        <main></main>
+
+<script>
+    document.querySelector('main').innerHTML = `
+    <form id=register-form action="/api/authentication/register" method=post>
+        <div>
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email" required>
+        </div>
+        <div>
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" required>
+        </div>
+        <div>
+            <label for="passwordConfirm">Confirm Password</label>
+            <input type="password" name="passwordConfirm" id="passwordConfirm" required>
+        </div>
+        <button>Register</button>
+    </form>
+    <p>Already registered? <a href="/login">Login here.</a></p>`
+</script>
+
+<script>
+    document.getElementById("register-form")
+    .addEventListener("change", e => {
+        if (!e.target.name.includes("assword")) {
+            return
+        }
+        let form = e.target.form
+        let password = form.password
+        let confirm = form.passwordConfirm
+        if (password.value === confirm.value) {
+            confirm.setCustomValidity('')
+        } else {
+            confirm.setCustomValidity('Passwords do not match.')
+        }
+    })
+</script>
+
+    <script src="{{appJs}}"></script>
+
+    </body>
+</html>
+
