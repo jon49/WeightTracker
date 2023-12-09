@@ -58,7 +58,7 @@ export function avg(numbers: (number|undefined)[] | null | undefined): number | 
         }
     }
 
-    if (count === 0) return undefined
+    if (count === 0) return
 
     return sum / count
 }

@@ -1,8 +1,8 @@
-import { getGoalWeight, getWeeklyData } from "./js/charts-shared"
-import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, isNil, setDefaults, stdev } from "./js/utils"
-import html from "./server/html-template-tag"
-import layout from "./_layout.html"
-import { ChartSettings, get, getMany, UserSettings, WeightData } from "./server/db"
+import { getGoalWeight, getWeeklyData } from "../js/charts-shared.js"
+import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, isNil, setDefaults, stdev } from "../js/utils.js"
+import html from "html-template-tag-stream"
+import layout from "./_layout.html.js"
+import { ChartSettings, get, getMany, UserSettings, WeightData } from "../server/db.js"
 
 async function getChartSettings() {
     let rawChartSettings = await get("chart-settings")
@@ -75,8 +75,10 @@ async function weeksToGo(
     chartSettings: ChartSettings,
     weightDataGetter: (start: Date) => Promise<WeightData[]>) {
 
-    const { avgValues } = await getWeeklyData(chartSettings, weightDataGetter),
-        length = avgValues.length,
+    const weeklyData = await getWeeklyData(chartSettings, weightDataGetter)
+    if (!weeklyData) return
+    let { avgValues } = weeklyData
+    const length = avgValues.length,
         currentWeight = avgValues[length - 1],
         goalWeight = getGoalWeight(userSettings)
     if (!goalWeight) return

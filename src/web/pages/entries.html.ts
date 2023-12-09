@@ -1,7 +1,7 @@
-import { dateFill, dateToString } from "./js/utils"
-import html from "./server/html-template-tag"
-import layout from "./_layout.html"
-import { get, getMany, WeightData } from "./server/db"
+import { dateFill, dateToString } from "../js/utils.js"
+import html from "html-template-tag-stream"
+import layout from "./_layout.html.js"
+import { get, getMany, WeightData } from "../server/db.js"
 
 interface WeightDataYear extends WeightData { year: string }
 

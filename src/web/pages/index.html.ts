@@ -1,5 +1,5 @@
-import html from "./server/html-template-tag"
-import layout from "./_layout.html"
+import html from "html-template-tag-stream"
+import layout from "./_layout.html.js"
 
 export default {
     route: /\/web\/?$/,

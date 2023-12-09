@@ -1,10 +1,11 @@
-import { formatNumber, isSelected, toNumber } from "../js/utils"
-import html from "../server/html-template-tag"
-import layout from "../_layout.html"
-import * as db from "../server/db"
-import { UserSettings, Settings } from "../server/db"
-import { RoutePostArgs } from "../server/route"
-import { redirect } from "../server/utils"
+import { formatNumber, isSelected, toNumber } from "../../js/utils.js"
+import html from "html-template-tag-stream"
+import layout from "../_layout.html.js"
+import * as db from "../../server/db.js"
+import { UserSettings, Settings } from "../../server/db.js"
+import { PostHandlers, Route } from "@jon49/sw/routes.js"
+import { createDateString, createIdNumber, createPositiveNumber, createString25, maybe } from "@jon49/sw/validation.js"
+import { validateObject } from "promise-validation"
 
 const themes = ["dark", "light", "none"] as const
 export type Theme = typeof themes[number]
@@ -45,48 +46,48 @@ const render = (o: UserSettings & { theme: Theme }) => {
 </form>`
 }
 
-function handleSetting(data: Settings) {
-    return db.update("settings", x => {
-        let theme = { theme: getTheme(data.theme) }
-        if (!x) {
-            return theme
-        }
-        return { ...x, ...theme }
-    }, { sync: false })
-}
-
-function handleUserSettings(data: UserSettings) {
-    const o: UserSettings = {
-        earliestDate: data.earliestDate,
-        goalWeight: toNumber(data.goalWeight),
-        height: toNumber(data.height),
-    }
-    return db.set("user-settings", o)
-}
-
 function getTheme(s: unknown) {
     return themes.find(x => x === s) ?? "none"
 }
 
-async function get(req: Request) {
-    let [settings, template] = await Promise.all([start(), layout(req)])
-    return template({ main: render(settings) })
+const settingsValidator = {
+    lastSyncedId: maybe(createIdNumber("Last Synced Id")),
+    theme: maybe(createString25("Theme")),
 }
 
-const handler = <any>{
-    settings: handleSetting,
-    userSettings: handleUserSettings,
+const userSettingsValidator = {
+    earliestDate: maybe(createDateString("Earliest Date")),
+    height: maybe(createPositiveNumber("Height")),
+    goalWeight: maybe(createPositiveNumber("Goal Weight")),
 }
 
-export default {
-    route: /\/user-settings\/edit\/$/,
-    get,
-    async post({ data, req }: RoutePostArgs) {
-        let handlerType = new URL(req.url).searchParams.get("handler")
-        let handle
-        if (handlerType && (handle = handler[<any>handlerType])) {
-            await handle(data)
-        }
-        return redirect(req)
+const postHandlers: PostHandlers = {
+    async settings({ data }) {
+        let settings = await validateObject(data, settingsValidator)
+        await db.update("settings", x => {
+
+            let theme = { theme: getTheme(settings.theme) }
+            if (!x) {
+                return theme
+            }
+            return { ...x, ...theme }
+        }, { sync: false })
+        return { status: 204 }
+    },
+
+    async userSettings({ data }) {
+        let o = await validateObject(data, userSettingsValidator)
+        return db.set("user-settings", o)
     }
 }
+
+const route: Route = {
+    route: /\/user-settings\/edit\/$/,
+    async get({ req }) {
+        let [settings, template] = await Promise.all([start(), layout(req)])
+        return template({ main: render(settings) })
+    },
+    post: postHandlers,
+}
+
+export default route

@@ -1,6 +1,6 @@
-import html from "./server/html-template-tag"
-import * as db from "./server/db"
-import { version } from "./settings"
+import html from "html-template-tag-stream"
+import * as db from "../server/db.js"
+import { version } from "../server/settings.js"
 
 const render = (theme: string | undefined, syncCount: number, url: string) => (o: LayoutTemplateArguments) => {
     const { main, head, scripts, bodyAttr } = o
@@ -55,7 +55,7 @@ export type Layout = typeof layout
 
 export interface LayoutTemplateArguments {
     head?: string
-    main?: Generator|string
+    main?: AsyncGenerator|string
     scripts?: string[]
     bodyAttr?: string
 }

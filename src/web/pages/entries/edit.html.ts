@@ -1,10 +1,11 @@
-import { dateToString, formatNumber, round, toNumber } from "../js/utils"
-import html from "../server/html-template-tag"
-import layout from "../_layout.html"
-import * as db from "../server/db"
-import { FormReturn, WeightData } from "../server/db"
-import { RoutePostArgs } from "../server/route"
-import { redirect } from "../server/utils"
+import { dateToString, formatNumber, round } from "../../js/utils.js"
+import html from "html-template-tag-stream"
+import layout from "../_layout.html.js"
+import * as db from "../../server/db.js"
+import { FormReturn, WeightData } from "../../server/db.js"
+import { PostHandlers, Route } from "@jon49/sw/routes.js"
+import { createDateString, createPositiveNumber, createString50, createTimeString, maybe, reject } from "@jon49/sw/validation.js"
+import { validateObject } from "promise-validation"
 
 const start = async (req: Request) => {
     const url = new URL(req.url)
@@ -19,29 +20,6 @@ const start = async (req: Request) => {
         weight: formatNumber(data?.weight)
     }
     return weightData
-}
-
-async function post(data: WeightData & { wakeUpTime?: string }) {
-    if (!/\d{4}-[01]\d-[0123]\d/.test(data.date)) {
-        return Promise.reject({ message: "Date is required!", error: new Error("post:/sw/entries/edit/") })
-    }
-
-    if (!data.bedtime) {
-        data.sleep = undefined
-    }
-
-    const cleanedData = cleanData(data)
-    await db.set(cleanedData.date, cleanedData)
-    let shouldSyncUserSettings = { sync: false }
-    await db.update("user-settings", settings => {
-        const earliestDate = settings?.earliestDate
-        return !earliestDate
-            ? (shouldSyncUserSettings.sync = true, { ...settings, earliestDate: data.date })
-            : new Date(earliestDate) < new Date(data.date)
-                ? settings
-                : (shouldSyncUserSettings.sync = true, { ...settings, earliestDate: data.date })
-    }, shouldSyncUserSettings)
-    return
 }
 
 const render = ({ bedtime, comments, sleep, waist, weight, date }: FormReturn<WeightData>) => html`
@@ -93,50 +71,80 @@ const render = ({ bedtime, comments, sleep, waist, weight, date }: FormReturn<We
 <script src="/web/js/elastic-textarea.js" defer></script>
 `
 
-async function get(req: Request) {
-    let data = await start(req)
-    let template = await layout(req)
-    return template({ main: render(data) })
+const dateValidator = {
+    date: createDateString("Date"),
 }
 
-export default {
-    route: /\/entries\/edit\/$/,
-    get,
-    post: {
-        async post({ data, req }: RoutePostArgs) {
-            await post(data)
-            return redirect(req)
-        },
-        async startSleep({ data, req }: RoutePostArgs) {
-            let now = new Date().toTimeString().slice(0, 5)
-            data.bedtime = now
-            let cleanedData = cleanData(data)
-            await db.set(cleanedData.date, cleanedData)
-            return redirect(req)
-        },
-        async wakeUp({ data, req }: RoutePostArgs) {
-            data.wakeUpTime = new Date().toTimeString().slice(0, 5)
-            if (data.wakeUpTime && data.bedtime) {
-                let bedtime = new Date(`1970-01-01T${data.bedtime}`)
-                let wakeUpTime = new Date(`1970-01-0${+(+data.bedtime.slice(0, 2) > +data.wakeUpTime.slice(0, 2)) + 1}T${data.wakeUpTime}`)
-                // time slept (milliseconds) / 1000 (milliseconds) / 60 (seconds) / 60 (hours)
-                data.sleep = round((+wakeUpTime - +bedtime) / 36e5, 2)
-            }
-            let cleanedData = cleanData(data)
-            await db.set(cleanedData.date, cleanedData)
-            return redirect(req)
+const weightDataValidator = {
+    ...dateValidator,
+    weight: maybe(createPositiveNumber("Weight")),
+    bedtime: maybe(createTimeString("Bedtime")),
+    sleep: maybe(createPositiveNumber("Sleep")),
+    waist: maybe(createPositiveNumber("Waist")),
+    comments: maybe(createString50("Comments")),
+    wakeUpTime: maybe(createTimeString("Wake Up Time")),
+}
+
+const postHandlers : PostHandlers = {
+    async post({ data }) {
+        let o = await validateObject(data, weightDataValidator)
+
+        if (!o.bedtime) {
+            o.sleep = undefined
         }
+
+        await db.set(o.date, o)
+        let shouldSyncUserSettings = { sync: false }
+        await db.update("user-settings", settings => {
+            const earliestDate = settings?.earliestDate
+            return !earliestDate
+                ? (shouldSyncUserSettings.sync = true, { ...settings, earliestDate: o.date })
+                : new Date(earliestDate) < new Date(o.date)
+                    ? settings
+                    : (shouldSyncUserSettings.sync = true, { ...settings, earliestDate: o.date })
+        }, shouldSyncUserSettings)
+        return
+    },
+
+    async startSleep() {
+        let now = new Date().toTimeString().slice(0, 5)
+        let today = dateToString(new Date())
+        let data = await db.get<WeightData | undefined>(today)
+        if (!data) {
+            data = { date: today }
+        }
+        data.bedtime = now
+        await db.set(data.date, data)
+    },
+
+    async wakeUp({ data }) {
+        let { date } = await validateObject(data, dateValidator)
+        let o = await db.get<WeightData | undefined>(date)
+        if (!o) {
+            return reject("No data found for this date")
+        }
+        let wakeUpTime = new Date().toTimeString().slice(0, 5)
+        if (o.bedtime) {
+            let bedtime = new Date(`1970-01-01T${o.bedtime}`)
+            let wakeUpDateTime = new Date(`1970-01-0${+(+o.bedtime.slice(0, 2) > +wakeUpTime.slice(0, 2)) + 1}T${wakeUpTime}`)
+            // time slept (milliseconds) / 1000 (milliseconds) / 60 (seconds) / 60 (hours)
+            o.sleep = round((+wakeUpDateTime - +bedtime) / 36e5, 2)
+        }
+        await db.set(o.date, o)
     }
 }
 
-function cleanData(data: any): WeightData {
-    return {
-        bedtime: data.bedtime,
-        comments: data.comments,
-        date: data.date,
-        sleep: toNumber(data.sleep),
-        waist: toNumber(data.waist),
-        weight: toNumber(data.weight)
-    }
+const routes : Route = {
+    route: /\/entries\/edit\/$/,
+
+    async get({ req }) {
+        let data = await start(req)
+        let template = await layout(req)
+        return template({ main: render(data) })
+    },
+
+    post: postHandlers
 }
+
+export default routes
 

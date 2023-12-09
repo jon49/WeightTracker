@@ -44,11 +44,11 @@ export { update, set, get, getMany, setMany }
 
 export interface WeightData {
     date: string
-    weight: number | undefined
-    bedtime: string | undefined
-    sleep: number | undefined
-    waist: number | undefined
-    comments: string | undefined
+    weight?: number
+    bedtime?: string
+    sleep?: number
+    waist?: number
+    comments?: string
 }
 
 export interface Settings {
