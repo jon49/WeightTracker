@@ -1,5 +1,5 @@
-import { Theme } from "../pages/user-settings/edit.html.js"
 import { get as get1, getMany, setMany, set as set1, update as update1 } from "idb-keyval"
+import { Theme } from "../api/settings.js"
 
 const get : DBGet = get1
 

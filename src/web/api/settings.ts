@@ -1,7 +1,10 @@
 import html from "html-template-tag-stream"
 import { Route, RoutePostHandler } from "@jon49/sw/routes.js"
 import db from "../server/global-model.js"
-import { Theme } from "../pages/user-settings/edit.html.js"
+
+const themes = ["dark", "light", "neither"] as const
+export type Theme = typeof themes[number]
+
 
 const defaultTheme = "⛅",
     lightTheme = "&#127774;",
@@ -10,21 +13,21 @@ const defaultTheme = "⛅",
 export function themeView(theme: Theme | undefined) {
     let image = theme === "light"
         ? lightTheme
-    : theme === "dark"
-        ? darkTheme
-    : defaultTheme
+        : theme === "dark"
+            ? darkTheme
+            : defaultTheme
     return html`<button class="bg">$${image}</button>`
 }
 
-const postHandlers : RoutePostHandler = {
+const postHandlers: RoutePostHandler = {
     async theme({ req }) {
         let { theme } = await db.settings()
         theme =
             theme === "light"
                 ? "dark"
-            : theme === "dark"
-                ? "neither"
-            : "light"
+                : theme === "dark"
+                    ? "neither"
+                    : "light"
 
         await db.setTheme(theme)
 
@@ -40,7 +43,7 @@ const postHandlers : RoutePostHandler = {
     }
 }
 
-const route : Route = {
+const route: Route = {
     route: /\/api\/settings\/$/,
     post: postHandlers
 }

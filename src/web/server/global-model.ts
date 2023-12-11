@@ -1,4 +1,4 @@
-import { Theme } from "../pages/user-settings/edit.html.js";
+import { Theme } from "../api/settings.js";
 import { Settings, get, set, update } from "./db.js";
 
 function parseKey(key: unknown) : string | number {
