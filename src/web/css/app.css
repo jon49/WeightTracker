@@ -280,17 +280,6 @@ button.anchor:hover {
     width: 100%;
 }
 
-.top-nav {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-}
-
-.top-nav * {
-    max-height: 2.5em;
-    color: var(--c1);
-}
-
 nav li {
     display: inline-block;
     margin: 0 0.5em;
@@ -312,4 +301,14 @@ dialog::backdrop {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    overflow-x: auto;
+}
+
+.header > div {
+    min-width: 12em;
+}
 

@@ -3,7 +3,7 @@ import { notifier } from "@jon49/sw/new-app-notifier.js"
 notifier(notifyUserAboutNewVersion)
 
 function notifyUserAboutNewVersion(state = "", worker: ServiceWorker) {
-    let nav = document.getElementById("top-nav")
+    let nav = document.getElementById("sw-message")
     nav?.insertAdjacentHTML("afterbegin", `<div class=inline><a id=new-worker href="#">Click here to update your app.</a></div>`)
     let newWorkerLink = document.getElementById("new-worker")
     function handleUpdateClick(e: Event) {

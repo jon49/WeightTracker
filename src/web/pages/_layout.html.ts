@@ -41,38 +41,23 @@ const render = async (
 <body $${when(theme, x => `class=${x}`)} $${bodyAttr}>
     <script> window.app = { scripts: new Map() } </script>
     <div id=head>$${head}</div>
-    <div id=top-nav class=top-nav>
-        <form method=post action="/web/api/settings?handler=theme" class=inline>
-            ${themeView(theme)}
-        </form>
-
-       <form method=post action="/web/api/sync?handler=force" class=inline>
-           <button id=sync-count class=bg>${syncCountView(updatedCount)}</button>
-       </form>
-       <!--<form
-            id=soft-sync
-            is=form-subscribe
-            data-event="hf:completed"
-            data-match="detail:{method:'post'}"
-            data-match-not="detail:{form:{id:'soft-sync'}}"
-            data-debounce="6e5"
-            data-onload
-
-            method=post
-            action="/web/api/sync"
-            hidden>
-            <span></span>
-        </form>-->
-
-        ${isLoggedIn
-            ? html`<a href="/login?logout">Logout</a>`
-            : html`<a href="/login">Login</a>`}
-
-    </div>
     <header>
-        <div class=sync>
-            <h1>Weight Tracker</h1>
-            <img style="max-height:2.5em;" src="/web/images/weight.svg"></img>
+        <div id=sw-message></div>
+        <div class=header>
+            <a href="/web"><img style="height:2.25em;" src="/web/images/weight.svg"></img></a>
+            <div>
+                <form method=post action="/web/api/settings?handler=theme" class=inline>
+                    ${themeView(theme)}
+                </form>
+
+               <form method=post action="/web/api/sync?handler=force" class=inline>
+                   <button id=sync-count class=bg>${syncCountView(updatedCount)}</button>
+               </form>
+
+                ${isLoggedIn
+                    ? html`<a href="/login?logout">Logout</a>`
+                    : html`<a href="/login">Login</a>`}
+            </div>
         </div>
         <nav id=nav-main>
             <ul>
