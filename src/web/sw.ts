@@ -1,6 +1,6 @@
 import "./service-worker/routes.js"
 import links from "./entry-points.js"
-import staticFiles from "./static-files.js"
+// import staticFiles from "./static-files.js"
 import { version } from "./server/settings.js"
 import { ValidationResult } from "promise-validation"
 import { getResponse, options } from "@jon49/sw/routes.js"
@@ -19,8 +19,7 @@ self.addEventListener("install", (e: Event) => {
     // @ts-ignore
     e.waitUntil(caches.open(version).then(async cache => {
         console.log("Caching files.")
-        // @ts-ignore
-        return cache.addAll(links.map(x => x.file).concat(staticFiles))
+        return cache.addAll(links.map(x => x.file)/*.concat(staticFiles)*/)
     }))
 
 })

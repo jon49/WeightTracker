@@ -1,0 +1,315 @@
+:root {
+  --card-width: 150px;
+}
+
+body {
+    max-width: 800px;
+    margin: 0 auto;
+    overflow-x: scroll;
+    -webkit-overflow-scrolling: touch;
+}
+
+.editable {
+    position: absolute;
+    right: 100%;
+}
+
+.editable:focus {
+    position: inherit;
+}
+
+.editable + label {
+    cursor: pointer;
+}
+
+.editable:focus + label {
+    display: none;
+}
+
+.editable-pencil {
+    display: inline-block;
+    transform: rotate(90deg);
+}
+
+/** Overrides */
+
+:root {
+ --sans: Georgia, "Times New Roman", Times, serif;
+}
+
+@media (prefers-color-scheme: dark) {
+ :root { --c1:#87c2f6; --c2:#333; --c4:#eee; }
+}
+
+.light {
+  --c1:#0074d9;
+  --c2:#ddd;
+  --c3:#eee;
+  --c4:#333;
+}
+
+.dark {
+  --c1:#87c2f6;
+  --c2:#333;
+  --c3:#1e1f20;
+  --c4:#eee;
+}
+
+/* Fixes an issue where dialog doesn't inherit the color properly. */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--c4);
+}
+
+.form {
+    border: 1px solid black;
+    margin: 5px 0;
+    padding: 1em;
+}
+
+form > div {
+  padding: 10px 0;
+}
+
+input, select, textarea {
+  font-size: inherit;
+  display: block;
+  margin-top: 5px;
+}
+
+.button, button, input[type=submit], input[type=reset] {
+  margin-top: 4px;
+}
+
+/* Cards */
+
+.cards, .row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(var(--card-width), 1fr));
+    grid-gap: 0.5em;
+    padding-bottom: 2em;
+}
+
+.cards > * {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: var(--rc);
+  padding: 1em;
+  box-shadow: 0px 1px 0px rgba(0,0,0,0.3);
+}
+
+.grid-center {
+    justify-items: center;
+}
+
+input {
+    max-width: 100%;
+}
+
+.cards input {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/**
+Custom
+*/
+
+body {
+ padding-bottom: 50%;
+}
+
+header, main,footer {
+  margin: 0 auto;
+  /* width: 60%; */
+  max-width: 800px;
+  text-align: left;
+  padding: 1em;
+}
+
+aside {
+  color: #fff;
+  background-color: var(--c1);
+  padding: 15px;
+  margin: 10px 8px 10px 8px;
+  text-align: center;
+}
+
+@media (max-width: 481px) {
+  main,footer {width: 98%}
+  .cards>div,aside,article {flex:none; width:100%; margin-left: 0;}
+  header { padding: 1em; width: 100%; }
+}
+
+.highlight { background-color: coral; }
+
+.cursor-pointer {
+ cursor: pointer;
+}
+
+.inline {
+    display: inline-block;
+}
+
+a.external {
+    background-image: url(/images/external-link.svg);
+    background-position: center right;
+    background-repeat: no-repeat;
+    padding-right: 20px;
+}
+
+.reverse {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+[draggable] {
+    cursor: move;
+}
+
+.message {
+    margin: 0;
+    padding: 0.25em;
+    font-size: 2em;
+}
+
+.error {
+  color: red;
+}
+
+.toast {
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(5px);
+    max-width: 80vw;
+    border-radius: 1rem;
+    position: fixed;
+    bottom: 1rem;
+}
+
+footer {
+    font-size: 0.65em;
+}
+
+.hidden {
+    display: none !important;
+}
+
+textarea {
+  width: 100%;
+}
+
+.back-to-top {
+  position: fixed;
+  bottom: 10px;
+}
+
+
+.sync {
+  display: flex;
+  align-items: center;
+}
+
+h1 {
+  margin-right: 0.25em;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+header {
+  padding-bottom: 0;
+}
+
+.list {
+    list-style-type: none;
+    display: table;
+    padding: 0;
+}
+
+.list > li {
+    display: table-row;
+}
+
+.list > li > :not([hidden]) {
+    display: table-cell;
+    padding: 5px 10px!important;
+}
+
+/** Fancy Checkbox **/
+
+.toggle > [type="checkbox"],
+.on,
+input:checked ~ .off,
+input:indeterminate ~ .off,
+.none {
+  display: none;
+}
+
+.off {
+  background-color: firebrick;
+}
+
+input:checked ~ .on {
+  display: inline-block;
+  background-color: green;
+}
+
+input:indeterminate ~ .none {
+  display: inline-block;
+}
+
+.bg {
+  background-color: var(--c2) !important;
+}
+
+button.anchor {
+    background: none;
+    margin: 0;
+    padding: 0;
+    color: var(--c1);
+    font-family: inherit;
+}
+
+button.anchor:hover {
+  text-decoration: underline;
+}
+
+.float-right {
+    float: right;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.top-nav {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.top-nav * {
+    max-height: 2.5em;
+    color: var(--c1);
+}
+
+nav li {
+    display: inline-block;
+    margin: 0 0.5em;
+}
+
+/** Dialog **/
+
+dialog.modal {
+    background-color: var(--c2);
+    color: var(--c4);
+    border-radius: 0.5em;
+    padding: 1em;
+    width: 100%;
+    max-width: 800px;
+    overflow: auto;
+}
+
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+

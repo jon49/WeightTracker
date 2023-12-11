@@ -1,5 +1,5 @@
-import { get as get1, getMany, setMany, set as set1, update as update1 } from "./lib/db.min.js"
-import { Theme } from "../user-settings/edit.html"
+import { Theme } from "../pages/user-settings/edit.html.js"
+import { get as get1, getMany, setMany, set as set1, update as update1 } from "idb-keyval"
 
 const get : DBGet = get1
 

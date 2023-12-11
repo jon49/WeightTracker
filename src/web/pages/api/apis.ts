@@ -1,13 +1,15 @@
-import { dateFill } from "../js/utils"
-import * as db from "../server/db"
-import { jsonResponse, searchParams } from "../server/utils"
-import { validateObject, createDateString } from "../server/validation"
+import { createDateString } from "@jon49/sw/validation.js"
+import { dateFill } from "../../js/utils.js"
+import * as db from "../../server/db.js"
+import { jsonResponse } from "../../server/utils.js"
+import { Route } from "@jon49/sw/routes.js"
+import { validateObject } from "promise-validation"
 
 const startQuery = {
     start: createDateString("Query Start")
 }
 
-export default [
+const routes: Route[] = [
     { route: /\/api\/chart-settings\/$/
     , async get() {
         let chartSettings = await db.get("chart-settings")
@@ -21,8 +23,7 @@ export default [
       }
     },
     { route: /\/api\/data\/$/
-    , async get(req: Request) {
-        let query = searchParams(req)
+    , async get({ query }) {
         let { start } = await validateObject(query, startQuery)
         let split = start.split("-")
         let startDate = new Date(+split[0], +split[1] - 1, +split[2])
@@ -33,4 +34,5 @@ export default [
     },
 ]
 
+export default routes
 

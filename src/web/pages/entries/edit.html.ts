@@ -1,75 +1,98 @@
-import { dateToString, formatNumber, round } from "../../js/utils.js"
+import { dateToString, round } from "../../js/utils.js"
 import html from "html-template-tag-stream"
 import layout from "../_layout.html.js"
 import * as db from "../../server/db.js"
-import { FormReturn, WeightData } from "../../server/db.js"
-import { PostHandlers, Route } from "@jon49/sw/routes.js"
+import { WeightData } from "../../server/db.js"
+import { Route, RouteGetHandler, RoutePostHandler } from "@jon49/sw/routes.js"
 import { createDateString, createPositiveNumber, createString50, createTimeString, maybe, reject } from "@jon49/sw/validation.js"
 import { validateObject } from "promise-validation"
 
-const start = async (req: Request) => {
-    const url = new URL(req.url)
-    let date = url.searchParams.get("date") ?? dateToString(new Date())
-    let data = await db.get<WeightData | undefined>(date)
-    let weightData: FormReturn<WeightData> = {
-        bedtime: data?.bedtime,
-        comments: data?.comments,
-        date,
-        sleep: formatNumber(data?.sleep),
-        waist: formatNumber(data?.waist),
-        weight: formatNumber(data?.weight)
+async function render(query: any) {
+    let { date } = await validateObject(query, { date: maybe(createDateString("Query Date")) })
+    if (!date) {
+        date = dateToString(new Date())
     }
-    return weightData
-}
+    // {}: FormReturn<WeightData>
+    let data = (await db.get<WeightData | undefined>(date))
+        ?? {
+            date,
+            weight: void 0,
+            waist: void 0,
+            bedtime: void 0,
+            sleep: void 0,
+            comments: void 0
+        }
 
-const render = ({ bedtime, comments, sleep, waist, weight, date }: FormReturn<WeightData>) => html`
+    return html`
 <h2>Add/Edit Entry</h2>
-<form onchange="this.submit()">
+<form
+    action="/web/entries/edit?handler=date"
+    hf-target="#entry-form"
+    onchange="this.requestSubmit()">
     <label>Date<br>
     <input name=date type=date required value="${date}"></label>
     <br><br>
 </form>
-<form id=entry-form method=POST onchange="this.submit()">
-    <input name=date type=hidden value=${date}>
 
-    <label>Weight<br>
-    <input name=weight type=number step=any value="${weight}"></label><br><br>
-
-    ${(() => {
-        if (!bedtime) {
-            return html`<button formaction="?handler=startSleep">Bedtime</button>`
-        }
-        return html`<label>Bedtime${bedtime?.endsWith("M") ? ` (${bedtime})` : ""}<br>
-            <input style="min-width:214px" name=bedtime type=time value="${bedtime}">
-        </label>`
-    })()}
-    <br><br>
-
-    ${(() => {
-        if (!bedtime) {
-            return null
-        } else if (!sleep) {
-            return html`<button formaction="?handler=wakeUp">Wake Up</button><br><br>`
-        }
-        return html`
-            <label>Number of hours slept<br>
-                <input id=wake-up-time name=sleep type=number step=any value="${sleep}">
-            </label><br><br>`
-    })()}
-
-    <label>Waist Size (cm)<br>
-        <input name=waist type=number step=any value="${waist}">
-    </label><br><br>
-
-    <label>Comment
-        <elastic-textarea>
-            <textarea name=comments>${comments}</textarea>
-        </elastic-textarea>
-    </label>
+<form id=entry-form method=post action="/web/entries/edit" onchange="this.requestSubmit()">
+    ${getEntryForm(data)}
 </form>
-
 <script src="/web/js/elastic-textarea.js" defer></script>
 `
+}
+
+function getEntryForm({ date, bedtime, sleep, weight, waist, comments } : WeightData) {
+    return html`
+<input name=date type=hidden value=${date}>
+
+<div class=row>
+<label>Weight<br>
+<input name=weight type=number step=any value="${weight}"></label>
+</div>
+<button class=hidden></button>
+
+<div class=row>
+${getBedtime(bedtime)}
+${getWakeUp(bedtime, sleep)}
+</div>
+
+<div class=row>
+<label>Waist Size (cm)<br>
+    <input name=waist type=number step=any value="${waist}">
+</label>
+</div>
+
+<div class=row>
+<label>Comment
+    <elastic-textarea>
+        <textarea name=comments>${comments}</textarea>
+    </elastic-textarea>
+</label>
+</div>`
+}
+
+function getWakeUp(bedtime: string | undefined, sleep: number | undefined) {
+    return !bedtime
+        ? null
+    : !sleep
+        ? html`<button id=wake-up hf-target="#wake-up" hf-swap=outerHTML formaction="/web/entries/edit?handler=wakeUp">Wake Up</button><br><br>`
+    : html`
+        <label>Hours Slept<br>
+            <input id=wake-up-time name=sleep type=number step=any value="${sleep}">
+        </label>`
+}
+
+function getBedtime(bedtime: string | undefined) {
+    if (!bedtime) {
+        return html`<button formaction="/web/entries/edit?handler=startSleep">
+        Bedtime
+        </button>`
+    }
+    return html`
+    <label>Bedtime${bedtime?.endsWith("M") ? ` (${bedtime})` : ""}<br>
+        <input style="min-width:214px" name=bedtime type=time value="${bedtime}">
+    </label>`
+}
 
 const dateValidator = {
     date: createDateString("Date"),
@@ -85,7 +108,7 @@ const weightDataValidator = {
     wakeUpTime: maybe(createTimeString("Wake Up Time")),
 }
 
-const postHandlers : PostHandlers = {
+const postHandlers : RoutePostHandler = {
     async post({ data }) {
         let o = await validateObject(data, weightDataValidator)
 
@@ -103,18 +126,22 @@ const postHandlers : PostHandlers = {
                     ? settings
                     : (shouldSyncUserSettings.sync = true, { ...settings, earliestDate: o.date })
         }, shouldSyncUserSettings)
-        return
+
+        return getEntryForm(o)
     },
 
-    async startSleep() {
+    async startSleep({ data }) {
+        let { date } = await validateObject(data, dateValidator)
         let now = new Date().toTimeString().slice(0, 5)
-        let today = dateToString(new Date())
-        let data = await db.get<WeightData | undefined>(today)
-        if (!data) {
-            data = { date: today }
+        date ??= dateToString(new Date())
+        let dbData = await db.get<WeightData | undefined>(date)
+        if (!dbData) {
+            dbData = { date }
         }
-        data.bedtime = now
-        await db.set(data.date, data)
+        dbData.bedtime = now
+        await db.set(dbData.date, dbData)
+
+        return getEntryForm(dbData)
     },
 
     async wakeUp({ data }) {
@@ -131,18 +158,28 @@ const postHandlers : PostHandlers = {
             o.sleep = round((+wakeUpDateTime - +bedtime) / 36e5, 2)
         }
         await db.set(o.date, o)
+        return getWakeUp(o.bedtime, o.sleep)
     }
+}
+
+const getHandlers: RouteGetHandler = {
+    async date({ query }) {
+        let { date } = await validateObject(query, dateValidator)
+        let data = (await db.get<WeightData | undefined>(date)) ?? { date }
+        return getEntryForm(data)
+    },
+
+    async get({ query }) {
+        return layout({
+            main: await render(query),
+            title: "Edit Entry"
+        })
+    },
 }
 
 const routes : Route = {
     route: /\/entries\/edit\/$/,
-
-    async get({ req }) {
-        let data = await start(req)
-        let template = await layout(req)
-        return template({ main: render(data) })
-    },
-
+    get: getHandlers,
     post: postHandlers
 }
 

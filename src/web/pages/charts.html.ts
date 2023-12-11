@@ -3,6 +3,7 @@ import { avg, dateAdd, dateFill, formatNumber, getPreviousDay, isNil, setDefault
 import html from "html-template-tag-stream"
 import layout from "./_layout.html.js"
 import { ChartSettings, get, getMany, UserSettings, WeightData } from "../server/db.js"
+import { Route } from "@jon49/sw/routes.js"
 
 async function getChartSettings() {
     let rawChartSettings = await get("chart-settings")
@@ -151,11 +152,16 @@ interface StatsData {
     weight: string | undefined
 }
 
-export default {
+const route: Route = {
     route: /\/charts\/$/,
-    get: async (req: Request) => {
+    get: async () => {
         let data = await setupStats()
-        let template = await layout(req)
-        return template({ main: render(data), scripts: ["/web/js/charts-page.js"] })
+        return layout({
+            main: render(data),
+            scripts: ["/web/js/charts-page.js"],
+            title: "Charts",
+        })
     }
 }
+
+export default route

@@ -2,29 +2,22 @@ import { formatNumber, isSelected, toNumber } from "../../js/utils.js"
 import html from "html-template-tag-stream"
 import layout from "../_layout.html.js"
 import * as db from "../../server/db.js"
-import { RoutePostArgs } from "@jon49/sw/routes.js"
-import { redirect } from "../../server/utils.js"
+import { Route } from "@jon49/sw/routes.js"
+import { validateObject } from "promise-validation"
+import { createPositiveNumber, createString25 } from "@jon49/sw/validation.js"
 
 const units = ["month", "year", "week"] as const
 export type DurationUnit = typeof units[number]
 
-interface Data {
-    duration: string | undefined
-    durationUnit: any
-}
-
-async function getData() : Promise<Data> {
+async function render() {
     let chartSettings = await db.get("chart-settings")
-    return {
+    let data = {
         duration: formatNumber(chartSettings?.duration, 0),
         durationUnit: chartSettings?.durationUnit
     }
-}
-
-const render = (data: Data) => {
     const selected = isSelected<DurationUnit>(data.durationUnit)
     return html`<h2>Chart Settings</h2>
-<form method=POST onchange="this.submit()">
+<form method=POST onchange="this.requestSubmit()">
     <input name=duration type=number placeholder="Number of months" required value="${data.duration}">
     <select name=durationUnit required>
         <option value=month ${selected("month")}>Month(s)</option>
@@ -34,25 +27,30 @@ const render = (data: Data) => {
 </form>`
 }
 
-function post(data: db.ChartSettings) {
-    const duration = toNumber(data.duration) || 9
-    const maybeDurationUnit = data.durationUnit
-    const durationUnit = units.find(x => x === maybeDurationUnit) ?? "month"
-    const settings : db.ChartSettings = { duration, durationUnit }
-    return db.set("chart-settings", settings)
+let settingsValidator = {
+    duration: createPositiveNumber("Duration"),
+    durationUnit: createString25("Duration Unit"),
 }
 
-let getHandler = async (req: Request) => {
-    let [data, template] = await Promise.all([getData(), layout(req)])
-    return template({ main: render(data) })
-}
-
-export default {
+const route: Route = {
     route: /\/charts\/edit\/$/,
-    get: getHandler,
-    async post({ data, req }: RoutePostArgs) {
-        await post(data)
-        return redirect(req)
+    async get() {
+        return layout({
+            main: await render(),
+            title: "Chart Settings",
+        })
+    },
+
+    async post({ data }) {
+        const o =
+            await validateObject(data, settingsValidator)
+        const duration = toNumber(o.duration) || 9
+        const maybeDurationUnit = o.durationUnit
+        const durationUnit = units.find(x => x === maybeDurationUnit) ?? "month"
+        const settings : db.ChartSettings = { duration, durationUnit }
+        await db.set("chart-settings", settings)
+        return { status: 204 }
     }
 }
 
+export default route

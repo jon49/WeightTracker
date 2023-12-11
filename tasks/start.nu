@@ -11,6 +11,7 @@ def main [build: string = "dev"] {
         })
 
     rm -r -f $targetDir
+    mkdir $targetDir
 
     let insertHash = { |x|
         let splitFilename = ($x.name | split column '.' | transpose | get column1) 
@@ -31,7 +32,7 @@ def main [build: string = "dev"] {
     }
 
     # copy html file
-    cp node_modules/@jon49/sw/lib/app-loader.html $"($targetDir)/web/index.html"
+    cp -r -u "./node_modules/@jon49/sw/lib/app-loader.html" $"($targetDir)/web/index.html"
 
     # copy css files
     ls src/**/css/**/*.css
@@ -42,17 +43,19 @@ def main [build: string = "dev"] {
     }
 
     # copy json files
-    ls src/**/*.json
-    | each $addHash
-    | each { |x|
-        mkdir $x.target-dir
-        # minify json
-        if $build == "prod" {
-            open $x.name | to json -r | save -f $x.hashed
-        } else {
-            cp $x.name $x.hashed
+    try {
+        ls src/**/*.json
+        | each $addHash
+        | each { |x|
+            mkdir $x.target-dir
+            # minify json
+            if $build == "prod" {
+                open $x.name | to json -r | save -f $x.hashed
+            } else {
+                cp $x.name $x.hashed
+            }
         }
-    }
+    } catch {}
 
     let js = (
         ls **/src/**/js/**/*

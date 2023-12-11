@@ -6,7 +6,7 @@ import {
     reduceSlice,
     setDefaults
 } from "./utils.js"
-import { ChartSettings, UserSettings, WeightData } from "../server/db"
+import { ChartSettings, UserSettings, WeightData } from "../server/db.js"
 
 export async function setChartSettingDefaults(rawChartSettings: ChartSettings) {
     return setDefaults(rawChartSettings, [["duration", 9], ["durationUnit", "month"]])

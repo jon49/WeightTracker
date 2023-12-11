@@ -1,4 +1,4 @@
-import { ChartSettings, UserSettings, WeightData } from "../server/db"
+import { ChartSettings, UserSettings, WeightData } from "../server/db.js"
 import { avg, dateFill, dateToString, reduceSlice, stdev } from "./utils.js"
 import { getById } from "./dom-utils.js"
 import { getWeeklyData, getStartDate, setChartSettingDefaults } from "./charts-shared.js"

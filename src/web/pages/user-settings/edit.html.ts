@@ -1,53 +1,51 @@
-import { formatNumber, isSelected, toNumber } from "../../js/utils.js"
+import { formatNumber, isSelected } from "../../js/utils.js"
 import html from "html-template-tag-stream"
 import layout from "../_layout.html.js"
 import * as db from "../../server/db.js"
 import { UserSettings, Settings } from "../../server/db.js"
-import { PostHandlers, Route } from "@jon49/sw/routes.js"
+import { Route, RoutePostHandler } from "@jon49/sw/routes.js"
 import { createDateString, createIdNumber, createPositiveNumber, createString25, maybe } from "@jon49/sw/validation.js"
 import { validateObject } from "promise-validation"
 
-const themes = ["dark", "light", "none"] as const
-export type Theme = typeof themes[number]
-
-const start = async () => {
-    let [userSettings, settings] = await Promise.all([db.get("user-settings"), db.get("settings")])
-    userSettings = userSettings ?? <UserSettings>{}
-    settings = settings ?? <Settings>{}
-    return { ...userSettings, theme: getTheme(settings.theme) }
+function getTheme(s: unknown): Theme {
+    return themes.find(x => x === s) ?? "neither"
 }
 
-const render = (o: UserSettings & { theme: Theme }) => {
-    const selected = isSelected<Theme>(o.theme)
+const themes = ["dark", "light", "neither"] as const
+export type Theme = typeof themes[number]
+
+async function render() {
+    let [userSettings, settings] =
+        await Promise.all([db.get("user-settings"), db.get("settings")])
+    let { earliestDate, height, goalWeight } = userSettings ?? <UserSettings>{}
+    let theme = getTheme(settings?.theme)
+    settings = settings ?? <Settings>{}
+    const selected = isSelected<Theme>(theme)
     const option = (value: Theme, display: string) => html`<option value="${value}" ${selected(value)}>${display}</option>`
     return html`
 <h2>User Settings</h2>
 <p id=message></p>
-<form method=POST action="?handler=settings" onchange="this.submit()">
+<form method=POST action="?handler=settings" onchange="this.requestSubmit()">
     <label>Theme:<br>
         <select name=theme required>
             ${option("dark", "Dark")}
             ${option("light", "Light")}
-            ${option("none", "Default")}
+            ${option("neither", "Default")}
         </select>
     </label>
 </form>
 
 <br>
 
-<form method=POST action="?handler=userSettings" onchange="this.submit()">
-    <input name=earliestDate type=hidden value="${o.earliestDate}">
+<form method=POST action="?handler=userSettings" onchange="this.requestSubmit()">
+    <input name=earliestDate type=hidden value="${earliestDate}">
     <label>Height (inches):<br>
-        <input name=height type=number step=any value="${o.height ? formatNumber(o.height) : null}">
+        <input name=height type=number step=any value="${height ? formatNumber(height) : null}">
     </label><br><br>
     <label>Goal Weight:<br>
-        <input name=goalWeight type=number step=any value="${o.goalWeight ? formatNumber(o.goalWeight) : null}">
+        <input name=goalWeight type=number step=any value="${goalWeight ? formatNumber(goalWeight) : null}">
     </label><br><br>
 </form>`
-}
-
-function getTheme(s: unknown) {
-    return themes.find(x => x === s) ?? "none"
 }
 
 const settingsValidator = {
@@ -61,7 +59,7 @@ const userSettingsValidator = {
     goalWeight: maybe(createPositiveNumber("Goal Weight")),
 }
 
-const postHandlers: PostHandlers = {
+const postHandlers: RoutePostHandler = {
     async settings({ data }) {
         let settings = await validateObject(data, settingsValidator)
         await db.update("settings", x => {
@@ -83,9 +81,11 @@ const postHandlers: PostHandlers = {
 
 const route: Route = {
     route: /\/user-settings\/edit\/$/,
-    async get({ req }) {
-        let [settings, template] = await Promise.all([start(), layout(req)])
-        return template({ main: render(settings) })
+    async get() {
+        return layout({
+            main: await render(),
+            title: "User Settings",
+        })
     },
     post: postHandlers,
 }

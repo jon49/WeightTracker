@@ -2,23 +2,11 @@ import { dateFill, dateToString } from "../js/utils.js"
 import html from "html-template-tag-stream"
 import layout from "./_layout.html.js"
 import { get, getMany, WeightData } from "../server/db.js"
+import { Route } from "@jon49/sw/routes.js"
+import { createPositiveNumber, maybe } from "@jon49/sw/validation.js"
+import { validateObject } from "promise-validation"
 
 interface WeightDataYear extends WeightData { year: string }
-
-async function start(req: Request) {
-    let data : WeightDataYear[] = []
-    const url = new URL(req.url)
-    const year = +(url.searchParams.get("year") ?? new Date().getFullYear())
-    const [ yearList, dataList ] = await Promise.all([getYears(), getData(year)])
-    const years = yearList.map(x => ""+x)
-    for (let index = 0; index < dataList.data.length; index++) {
-        let d = <WeightDataYear>dataList.data[index];
-        if (!d) continue
-        d.year = dataList.dates[index]
-        data.push(d)
-    }
-    return {data, years}
-}
 
 function $row({date, weight, bedtime, sleep, waist, comments}: WeightDataYear) {
     let c : string[] = comments?.split('\n') ?? []
@@ -39,8 +27,24 @@ function $row({date, weight, bedtime, sleep, waist, comments}: WeightDataYear) {
     </tr>`
 }
 
-const render = (years: string[], data: WeightDataYear[]) => 
-    html`
+const entriesValidator = {
+    year: maybe(createPositiveNumber("Query Year"))
+}
+
+async function render(query: any) {
+    let { year } = await validateObject(query, entriesValidator)
+    year ??= new Date().getFullYear()
+    let data : WeightDataYear[] = []
+    const [ yearList, dataList ] = await Promise.all([getYears(), getData(year)])
+    const years = yearList.map(x => ""+x)
+    for (let index = 0; index < dataList.data.length; index++) {
+        let d = <WeightDataYear>dataList.data[index];
+        if (!d) continue
+        d.year = dataList.dates[index]
+        data.push(d)
+    }
+
+    return html`
 <h2 id="top">Entries</h2>
 
 <div class=date-list>
@@ -53,6 +57,8 @@ const render = (years: string[], data: WeightDataYear[]) =>
 </table>
 
 <a href="#" class="back-to-top button">Back to Top</a>`
+
+}
 
 async function getData(year: number) : Promise<TableData> {
     const start = new Date()
@@ -99,14 +105,16 @@ interface TableData {
     data: WeightData[]
 }
 
-export default {
+const route: Route = {
     route: /\/entries\/$/,
-    async get(req: Request) {
-        const [result, template] = await Promise.all([start(req), layout(req)])
-        return template({
-            main: render(result.years, result.data),
+    async get({ query }) {
+        return layout({
+            main: await render(query),
             head,
-            bodyAttr: `data-mpa-scroll-to="#top"`
+            bodyAttr: `data-mpa-scroll-to="#top"`,
+            title: "Entries",
         })
     }
 }
+
+export default route

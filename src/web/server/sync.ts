@@ -13,7 +13,7 @@ export default async function sync() {
         let d = items[index]
         data[index] = { key, data: d, id: d._rev ?? 0 }
     }
-    const lastSyncedId = (await db.settings()).lastSyncedId
+    const lastSyncedId = (await db.settings()).lastSyncedId ?? 0
 
     let postData : PostData = { lastSyncedId, data }
     const res = await fetch("/api/data", {
