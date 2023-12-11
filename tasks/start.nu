@@ -32,7 +32,8 @@ def main [build: string = "dev"] {
     }
 
     # copy html file
-    cp -r -u "./node_modules/@jon49/sw/lib/app-loader.html" $"($targetDir)/web/index.html"
+    ^mkdir -p $"($targetDir)/web"
+    ^cp "./node_modules/@jon49/sw/lib/app-loader.html" $"($targetDir)/web/index.html"
 
     # copy css files
     ls src/**/css/**/*.css
