@@ -48,7 +48,7 @@ async function render(query: any) {
 <h2 id="top">Entries</h2>
 
 <div class=date-list>
-    ${years.reverse().map((year: string) => html`<a href="?year=${year}">${year}</a>`)}
+    ${years.reverse().map((year: string) => html`<a href="/web/entries?year=${year}">${year}</a>`)}
 </div>
 
 <table>
