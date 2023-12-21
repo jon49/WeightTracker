@@ -15,16 +15,6 @@ export function getProperty<T>(obj: any, prop: string) : T | undefined {
   return
 }
 
-export function jsonResponse(o: any) {
-    return new Response(
-        JSON.stringify(o),
-        { status: 200
-        , headers: {
-            "Content-Type": "application/json"
-        } },
-    )
-}
-
 export function equals(a: string, b: string) {
   return a.localeCompare(b, void 0, {sensitivity: "base"}) === 0
 }
