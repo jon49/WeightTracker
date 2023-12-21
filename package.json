@@ -13,7 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@cloudfour/elastic-textarea": "^1.0.7",
-    "@jon49/sw": "^0.5.5",
+    "@jon49/sw": "^0.6.0",
     "@jon49/web": "^0.2.0",
     "@ungap/custom-elements": "^1.3.0",
     "form-subscribe": "^0.1.0",
