@@ -2,7 +2,8 @@ import { ChartSettings, UserSettings, WeightData } from "../server/db.js"
 import { avg, dateFill, dateToString, reduceSlice, stdev } from "./utils.js"
 import { getById } from "./dom-utils.js"
 import { getWeeklyData, getStartDate, setChartSettingDefaults } from "./charts-shared.js"
-import "./lib/chart.min.js"
+// @ts-ignore
+import { Chart, ChartConfig, ChartData } from "./_chart-lib.js"
 
 const red = "#ff6384", blue = "#6391ff", green = "#63ff83"
 
@@ -37,18 +38,35 @@ const chartFunc = {
     "chart-rate": rate,
 }
 
-const charts = new Map()
-const chartButtons = getById("create-chart")
-chartButtons?.addEventListener("click", async ev => {
-    let el = ev.target
-    if (!el || !(el instanceof HTMLButtonElement)) return
-    el.classList.add("hidden")
+// @ts-ignore
+window.app.scripts.set("/web/js/charts-page.js", {
+    load: () => {
+        const chartButtons = getById("create-chart")
+        chartButtons?.addEventListener("click", handleChartButtons)
+    },
+    unload: () => {
+        const chartButtons = getById("create-chart")
+        chartButtons?.removeEventListener("click", handleChartButtons)
+    }
+})
+
+async function handleChartButtons(e: Event) {
+    let el = e.target
+    if (!chartsLocation || !(el instanceof HTMLButtonElement)) return
+    el.remove()
     const baseId = el.id.slice(0, -4)
     // @ts-ignore
-    chartsLocation.prepend(getById(`${baseId}-template`).content.cloneNode(true))
-    // @ts-ignore
-    charts.set(baseId, new Chart(baseId, await chartFunc[baseId]()))
-})
+    let fn: any = chartFunc[baseId]
+    if (!(fn instanceof Function)) {
+        console.error("Unknown chart type", baseId)
+        return
+    }
+
+    let config = await fn()
+    config.height = 250
+    config.width = chartsLocation?.clientWidth
+    chartsLocation.prepend(new Chart(config))
+}
 
 async function weightAverageChartData() {
     let chartSettings = await getChartSettings()
@@ -59,80 +77,68 @@ async function weightAverageChartData() {
     if (!weeklyData) return
     const { labels, maxValues, minValues, avgValues } = weeklyData
 
-    const borderWidth = labels.length < 500 ? 2 : 1
-    const pointRadius =
-        labels.length < 500
-            ? 2
-        : labels.length > 750
-            ? 1
-        : 0
-    const data = {
+    // const borderWidth = labels.length < 500 ? 2 : 1
+    // const pointRadius =
+    //     labels.length < 500
+    //         ? 2
+    //     : labels.length > 750
+    //         ? 1
+    //     : 0
+    const data: ChartData = {
         labels,
-        normalized: true,
-        parsing: false,
-        spanGaps: false,
         datasets: [ {
+                type: "line",
                 label: "Max",
-                data: maxValues,
-                pointRadius,
-                borderWidth,
-                backgroundColor: red,
-                borderColor: red
+                values: maxValues,
+                // pointRadius,
+                // borderWidth,
+                color: red,
             }, {
+                type: "line",
                 label: "Average",
-                data: avgValues,
-                pointRadius,
-                borderWidth,
-                backgroundColor: green,
-                borderColor: green
+                values: avgValues,
+                // pointRadius,
+                // borderWidth,
+                color: green,
             }, {
+                type: "line",
                 label: "Min",
-                data: minValues,
-                pointRadius,
-                borderWidth,
-                backgroundColor: blue,
-                borderColor: blue
+                values: minValues,
+                // pointRadius,
+                // borderWidth,
+                color: blue,
             }
         ]
     }
 
-    return {
-        type: 'line',
+    let config: ChartConfig = {
+        title: `
+        <span class="inline-box" style="--box-color: ${red};"></span>&nbsp;Max &nbsp;&nbsp;
+        <span class="inline-box" style="--box-color: ${green};"></span>&nbsp;Average &nbsp;&nbsp;
+        <span class="inline-box" style="--box-color: ${blue};"></span>&nbsp;Min`,
         data,
-        options: {}
     }
+    return config
 }
 
-async function weightData() {
+async function weightData(): Promise<ChartConfig | undefined> {
     const startDate = (await api<UserSettings>("user-settings"))?.earliestDate
     if (!startDate) return
     const labels = dateFill(new Date(startDate), new Date())
     const rawValues = await getWeightData(startDate)
     if (!rawValues) return
     const values = rawValues.map(x => x?.weight || null)
-    const pointRadius =
-        labels.length < 500
-            ? 2
-        : 1
-    const data = {
+    const data: ChartData = {
         labels: labels,
-        normalized: true,
-        parsing: false,
-        spanGaps: false,
         datasets: [{
-            label: "Weight",
-            backgroundColor: red,
-            borderColor: red,
-            data: values,
-            pointRadius,
-            borderWidth: 1,
-            showLine: labels.length < 500
+            color: red,
+            type: labels.length < 500 ? 'line' : 'bar',
+            values
         }]
     }
-    const config = {
-        type: 'line',
+    const config: ChartConfig = {
         data,
-        options: {}
+        title: "Weight",
     }
     return config
 }

@@ -49,27 +49,7 @@ const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, stats
     <button id=chart-sleep-btn>Sleep</button>
     <button id=chart-rate-btn>Rate</button>
 </div>
-<div id=charts-location></div>
-
-<template id=chart-weight-template>
-    <div><canvas id=chart-weight></canvas></div>
-</template>
-
-<template id=chart-weight-average-template>
-    <div><canvas id=chart-weight-average></canvas></div>
-</template>
-
-<template id=chart-histogram-template>
-    <div><canvas id=chart-histogram></canvas></div>
-</template>
-
-<template id=chart-sleep-template>
-    <div><canvas id=chart-sleep></canvas></div>
-</template>
-
-<template id=chart-rate-template>
-    <div><canvas id=chart-rate></canvas></div>
-</template>`
+<div id=charts-location></div>`
 
 async function weeksToGo(
     userSettings: UserSettings | undefined,
@@ -160,6 +140,12 @@ const route: Route = {
             main: render(data),
             scripts: ["/web/js/charts-page.js"],
             title: "Charts",
+            head: `<style>.inline-box {
+                display: inline-block;
+                width: 1em;
+                height: .7lh;
+                background: var(--box-color);
+            }</style>`
         })
     }
 }
