@@ -312,3 +312,12 @@ dialog::backdrop {
     min-width: 12em;
 }
 
+.center {
+    display: flex;
+    justify-content: center;
+}
+
+.center-vertical {
+    align-items: center;
+}
+
