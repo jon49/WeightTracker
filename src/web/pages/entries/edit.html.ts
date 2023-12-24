@@ -12,16 +12,8 @@ async function render(query: any) {
     if (!date) {
         date = dateToString(new Date())
     }
-    // {}: FormReturn<WeightData>
-    let data = (await db.get<WeightData | undefined>(date))
-        ?? {
-            date,
-            weight: void 0,
-            waist: void 0,
-            bedtime: void 0,
-            sleep: void 0,
-            comments: void 0
-        }
+    let data = (await db.get<WeightData | undefined>(date)) ?? { date }
+    cleanWeightData(data)
 
     return html`
 <h2>Add/Edit Entry</h2>
@@ -41,7 +33,9 @@ async function render(query: any) {
 `
 }
 
-function getEntryForm({ date, bedtime, sleep, weight, waist, comments } : WeightData) {
+function getEntryForm(o: WeightData) {
+    cleanWeightData(o)
+    let { date, bedtime, sleep, weight, waist, comments } = o
     return html`
 <input name=date type=hidden value=${date}>
 
@@ -108,23 +102,37 @@ const weightDataValidator = {
     wakeUpTime: maybe(createTimeString("Wake Up Time")),
 }
 
+export function cleanWeightData(data: WeightData) {
+    let nil = undefined
+    data.weight ||= nil
+    data.waist ||= nil
+    data.comments ||= nil
+    data.bedtime ||= nil
+    data.sleep ||= nil
+    if (!data.bedtime) {
+        data.sleep = nil
+    }
+}
+
 const postHandlers : RoutePostHandler = {
     async post({ data }) {
         let o = await validateObject(data, weightDataValidator)
 
-        if (!o.bedtime) {
-            o.sleep = undefined
-        }
+        cleanWeightData(o)
 
         await db.set(o.date, o)
         let shouldSyncUserSettings = { sync: false }
         await db.update("user-settings", settings => {
             const earliestDate = settings?.earliestDate
             return !earliestDate
-                ? (shouldSyncUserSettings.sync = true, { ...settings, earliestDate: o.date })
+                ? (shouldSyncUserSettings.sync = true, {
+                    ...settings,
+                    earliestDate: o.date })
                 : new Date(earliestDate) < new Date(o.date)
                     ? settings
-                    : (shouldSyncUserSettings.sync = true, { ...settings, earliestDate: o.date })
+                    : (shouldSyncUserSettings.sync = true, {
+                        ...settings,
+                        earliestDate: o.date })
         }, shouldSyncUserSettings)
 
         return getEntryForm(o)
@@ -139,6 +147,7 @@ const postHandlers : RoutePostHandler = {
             dbData = { date }
         }
         dbData.bedtime = now
+        cleanWeightData(dbData)
         await db.set(dbData.date, dbData)
 
         return getEntryForm(dbData)
@@ -157,6 +166,7 @@ const postHandlers : RoutePostHandler = {
             // time slept (milliseconds) / 1000 (milliseconds) / 60 (seconds) / 60 (hours)
             o.sleep = round((+wakeUpDateTime - +bedtime) / 36e5, 2)
         }
+        cleanWeightData(o)
         await db.set(o.date, o)
         return getWakeUp(o.bedtime, o.sleep)
     }

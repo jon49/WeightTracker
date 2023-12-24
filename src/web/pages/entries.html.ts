@@ -5,10 +5,13 @@ import { get, getMany, WeightData } from "../server/db.js"
 import { Route } from "@jon49/sw/routes.js"
 import { createPositiveNumber, maybe } from "@jon49/sw/validation.js"
 import { validateObject } from "promise-validation"
+import { cleanWeightData } from "./entries/edit.html.js"
 
 interface WeightDataYear extends WeightData { year: string }
 
-function $row({date, weight, bedtime, sleep, waist, comments}: WeightDataYear) {
+function rowView(o: WeightData) {
+    cleanWeightData(o)
+    let {date, weight, bedtime, sleep, waist, comments} = o
     let c : string[] = comments?.split('\n') ?? []
     let comment =
         c.length > 1
@@ -53,7 +56,7 @@ async function render(query: any) {
 
 <table>
     <thead><tr><th>Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><th>Weight</th><th>Bedtime</th><th>Hours Slept</th><th>Waist (cm)</th><th>Comments</th></tr></thead>
-    <tbody>${data.reverse().map($row)}</tbody>
+    <tbody>${data.reverse().map(rowView)}</tbody>
 </table>
 
 <a href="#" class="back-to-top button">Back to Top</a>`
