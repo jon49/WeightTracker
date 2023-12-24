@@ -1,4 +1,4 @@
-import { get as get1, getMany, setMany, set as set1, update as update1 } from "idb-keyval"
+import { get as get1, getMany, setMany, set as set1, update as update1, clear } from "idb-keyval"
 import { Theme } from "../api/settings.js"
 
 const get : DBGet = get1
@@ -40,7 +40,7 @@ async function update(key: string, f: (v: any) => any, sync = { sync: true }) {
     }
 }
 
-export { update, set, get, getMany, setMany }
+export { update, set, get, getMany, setMany, clear }
 
 export interface WeightData {
     date: string

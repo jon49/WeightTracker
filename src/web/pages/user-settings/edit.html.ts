@@ -16,7 +16,13 @@ async function render() {
     return html`
 <h2>User Settings</h2>
 
-<form method=POST action="/web/user-settings/edit?handler=userSettings" onchange="this.requestSubmit()">
+<form method=post action="/web/user-settings/edit?handler=clearData">
+<button>Clear All Data</button>
+</form>
+
+<br>
+
+<form method=post action="/web/user-settings/edit?handler=userSettings" onchange="this.requestSubmit()">
     <input name=earliestDate type=hidden value="${earliestDate}">
     <label>Height (inches):<br>
         <input name=height type=number step=any value="${height ? formatNumber(height) : null}">
@@ -37,6 +43,11 @@ const postHandlers: RoutePostHandler = {
     async userSettings({ data }) {
         let o = await validateObject(data, userSettingsValidator)
         await db.set("user-settings", o)
+        return { status: 204 }
+    },
+
+    async clearData() {
+        await db.clear()
         return { status: 204 }
     }
 }
