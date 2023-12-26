@@ -6,8 +6,7 @@ export default async function sync() {
     if (!isLoggedIn) return { status: 403 }
 
     let keys = await db.updated()
-    // @ts-ignore
-    const items = await getMany(keys.map(x => x[0]))
+    const items = await getMany(keys)
     const data : Data[] = new Array(keys.length)
     for (let index = 0; index < items.length; index++) {
         let key = keys[index]
@@ -41,21 +40,21 @@ export default async function sync() {
 
     let toSaveNewData = []
     for (let saved of newData.data) {
-        let key = parseKey(saved.key)
+        let key = parse(saved.key)
         let data = parse(saved.data)
         data._rev = saved.id
         toSaveNewData.push([key, data])
     }
     await setMany(<any>toSaveNewData)
 
-    let updatedData = await getMany(newData.saved.map(x => parseKey(x.key)))
+    let updatedData = await getMany(newData.saved.map(x => parse(x.key)))
     let updatedRevisionsTask = []
     for (let index = 0; index < updatedData.length; index++) {
         let d = updatedData[index]
         let { key, id } = newData.saved[index]
         if (d) {
             d._rev = id
-            updatedRevisionsTask.push(set(parseKey(key), updatedData[index], false))
+            updatedRevisionsTask.push(set(parse(key), updatedData[index], false))
         } else {
             console.error("Could not find the key to update the revision!", key, id)
         }
@@ -72,16 +71,11 @@ export default async function sync() {
     return { status: 204 }
 }
 
-const isJson = ["[", "{", `"`]
-function parseKey(key: string) {
-    if (isJson.includes(key[0])) {
-        return parse(key)
-    }
-    return key
-}
-
 function parse(value: any) {
-    return JSON.parse(value)
+    return typeof value === "string"
+        && (["{", "[", `"`].includes(value[0]))
+        ? JSON.parse(value)
+    : value
 }
 
 interface Data {
@@ -113,4 +107,5 @@ interface ConflictedDto {
     id: number
     timestamp: string
 }
+
 

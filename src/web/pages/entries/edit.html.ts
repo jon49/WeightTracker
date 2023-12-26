@@ -4,7 +4,7 @@ import layout from "../_layout.html.js"
 import * as db from "../../server/db.js"
 import { WeightData } from "../../server/db.js"
 import { Route, RouteGetHandler, RoutePostHandler } from "@jon49/sw/routes.js"
-import { createDateString, createPositiveNumber, createString50, createTimeString, maybe, reject } from "@jon49/sw/validation.js"
+import { createDateString, createPositiveNumber, createPositiveWholeNumber, createString50, createTimeString, maybe, reject } from "@jon49/sw/validation.js"
 import { validateObject } from "promise-validation"
 
 async function render(query: any) {
@@ -12,7 +12,7 @@ async function render(query: any) {
     if (!date) {
         date = dateToString(new Date())
     }
-    let data = (await db.get<WeightData | undefined>(date)) ?? { date }
+    let data = <WeightData>(await db.get<WeightData | undefined>(date)) ?? { date }
     cleanWeightData(data)
 
     return html`
@@ -23,7 +23,7 @@ async function render(query: any) {
     onchange="this.requestSubmit()">
     <label>Date<br>
     <input name=date type=date required value="${date}"></label>
-    <br><br>
+    <br>
 </form>
 
 <form id=entry-form method=post action="/web/entries/edit" onchange="this.requestSubmit()">
@@ -35,41 +35,41 @@ async function render(query: any) {
 
 function getEntryForm(o: WeightData) {
     cleanWeightData(o)
-    let { date, bedtime, sleep, weight, waist, comments } = o
+    let { date, bedtime, sleep, weight, waist, comments, _rev } = o
     return html`
 <input name=date type=hidden value=${date}>
+<input name=_rev type=hidden value=${_rev}>
 
-<div class=row>
 <label>Weight<br>
 <input name=weight type=number step=any value="${weight}"></label>
-</div>
 <button class=hidden></button>
 
-<div class=row>
+<br>
 ${getBedtime(bedtime)}
+<br>
 ${getWakeUp(bedtime, sleep)}
-</div>
 
-<div class=row>
+<br>
+
 <label>Waist Size (cm)<br>
     <input name=waist type=number step=any value="${waist}">
 </label>
-</div>
 
-<div class=row>
+<br>
+
 <label>Comment
     <elastic-textarea>
         <textarea name=comments>${comments}</textarea>
     </elastic-textarea>
 </label>
-</div>`
+`
 }
 
 function getWakeUp(bedtime: string | undefined, sleep: number | undefined) {
     return !bedtime
         ? null
     : !sleep
-        ? html`<button id=wake-up hf-target="#wake-up" hf-swap=outerHTML formaction="/web/entries/edit?handler=wakeUp">Wake Up</button><br><br>`
+        ? html`<button id=wake-up hf-target="#wake-up" hf-swap=outerHTML formaction="/web/entries/edit?handler=wakeUp">Wake Up</button>`
     : html`
         <label>Hours Slept<br>
             <input id=wake-up-time name=sleep type=number step=any value="${sleep}">
@@ -100,6 +100,7 @@ const weightDataValidator = {
     waist: maybe(createPositiveNumber("Waist")),
     comments: maybe(createString50("Comments")),
     wakeUpTime: maybe(createTimeString("Wake Up Time")),
+    _rev: createPositiveWholeNumber("Revision"),
 }
 
 export function cleanWeightData(data: WeightData) {
@@ -144,7 +145,7 @@ const postHandlers : RoutePostHandler = {
         date ??= dateToString(new Date())
         let dbData = await db.get<WeightData | undefined>(date)
         if (!dbData) {
-            dbData = { date }
+            dbData = { date, _rev: 0 }
         }
         dbData.bedtime = now
         cleanWeightData(dbData)
@@ -175,7 +176,7 @@ const postHandlers : RoutePostHandler = {
 const getHandlers: RouteGetHandler = {
     async date({ query }) {
         let { date } = await validateObject(query, dateValidator)
-        let data = (await db.get<WeightData | undefined>(date)) ?? { date }
+        let data = (await db.get<WeightData | undefined>(date)) ?? { date, _rev: 0 }
         return getEntryForm(data)
     },
 

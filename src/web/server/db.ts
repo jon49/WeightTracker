@@ -4,23 +4,46 @@ import { Theme } from "../api/settings.js"
 const get : DBGet = get1
 
 const _updated =
-    async (key: string) => {
-        await update1("updated", (val?: Map<string, number>) => {
-            if (val instanceof Set) {
-                let temp : Map<string, number> = new Map()
-                Array.from(val).forEach(x => temp.set(x, 0))
-                val = temp
+    async (key: IDBValidKey) => {
+        await update1("updated", (val?: Updated) => {
+            if (Array.isArray(key)) {
+                key = JSON.stringify(key)
             }
-            return (val || new Map()).set(key, Date.now())
+
+            // If key is not string or number then make it a string.
+            if (typeof key !== "string" && typeof key !== "number") {
+                key = key.toString()
+            }
+
+            return (val || new Set).add(key)
         })
     }
 
 function set<K extends keyof DBAccessors>(key: K, value: DBAccessors[K], sync?: boolean): Promise<void>
-function set<T>(key: string, value: T, sync?: boolean): Promise<void>
-async function set(key: string, value: any, sync = true) {
+function set<T>(key: string | any[], value: T, sync?: boolean): Promise<void>
+async function set(key: string | any[], value: any, sync = true) {
+    if (sync && "_rev" in value) {
+        if ("_rev" in value) {
+            await _updated(key)
+        } else {
+            return Promise.reject(`Revision number not specified! For "${key}".`)
+        }
+    }
     await set1(key, value)
-    if (sync) {
-        await _updated(key)
+    return
+}
+
+function update<K extends keyof DBAccessors>(key: K, f: (val: DBAccessors[K]) => DBAccessors[K], options?: { sync: boolean }): Promise<void>
+function update<T>(key: string, f: (val: T) => T, options?: { sync: boolean }): Promise<void>
+async function update(key: string, f: (v: any) => any, options = { sync: true }) {
+    await update1(key, f)
+    if (options.sync) {
+        let o : any = await get(key)
+        if (o && "_rev" in o) {
+            await _updated(key)
+        } else {
+            Promise.reject(`Revision number not found for "${key}".`)
+        }
     }
 }
 
@@ -31,18 +54,9 @@ interface DBAccessors {
     "settings": Settings
 }
 
-function update<K extends keyof DBAccessors>(key: K, f: (val: DBAccessors[K]) => DBAccessors[K], sync?: { sync: boolean }): Promise<void>
-function update<T>(key: string, f: (val: T) => T, sync?: { sync: boolean }): Promise<void>
-async function update(key: string, f: (v: any) => any, sync = { sync: true }) {
-    await update1(key, f)
-    if (sync.sync) {
-        await _updated(key)
-    }
-}
-
 export { update, set, get, getMany, setMany, clear }
 
-export interface WeightData {
+export interface WeightData extends Revision {
     date: string
     weight?: number
     bedtime?: string
@@ -56,19 +70,19 @@ export interface Settings {
     theme?: Theme
 }
 
-export interface UserSettings {
+export interface UserSettings extends Revision {
     earliestDate: string | undefined
     height: number | undefined
     goalWeight: number | undefined
 }
 
 export type DurationUnit = "month" | "year" | "week"
-export interface ChartSettings {
+export interface ChartSettings extends Revision {
     duration: number
     durationUnit: DurationUnit
 }
 
-export type Updated = Map<IDBValidKey, number>
+export type Updated = Set<IDBValidKey>
 
 interface DBGet {
     (key: "user-settings"): Promise<UserSettings | undefined>
@@ -76,6 +90,10 @@ interface DBGet {
     (key: "updated"): Promise<Updated | undefined>
     (key: "settings"): Promise<Settings | undefined>
     <T>(key: string): Promise<T | undefined>
+}
+
+export interface Revision {
+    _rev: number
 }
 
 export type FormReturn<T> = { [key in keyof T]: string|undefined }
