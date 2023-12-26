@@ -27,7 +27,6 @@ async function getChartSettings() {
     return setChartSettingDefaults(chartSettings)
 }
 
-const chartsLocation = getById("charts-location")
 
 const chartFunc = {
     "chart-weight": weightData,
@@ -37,9 +36,30 @@ const chartFunc = {
     "chart-rate": rate,
 }
 
-const charts = new Map()
-const chartButtons = getById("create-chart")
-chartButtons?.addEventListener("click", async ev => {
+let charts: Map<string, any> | null
+let chartButtons: HTMLElement | null
+let chartsLocation: HTMLElement | null
+// @ts-ignore
+window.app.scripts.set("/web/js/charts-page.js", {
+    load: () => {
+        if (charts) return
+        charts = new Map()
+        chartButtons = getById("create-chart")
+        chartsLocation = getById("charts-location")
+        chartButtons?.addEventListener("click", chartButtonClickListener)
+    },
+    unload: () => {
+        for (let chart of charts?.values() ?? []) {
+            chart.destroy()
+        }
+        charts = null
+        chartButtons?.removeEventListener("click", chartButtonClickListener)
+        chartButtons = null
+        chartsLocation = null
+    }
+})
+
+async function chartButtonClickListener(ev: Event) {
     let el = ev.target
     if (!el || !(el instanceof HTMLButtonElement)) return
     el.classList.add("hidden")
@@ -48,7 +68,7 @@ chartButtons?.addEventListener("click", async ev => {
     chartsLocation.prepend(getById(`${baseId}-template`).content.cloneNode(true))
     // @ts-ignore
     charts.set(baseId, new Chart(baseId, await chartFunc[baseId]()))
-})
+}
 
 async function weightAverageChartData() {
     let chartSettings = await getChartSettings()
