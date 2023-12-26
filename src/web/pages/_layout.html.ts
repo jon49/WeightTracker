@@ -36,7 +36,7 @@ const render = async (
     <link rel="icon" type="image/x-icon" href="/web/images/weight.ico">
     <link href="/web/css/index.css" rel=stylesheet>
     <link href="/web/css/app.css" rel=stylesheet>
-    <!--<link rel="manifest" href="/web/manifest.json">-->
+    <link rel="manifest" href="/web/manifest.json">
 </head>
 <body $${when(theme, x => `class=${x}`)} $${bodyAttr}>
     <script> window.app = { scripts: new Map() } </script>
