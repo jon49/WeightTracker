@@ -10,7 +10,8 @@ const postHandlers : RoutePostHandler = {
         switch (result.status) {
             case 200:
                 return {
-                    status: 302
+                    status: 200,
+                    events: "refresh"
                 }
             default:
                 return { status: 204, message: "" }
@@ -21,12 +22,14 @@ const postHandlers : RoutePostHandler = {
         switch (result.status) {
             case 200:
                 return {
-                    status: 302
+                    status: 200,
+                    events: "refresh"
                 }
             case 204:
                 return {
                     message: "Synced!",
-                    response: null
+                    response: null,
+                    events: "refresh"
                 }
             case 401:
             case 403:

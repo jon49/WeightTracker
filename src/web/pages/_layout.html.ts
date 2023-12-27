@@ -80,9 +80,16 @@ const render = async (
 
     <footer><p>${version}</p></footer>
 
-    <form id=href hf-select="title,#head,#nav-main,main,#errors,#toasts,#scripts">
+    <form
+        id=href
+
+        is=form-subscribe
+        data-event="refresh"
+
+        hf-select="title,#head,#nav-main,main,#errors,#toasts,#scripts">
         <button id=href-nav class=hidden></button>
     </form>
+
     <form
         id=get-sync-count-form
         action="/web/api/sync?handler=count"
