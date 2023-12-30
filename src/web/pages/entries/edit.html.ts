@@ -4,7 +4,7 @@ import layout from "../_layout.html.js"
 import * as db from "../../server/db.js"
 import { WeightData } from "../../server/db.js"
 import { Route, RouteGetHandler, RoutePostHandler } from "@jon49/sw/routes.js"
-import { createDateString, createPositiveNumber, createPositiveWholeNumber, createString50, createTimeString, maybe, reject } from "@jon49/sw/validation.js"
+import { createDateString, createPositiveNumber, createPositiveWholeNumber, createStringInfinity, createTimeString, maybe, reject } from "@jon49/sw/validation.js"
 import { validateObject } from "promise-validation"
 
 async function render(query: any) {
@@ -98,7 +98,7 @@ const weightDataValidator = {
     bedtime: maybe(createTimeString("Bedtime")),
     sleep: maybe(createPositiveNumber("Sleep")),
     waist: maybe(createPositiveNumber("Waist")),
-    comments: maybe(createString50("Comments")),
+    comments: maybe(createStringInfinity("Comments")),
     wakeUpTime: maybe(createTimeString("Wake Up Time")),
     _rev: createPositiveWholeNumber("Revision"),
 }
