@@ -5,6 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "./tasks/start.nu dev",
+    "serve": "./tasks/start.nu server",
     "build": "./tasks/start.nu prod",
     "check": "tsc --noEmit"
   },
