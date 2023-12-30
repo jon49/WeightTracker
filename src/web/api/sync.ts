@@ -60,4 +60,3 @@ const router: Route = {
 
 export default router
 
-
