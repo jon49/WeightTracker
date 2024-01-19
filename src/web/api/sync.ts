@@ -11,7 +11,7 @@ const postHandlers : RoutePostHandler = {
             case 200:
                 return {
                     status: 200,
-                    events: "refresh"
+                    events: { refresh: true }
                 }
             default:
                 return { status: 204, message: "" }
@@ -23,13 +23,13 @@ const postHandlers : RoutePostHandler = {
             case 200:
                 return {
                     status: 200,
-                    events: "refresh"
+                    events: { refresh: true }
                 }
             case 204:
                 return {
                     message: "Synced!",
                     response: null,
-                    events: "refresh"
+                    events: { refresh: true }
                 }
             case 401:
             case 403:

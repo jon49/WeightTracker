@@ -87,7 +87,6 @@ const render = async (
         data-event="refresh"
 
         hf-select="title,#head,#nav-main,main,#errors,#toasts,#scripts">
-        <button id=href-nav class=hidden></button>
     </form>
 
     <form
