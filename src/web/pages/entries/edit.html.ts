@@ -10,6 +10,11 @@ import { validateObject } from "promise-validation"
 async function render(query: any) {
     let { date } = await validateObject(query, { date: maybe(createDateString("Query Date")) })
     if (!date) {
+        let d = new Date()
+        // If it's after 8 PM then set to the next day
+        if (d.getHours() >= 20) {
+            d.setDate(d.getDate() + 1)
+        }
         date = dateToString(new Date())
     }
     let data = <WeightData>(await db.get<WeightData | undefined>(date)) ?? { date }
