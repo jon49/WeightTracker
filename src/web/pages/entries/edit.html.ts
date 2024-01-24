@@ -15,7 +15,7 @@ async function render(query: any) {
         if (d.getHours() >= 20) {
             d.setDate(d.getDate() + 1)
         }
-        date = dateToString(new Date())
+        date = dateToString(d)
     }
     let data = <WeightData>(await db.get<WeightData | undefined>(date)) ?? { date }
     cleanWeightData(data)
