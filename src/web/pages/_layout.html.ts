@@ -100,7 +100,7 @@ const render = async (
         hf-scroll-ignore
         hf-target="#sync-count"></form>
 
-    <script src="/web/js/app.js"></script>
+    <script src="/web/js/app.bundle.js"></script>
     <div id=scripts>${(scripts ?? []).map(x => html`<script src="${x}"></script>`)}</div>
 </body>
 </html>`

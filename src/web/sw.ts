@@ -1,10 +1,6 @@
-import "./service-worker/routes.js"
-import links from "./entry-points.js"
-// import staticFiles from "./static-files.js"
 import { version } from "./server/settings.js"
 import { ValidationResult } from "promise-validation"
 import { getResponse, options } from "@jon49/sw/routes.js"
-import { routes } from "./service-worker/routes.js"
 
 self.addEventListener('message', async function (event) {
     if (event.data === "skipWaiting") {
@@ -19,7 +15,8 @@ self.addEventListener("install", (e: Event) => {
     // @ts-ignore
     e.waitUntil(caches.open(version).then(async cache => {
         console.log("Caching files.")
-        return cache.addAll(links.map(x => x.file)/*.concat(staticFiles)*/)
+        // @ts-ignore
+        return cache.addAll(self.app.links.map(x => x.file))
     }))
 
 })
@@ -34,11 +31,8 @@ function handleErrors(errors: any) {
 
 // @ts-ignore
 self.addEventListener("fetch", (e: FetchEvent) => {
-    if (!options.links) {
+    if (!options.handleErrors) {
         options.handleErrors = handleErrors
-        options.version = version
-        options.links = links
-        options.routes = routes
     }
     e.respondWith(getResponse(e))
 })
