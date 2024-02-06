@@ -1,6 +1,8 @@
-import { version } from "./server/settings.js"
 import { ValidationResult } from "promise-validation"
 import { getResponse, options } from "@jon49/sw/routes.js"
+
+// @ts-ignore
+let version: string = self.app?.version ?? "unknown"
 
 self.addEventListener('message', async function (event) {
     if (event.data === "skipWaiting") {
@@ -48,7 +50,6 @@ self.addEventListener("activate", async (e: ExtendableEvent) => {
         .filter(x => x)
     if (deleteMe.length === 0) return
     e.waitUntil(Promise.all(deleteMe))
-
 })
 
 self.addEventListener('message', event => {

@@ -1,9 +1,12 @@
 import html from "html-template-tag-stream"
-import { version } from "../server/settings.js"
 import db from "../server/global-model.js"
 import { syncCountView } from "../api/sync.js"
 import { themeView } from "../api/settings.js"
 import { when } from "@jon49/sw/utils.js"
+
+let {
+    version
+} = self.app
 
 interface Nav {
     name: string
