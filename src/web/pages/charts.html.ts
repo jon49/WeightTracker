@@ -158,7 +158,7 @@ const route: Route = {
         let data = await setupStats()
         return layout({
             main: render(data),
-            scripts: ["/web/js/charts-page.js"],
+            scripts: ["/web/js/charts-page.bundle.js"],
             title: "Charts",
         })
     }

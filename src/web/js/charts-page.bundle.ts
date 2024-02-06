@@ -27,7 +27,6 @@ async function getChartSettings() {
     return setChartSettingDefaults(chartSettings)
 }
 
-
 const chartFunc = {
     "chart-weight": weightData,
     "chart-weight-average": weightAverageChartData,
@@ -40,7 +39,7 @@ let charts: Map<string, any> | null
 let chartButtons: HTMLElement | null
 let chartsLocation: HTMLElement | null
 // @ts-ignore
-window.app.scripts.set("/web/js/charts-page.js", {
+window.app.scripts.set("/web/js/charts-page.bundle.js", {
     load: () => {
         if (charts) return
         charts = new Map()
