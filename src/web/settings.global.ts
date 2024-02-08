@@ -1,6 +1,5 @@
 import sync from "./api/sync.js"
 import { Route } from "@jon49/sw/routes.js"
-import chartEditHandler from "./pages/charts/edit.html.js"
 import userSettingsEditHandler from "./pages/user-settings/edit.html.js"
 import localSettings from "./api/settings.js"
 import apis from "./pages/api/apis.js"
@@ -11,8 +10,9 @@ const routes : Route[] = [
     ...apis,
     sync,
     localSettings,
-    chartEditHandler,
     userSettingsEditHandler,
+    { route: /\/charts\/edit\/$/,
+      file: "/web/pages/charts/edit.page.js" },
     { route: /\/charts\/$/,
       file: "/web/pages/charts.page.js",},
     { route: /\/entries\/edit\/$/,

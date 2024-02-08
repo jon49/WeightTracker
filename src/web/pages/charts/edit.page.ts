@@ -1,10 +1,13 @@
-import { formatNumber, isSelected, toNumber } from "../../js/utils.js"
-import html from "html-template-tag-stream"
-import layout from "../_layout.html.js"
-import * as db from "../../server/db.js"
-import { Route } from "@jon49/sw/routes.js"
-import { validateObject } from "promise-validation"
-import { createPositiveNumber, createPositiveWholeNumber, createString25 } from "@jon49/sw/validation.js"
+import { RoutePage } from "@jon49/sw/routes.js"
+import { ChartSettings } from "../../server/db.js"
+
+let {
+    db,
+    html,
+    layout,
+    utils: { formatNumber, isSelected, toNumber },
+    validation: { createPositiveNumber, createPositiveWholeNumber, createString25, validateObject },
+} = self.app
 
 const units = ["month", "year", "week"] as const
 export type DurationUnit = typeof units[number]
@@ -34,8 +37,7 @@ let settingsValidator = {
     _rev: createPositiveWholeNumber("_rev")
 }
 
-const route: Route = {
-    route: /\/charts\/edit\/$/,
+const route: RoutePage = {
     async get() {
         return layout({
             main: await render(),
@@ -49,7 +51,7 @@ const route: Route = {
         const duration = toNumber(o.duration) || 9
         const maybeDurationUnit = o.durationUnit
         const durationUnit = units.find(x => x === maybeDurationUnit) ?? "month"
-        const settings: db.ChartSettings = { duration, durationUnit, _rev: o._rev }
+        const settings: ChartSettings = { duration, durationUnit, _rev: o._rev }
         await db.set("chart-settings", settings)
         return { status: 204 }
     }
