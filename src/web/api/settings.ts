@@ -5,7 +5,6 @@ import db from "../server/global-model.js"
 const themes = ["dark", "light", "neither"] as const
 export type Theme = typeof themes[number]
 
-
 const defaultTheme = "⛅",
     lightTheme = "&#127774;",
     darkTheme = "&#127762;"

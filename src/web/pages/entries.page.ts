@@ -1,11 +1,13 @@
-import { dateFill, dateToString } from "../js/utils.js"
-import html from "html-template-tag-stream"
-import layout from "./_layout.html.js"
-import { get, getMany, WeightData } from "../server/db.js"
-import { Route } from "@jon49/sw/routes.js"
-import { createPositiveNumber, maybe } from "@jon49/sw/validation.js"
-import { validateObject } from "promise-validation"
-import { cleanWeightData } from "./entries/edit.html.js"
+import { WeightData } from "../server/db.js"
+import { RoutePage } from "@jon49/sw/routes.js"
+
+let {
+    html,
+    layout,
+    db: { get, getMany },
+    utils: { dateFill, dateToString, cleanWeightData },
+    validation: { createPositiveNumber, maybe, validateObject },
+} = self.app
 
 interface WeightDataYear extends WeightData { year: string }
 
@@ -108,8 +110,7 @@ interface TableData {
     data: WeightData[]
 }
 
-const route: Route = {
-    route: /\/entries\/$/,
+const route: RoutePage = {
     async get({ query }) {
         return layout({
             main: await render(query),

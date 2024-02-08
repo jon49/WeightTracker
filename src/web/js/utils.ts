@@ -1,3 +1,17 @@
+import { WeightData } from "../server/db.js"
+
+export function cleanWeightData(data: WeightData) {
+    let nil = undefined
+    data.weight ||= nil
+    data.waist ||= nil
+    data.comments ||= nil
+    data.bedtime ||= nil
+    data.sleep ||= nil
+    if (!data.bedtime) {
+        data.sleep = nil
+    }
+}
+
 export function dateAdd(date: Date, value: number, mutate = false) {
     let newDate = mutate ? date : new Date(date)
     newDate.setDate(date.getDate() + value)

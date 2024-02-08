@@ -1,11 +1,13 @@
-import { dateToString, round } from "../../js/utils.js"
-import html from "html-template-tag-stream"
-import layout from "../_layout.html.js"
-import * as db from "../../server/db.js"
 import { WeightData } from "../../server/db.js"
-import { Route, RouteGetHandler, RoutePostHandler } from "@jon49/sw/routes.js"
-import { createDateString, createPositiveNumber, createPositiveWholeNumber, createStringInfinity, createTimeString, maybe, reject } from "@jon49/sw/validation.js"
-import { validateObject } from "promise-validation"
+import { Route, RouteGetHandler, RoutePage, RoutePostHandler } from "@jon49/sw/routes.js"
+
+let {
+    db,
+    html,
+    layout,
+    utils: { cleanWeightData, dateToString, round },
+    validation: { createDateString, createPositiveNumber, createPositiveWholeNumber, createStringInfinity, createTimeString, maybe, reject, validateObject },
+} = self.app
 
 async function render(query: any) {
     let { date } = await validateObject(query, { date: maybe(createDateString("Query Date")) })
@@ -110,18 +112,6 @@ const weightDataValidator = {
     _rev: createPositiveWholeNumber("Revision"),
 }
 
-export function cleanWeightData(data: WeightData) {
-    let nil = undefined
-    data.weight ||= nil
-    data.waist ||= nil
-    data.comments ||= nil
-    data.bedtime ||= nil
-    data.sleep ||= nil
-    if (!data.bedtime) {
-        data.sleep = nil
-    }
-}
-
 const postHandlers : RoutePostHandler = {
     async post({ data }) {
         let o = await validateObject(data, weightDataValidator)
@@ -195,8 +185,7 @@ const getHandlers: RouteGetHandler = {
     },
 }
 
-const routes : Route = {
-    route: /\/entries\/edit\/$/,
+const routes : RoutePage = {
     get: getHandlers,
     post: postHandlers
 }
