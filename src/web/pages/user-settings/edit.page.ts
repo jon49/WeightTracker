@@ -1,11 +1,17 @@
-import { formatNumber } from "../../js/utils.js"
-import html from "html-template-tag-stream"
-import layout from "../_layout.html.js"
-import * as db from "../../server/db.js"
 import { UserSettings, Settings } from "../../server/db.js"
-import { Route, RoutePostHandler } from "@jon49/sw/routes.js"
-import { createDateString, createPositiveNumber, maybe } from "@jon49/sw/validation.js"
-import { validateObject } from "promise-validation"
+import { RoutePage, RoutePostHandler } from "@jon49/sw/routes.js"
+
+const {
+    db,
+    html,
+    layout,
+    utils: { formatNumber },
+    validation: {
+        createDateString,
+        createPositiveNumber,
+        maybe,
+        validateObject },
+} = self.app
 
 async function render() {
     let [userSettings, settings] =
@@ -52,8 +58,7 @@ const postHandlers: RoutePostHandler = {
     }
 }
 
-const route: Route = {
-    route: /\/user-settings\/edit\/$/,
+const route: RoutePage = {
     async get() {
         return layout({
             main: await render(),
