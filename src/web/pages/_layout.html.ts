@@ -1,10 +1,23 @@
 import html from "html-template-tag-stream"
 import db from "../server/global-model.js"
 import { syncCountView } from "../api/sync.js"
-import { themeView } from "../api/settings.js"
 import { when } from "@jon49/sw/utils.js"
+import { Theme } from "../api/settings.page.js"
 
-let {
+const defaultTheme = "⛅",
+    lightTheme = "&#127774;",
+    darkTheme = "&#127762;"
+
+export function themeView(theme: Theme | undefined) {
+    let image = theme === "light"
+        ? lightTheme
+        : theme === "dark"
+            ? darkTheme
+            : defaultTheme
+    return html`<button class="bg">$${image}</button>`
+}
+
+const {
     version
 } = self.app
 

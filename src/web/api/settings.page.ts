@@ -1,22 +1,12 @@
-import html from "html-template-tag-stream"
-import { Route, RoutePostHandler } from "@jon49/sw/routes.js"
-import db from "../server/global-model.js"
+import { RoutePage, RoutePostHandler } from "@jon49/sw/routes.js"
+
+const {
+    globalDb: db,
+    page: { themeView },
+} = self.app
 
 const themes = ["dark", "light", "neither"] as const
 export type Theme = typeof themes[number]
-
-const defaultTheme = "⛅",
-    lightTheme = "&#127774;",
-    darkTheme = "&#127762;"
-
-export function themeView(theme: Theme | undefined) {
-    let image = theme === "light"
-        ? lightTheme
-        : theme === "dark"
-            ? darkTheme
-            : defaultTheme
-    return html`<button class="bg">$${image}</button>`
-}
 
 const postHandlers: RoutePostHandler = {
     async theme({ req }) {
@@ -42,8 +32,7 @@ const postHandlers: RoutePostHandler = {
     }
 }
 
-const route: Route = {
-    route: /\/api\/settings\/$/,
+const route: RoutePage = {
     post: postHandlers
 }
 

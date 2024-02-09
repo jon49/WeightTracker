@@ -1,5 +1,5 @@
-import { Theme } from "../api/settings.js";
-import { Settings, get, set, update } from "./db.js";
+import { Theme } from "../api/settings.page.js"
+import { Settings, get, set, update } from "./db.js"
 
 function parseKey(key: unknown): string | number {
     return typeof key === "string" && key.startsWith("[")
