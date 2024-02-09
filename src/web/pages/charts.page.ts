@@ -157,7 +157,6 @@ interface StatsData {
 }
 
 const route: RoutePage = {
-    route: /\/charts\/$/,
     get: async () => {
         let data = await setupStats()
         return layout({
