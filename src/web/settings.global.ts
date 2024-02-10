@@ -1,4 +1,3 @@
-import sync from "./api/sync.js"
 import { Route } from "@jon49/sw/routes.js"
 import apis from "./pages/api/apis.js"
 
@@ -6,9 +5,10 @@ self.app = self.app || {}
 
 const routes : Route[] = [
     ...apis,
-    sync,
+    { route: /\/api\/sync\/$/,
+      file: "/web/api/sync.page.js" },
     { route: /\/api\/settings\/$/,
-      file: "/web/pages/api/settings.page.js" },
+      file: "/web/api/settings.page.js" },
     { route: /\/user-settings\/edit\/$/,
       file: "/web/pages/user-settings/edit.page.js" },
     { route: /\/charts\/edit\/$/,

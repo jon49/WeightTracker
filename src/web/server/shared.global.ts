@@ -1,4 +1,4 @@
-import layout, { themeView } from "../pages/_layout.html.js"
+import layout, { themeView, syncCountView } from "../pages/_layout.html.js"
 import globalDb from "./global-model.js"
 import * as utils from "@jon49/sw/utils.js"
 import html from "html-template-tag-stream"
@@ -16,7 +16,7 @@ let app = {
     globalDb,
     html,
     layout,
-    page: { themeView },
+    page: { themeView, syncCountView },
     utils: { ...utils, ...localUtils },
     validation: { ...validation, ...validators },
 }

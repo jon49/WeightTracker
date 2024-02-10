@@ -1,8 +1,10 @@
-import html from "html-template-tag-stream"
-import { Route, RoutePostHandler } from "@jon49/sw/routes.js"
+import { RoutePage, RoutePostHandler } from "@jon49/sw/routes.js"
 import sync from "../server/sync.js"
-import db from "../server/global-model.js"
-import { when } from "@jon49/sw/utils.js"
+
+const {
+    globalDb: db,
+    page: { syncCountView },
+} = self.app
 
 const postHandlers : RoutePostHandler = {
     async post() {
@@ -45,12 +47,7 @@ const postHandlers : RoutePostHandler = {
     }
 }
 
-export function syncCountView(count: number) {
-    return html`&#128259; ${when(count, count => html`(${count})`)}`
-}
-
-const router: Route = {
-    route: /\/api\/sync\/$/,
+const router: RoutePage = {
     get: async () => {
         let updated = await db.updated()
         return syncCountView(updated.length)

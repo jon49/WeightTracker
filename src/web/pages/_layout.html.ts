@@ -1,6 +1,5 @@
 import html from "html-template-tag-stream"
 import db from "../server/global-model.js"
-import { syncCountView } from "../api/sync.js"
 import { when } from "@jon49/sw/utils.js"
 import { Theme } from "../api/settings.page.js"
 
@@ -15,6 +14,10 @@ export function themeView(theme: Theme | undefined) {
             ? darkTheme
             : defaultTheme
     return html`<button class="bg">$${image}</button>`
+}
+
+export function syncCountView(count: number) {
+    return html`&#128259; ${when(count, count => html`(${count})`)}`
 }
 
 const {
