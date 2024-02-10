@@ -41,8 +41,6 @@ async function update(key: string, f: (v: any) => any, options = { sync: true })
         let o : any = await get(key)
         if (o && "_rev" in o) {
             await _updated(key)
-        } else {
-            Promise.reject(`Revision number not found for "${key}".`)
         }
     }
 }
