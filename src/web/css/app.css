@@ -28,7 +28,7 @@ body {
     transition: background-color var(--main-transition), color var(--main-transition);
 }
 
-media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) {
     :root {
         --main-bg-color: #333;
         --main-text-color: #f0f0f0;
