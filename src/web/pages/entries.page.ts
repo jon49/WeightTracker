@@ -52,7 +52,7 @@ async function render(query: any) {
     return html`
 <h2 id="top">Entries</h2>
 
-<div class=date-list>
+<div class="flex justify-start wrap">
     ${years.reverse().map((year: string) => html`<a href="/web/entries?year=${year}">${year}</a>`)}
 </div>
 
@@ -61,7 +61,7 @@ async function render(query: any) {
     <tbody>${data.reverse().map(rowView)}</tbody>
 </table>
 
-<a href="#" class="back-to-top button">Back to Top</a>`
+<a href="#" class="fix bottom-10 button">Back to Top</a>`
 
 }
 

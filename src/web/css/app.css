@@ -1,323 +1,249 @@
 :root {
-  --card-width: 150px;
+    --main-bg-color: #f0f0f0;
+    --main-text-color: #333;
+    --main-link-color: #00f;
+    --main-link-hover-color: #00a;
+    --main-link-visited-color: #551a8b;
+    --main-link-visited-hover-color: #551a8b;
+    --main-border-color: #ccc;
+    --main-border-radius: 5px;
+    --main-box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    --main-transition: 0.3s;
+    /* https://css-tricks.com/linearly-scale-font-size-with-css-clamp-based-on-the-viewport/ */
+    --font-size: clamp(1rem, 0.1818rem + 3.6364vw, 1.75rem);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
+    font-family: sans-serif;
     max-width: 800px;
     margin: 0 auto;
-    overflow-x: scroll;
-    -webkit-overflow-scrolling: touch;
+    padding: 0 1em 20em 1em;
+    background-color: var(--main-bg-color);
+    color: var(--main-text-color);
+    font-size: var(--font-size);
+    transition: background-color var(--main-transition), color var(--main-transition);
 }
 
-.editable {
-    position: absolute;
-    right: 100%;
+media (prefers-color-scheme: dark) {
+    :root {
+        --main-bg-color: #333;
+        --main-text-color: #f0f0f0;
+        --main-link-color: #0ff;
+        --main-link-hover-color: #0aa;
+        --main-link-visited-color: #a81a55;
+        --main-link-visited-hover-color: #a81a55;
+        --main-border-color: #666;
+        --main-box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+    }
 }
 
-.editable:focus {
-    position: inherit;
+body.light {
+    --main-bg-color: #f0f0f0;
+    --main-text-color: #333;
+    --main-link-color: #00f;
+    --main-link-hover-color: #00a;
+    --main-link-visited-color: #551a8b;
+    --main-link-visited-hover-color: #551a8b;
+    --main-border-color: #ccc;
+    --main-box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
 
-.editable + label {
+body.dark {
+    --main-bg-color: #333;
+    --main-text-color: #f0f0f0;
+    --main-link-color: #0ff;
+    --main-link-hover-color: #0aa;
+    --main-link-visited-color: #a81a55;
+    --main-link-visited-hover-color: #a81a55;
+    --main-border-color: #666;
+    --main-box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+}
+
+a {
+    color: var(--main-link-color);
+    text-decoration: none;
+    transition: color var(--main-transition);
+    &:hover {
+        color: var(--main-link-hover-color);
+    }
+    &:visited {
+        color: var(--main-link-color);
+    }
+    &:visited:hover {
+        color: var(--main-link-visited-hover-color);
+    }
+    &:focus {
+        outline: 2px solid var(--main-link-color);
+    }
+}
+
+button, input[type="submit"], input[type="reset"], input[type="button"], .button {
+    background-color: var(--main-bg-color);
     cursor: pointer;
+    color: var(--main-text-color);
+    border: 1px solid var(--main-border-color);
+    border-radius: var(--main-border-radius);
+    box-shadow: var(--main-box-shadow);
+    padding: 0.5em 1em;
+    font-size: var(--font-size);
+    transition: background-color var(--main-transition), color var(--main-transition);
+    &:hover {
+        background-color: var(--main-border-color);
+    }
+    &:focus {
+        outline: 2px solid var(--main-link-color);
+    }
 }
 
-.editable:focus + label {
+input[type="reset"] {
+    background-color: var(--main-text-color);
+    color: var(--main-bg-color);
+}
+
+header {
+    nav {
+        border-bottom: 1px solid var(--main-border-color);
+    }
+}
+
+nav {
+    background-color: var(--main-bg-color);
+    color: var(--main-text-color);
+    ul {
+        list-style-type: none;
+        padding: 0;
+        display: flex;
+        justify-content: space-between;
+        li {
+            a {
+                color: var(--main-link-color);
+                text-decoration: none;
+                transition: color var(--main-transition);
+                &:hover {
+                    color: var(--main-link-hover-color);
+                }
+                &:visited {
+                    color: var(--main-link-visited-color);
+                }
+                &:visited:hover {
+                    color: var(--main-link-visited-hover-color);
+                }
+                &:focus {
+                    outline: 2px solid var(--main-link-color);
+                }
+            }
+        }
+    }
+}
+
+input, textarea {
+    background-color: var(--main-bg-color);
+    color: var(--main-text-color);
+    border: 1px solid var(--main-border-color);
+    border-radius: var(--main-border-radius);
+    box-shadow: var(--main-box-shadow);
+    display: block;
+    padding: 0.5em;
+    margin-top: 0.2em;
+    font-size: var(--font-size);
+    transition: background-color var(--main-transition), color var(--main-transition);
+    &:focus {
+        outline: 2px solid var(--main-link-color);
+    }
+}
+
+select {
+    background-color: var(--main-bg-color);
+    color: var(--main-text-color);
+    border: 1px solid var(--main-border-color);
+    border-radius: var(--main-border-radius);
+    box-shadow: var(--main-box-shadow);
+    display: block;
+    padding: 0.5em;
+    margin-top: 0.2em;
+    font-size: var(--font-size);
+    transition: background-color var(--main-transition), color var(--main-transition);
+    &:focus {
+        outline: 2px solid var(--main-link-color);
+    }
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5em;
+}
+
+button {
+    display: block;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+header {
+    margin-top: 1em;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 1em;
+    th, td {
+        border: 1px solid var(--main-border-color);
+        padding: 0.5em;
+    }
+    th {
+        background-color: var(--main-border-color);
+    }
+}
+
+.hidden {
     display: none;
 }
 
-.editable-pencil {
-    display: inline-block;
-    transform: rotate(90deg);
+.flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1em;
 }
 
-/** Overrides */
-
-:root {
- --sans: Georgia, "Times New Roman", Times, serif;
+.justify-start {
+    justify-content: flex-start;
 }
 
-@media (prefers-color-scheme: dark) {
- :root { --c1:#87c2f6; --c2:#333; --c4:#eee; }
-}
-
-.light {
-  --c1:#0074d9;
-  --c2:#ddd;
-  --c3:#eee;
-  --c4:#333;
-}
-
-.dark {
-  --c1:#87c2f6;
-  --c2:#333;
-  --c3:#1e1f20;
-  --c4:#eee;
-}
-
-/* Fixes an issue where dialog doesn't inherit the color properly. */
-h1, h2, h3, h4, h5, h6 {
-    color: var(--c4);
-}
-
-.form {
-    border: 1px solid black;
-    margin: 5px 0;
-    padding: 1em;
-}
-
-form > div {
-  padding: 10px 0;
-}
-
-input, select, textarea {
-  font-size: inherit;
-  display: block;
-  margin-top: 5px;
-}
-
-.button, button, input[type=submit], input[type=reset] {
-  margin-top: 4px;
-}
-
-/* Cards */
-
-.cards, .row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(var(--card-width), 1fr));
-    grid-gap: 0.5em;
-    padding-bottom: 2em;
-}
-
-.cards > * {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: var(--rc);
-  padding: 1em;
-  box-shadow: 0px 1px 0px rgba(0,0,0,0.3);
-}
-
-.grid-center {
-    justify-items: center;
-}
-
-input {
-    max-width: 100%;
-}
-
-.cards input {
-    background-color: rgba(0, 0, 0, 0.1);
-}
-
-/**
-Custom
-*/
-
-body {
- padding-bottom: 50%;
-}
-
-header, main,footer {
-  margin: 0 auto;
-  /* width: 60%; */
-  max-width: 800px;
-  text-align: left;
-  padding: 1em;
-}
-
-aside {
-  color: #fff;
-  background-color: var(--c1);
-  padding: 15px;
-  margin: 10px 8px 10px 8px;
-  text-align: center;
-}
-
-@media (max-width: 481px) {
-  main,footer {width: 98%}
-  .cards>div,aside,article {flex:none; width:100%; margin-left: 0;}
-  header { padding: 1em; width: 100%; }
-}
-
-.highlight { background-color: coral; }
-
-.cursor-pointer {
- cursor: pointer;
+.wrap {
+    flex-wrap: wrap;
 }
 
 .inline {
     display: inline-block;
 }
 
-a.external {
-    background-image: url(/images/external-link.svg);
-    background-position: center right;
-    background-repeat: no-repeat;
-    padding-right: 20px;
+.fix {
+    position: fixed;
+    z-index: 1000;
 }
 
-.reverse {
-    display: flex;
-    flex-direction: row-reverse;
-}
-
-[draggable] {
-    cursor: move;
-}
-
-.message {
-    margin: 0;
-    padding: 0.25em;
-    font-size: 2em;
-}
-
-.error {
-  color: red;
+.bottom-10 {
+    bottom: 10px;
 }
 
 .toast {
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: var(--main-bg-color);
     backdrop-filter: blur(5px);
+    color: var(--main-text-color);
+    border: 1px solid var(--main-border-color);
+    border-radius: var(--main-border-radius);
+    box-shadow: var(--main-box-shadow);
+    padding: 0.5em;
+    font-size: var(--font-size);
+    transition: background-color var(--main-transition), color var(--main-transition);
     max-width: 80vw;
-    border-radius: 1rem;
     position: fixed;
     bottom: 1rem;
-}
-
-footer {
-    font-size: 0.65em;
-}
-
-.hidden {
-    display: none !important;
-}
-
-textarea {
-  width: 100%;
-}
-
-.back-to-top {
-  position: fixed;
-  bottom: 10px;
-}
-
-
-.sync {
-  display: flex;
-  align-items: center;
-}
-
-h1 {
-  margin-right: 0.25em;
-}
-
-h2 {
-  margin-top: 0;
-}
-
-header {
-  padding-bottom: 0;
-}
-
-.list {
-    list-style-type: none;
-    display: table;
-    padding: 0;
-}
-
-.list > li {
-    display: table-row;
-}
-
-.list > li > :not([hidden]) {
-    display: table-cell;
-    padding: 5px 10px!important;
-}
-
-/** Fancy Checkbox **/
-
-.toggle > [type="checkbox"],
-.on,
-input:checked ~ .off,
-input:indeterminate ~ .off,
-.none {
-  display: none;
-}
-
-.off {
-  background-color: firebrick;
-}
-
-input:checked ~ .on {
-  display: inline-block;
-  background-color: green;
-}
-
-input:indeterminate ~ .none {
-  display: inline-block;
-}
-
-.bg {
-  background-color: var(--c2) !important;
-}
-
-button.anchor {
-    background: none;
-    margin: 0;
-    padding: 0;
-    color: var(--c1);
-    font-family: inherit;
-}
-
-button.anchor:hover {
-  text-decoration: underline;
-}
-
-.float-right {
-    float: right;
-}
-
-.full-width {
-    width: 100%;
-}
-
-nav li {
-    display: inline-block;
-    margin: 0 0.5em;
-}
-
-/** Dialog **/
-
-dialog.modal {
-    background-color: var(--c2);
-    color: var(--c4);
-    border-radius: 0.5em;
-    padding: 1em;
-    width: 100%;
-    max-width: 800px;
-    overflow: auto;
-}
-
-dialog::backdrop {
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    overflow-x: auto;
-}
-
-.header > div {
-    min-width: 12em;
-}
-
-.center {
-    display: flex;
-    justify-content: center;
-}
-
-.center-vertical {
-    align-items: center;
 }
 

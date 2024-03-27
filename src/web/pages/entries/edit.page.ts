@@ -30,9 +30,8 @@ async function render(query: any) {
     action="/web/entries/edit?handler=date"
     hf-target="#entry-form"
     onchange="app.updateUrl('${url}' + this.date.value); this.requestSubmit()">
-    <label>Date<br>
+    <label>Date
     <input name=date type=date required value="${date}"></label>
-    <br>
 </form>
 
 <form id=entry-form method=post action="/web/entries/edit" onchange="this.requestSubmit()">
@@ -49,22 +48,16 @@ function getEntryForm(o: WeightData) {
 <input name=date type=hidden value=${date}>
 <input name=_rev type=hidden value=${_rev}>
 
-<label>Weight<br>
+<label>Weight
 <input name=weight type=number step=any value="${weight}"></label>
 <button class=hidden></button>
 
-<br>
 ${getBedtime(bedtime)}
-<br>
 ${getWakeUp(bedtime, sleep)}
 
-<br>
-
-<label>Waist Size (cm)<br>
+<label>Waist Size (cm)
     <input name=waist type=number step=any value="${waist}">
 </label>
-
-<br>
 
 <label>Comment
     <elastic-textarea>
@@ -80,7 +73,7 @@ function getWakeUp(bedtime: string | undefined, sleep: number | undefined) {
     : !sleep
         ? html`<button id=wake-up hf-target="#wake-up" hf-swap=outerHTML formaction="/web/entries/edit?handler=wakeUp">Wake Up</button>`
     : html`
-        <label>Hours Slept<br>
+        <label>Hours Slept
             <input id=wake-up-time name=sleep type=number step=any value="${sleep}">
         </label>`
 }
@@ -92,7 +85,7 @@ function getBedtime(bedtime: string | undefined) {
         </button>`
     }
     return html`
-    <label>Bedtime${bedtime?.endsWith("M") ? ` (${bedtime})` : ""}<br>
+    <label>Bedtime${bedtime?.endsWith("M") ? ` (${bedtime})` : ""}
         <input style="min-width:214px" name=bedtime type=time value="${bedtime}">
     </label>`
 }

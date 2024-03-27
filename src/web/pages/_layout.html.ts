@@ -53,7 +53,6 @@ const render = async (
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title} - Weight</title>
     <link rel="icon" type="image/x-icon" href="/web/images/weight.ico">
-    <link href="/web/css/index.css" rel=stylesheet>
     <link href="/web/css/app.css" rel=stylesheet>
     <link rel="manifest" href="/web/manifest.json">
 </head>
@@ -62,9 +61,9 @@ const render = async (
     <div id=head>$${head}</div>
     <header>
         <div id=sw-message></div>
-        <div class=header>
+        <div class=flex>
             <a href="/web"><img style="height:2.25em;" src="/web/images/weight.svg"></img></a>
-            <div>
+            <div class=flex>
                 <form method=post action="/web/api/settings?handler=theme" class=inline>
                     ${themeView(theme)}
                 </form>
