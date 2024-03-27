@@ -28,6 +28,10 @@ body {
     transition: background-color var(--main-transition), color var(--main-transition);
 }
 
+footer {
+    font-size: 0.5em;
+}
+
 @media (prefers-color-scheme: dark) {
     :root {
         --main-bg-color: #333;
