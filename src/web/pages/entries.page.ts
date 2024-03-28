@@ -61,7 +61,7 @@ async function render(query: any) {
     <tbody>${data.reverse().map(rowView)}</tbody>
 </table>
 
-<a href="#" class="fix bottom-10 button">Back to Top</a>`
+<a href="#" class="back-to-top button">Back to Top</a>`
 
 }
 
@@ -95,13 +95,14 @@ function cleanBedtime(bedtime: string | undefined) {
 
 const head = `
     <style>
-        .date-list > a {
-            display: inline-block;
-            padding-right: 10px;
-            padding-top: 3px;
-        }
         tr > td:nth-child(3) {
             text-align: right;
+        }
+        .back-to-top {
+            position: fixed;
+            z-index: 1000;
+            bottom: 1em;
+            opacity: 0.9;
         }
     </style>`
 
