@@ -19,7 +19,7 @@
 
 body {
     font-family: sans-serif;
-    max-width: 800px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 0 1em 20em 1em;
     background-color: var(--main-bg-color);
