@@ -3,8 +3,6 @@
     --main-text-color: #333;
     --main-link-color: #00f;
     --main-link-hover-color: #00a;
-    --main-link-visited-color: var(--main-link-hover-color);
-    --main-link-visited-hover-color: var(--main-link-hover-color);
     --main-border-color: #ccc;
     --main-border-radius: 5px;
     --main-box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
@@ -38,7 +36,6 @@ footer {
         --main-text-color: #f0f0f0;
         --main-link-color: #0ff;
         --main-link-hover-color: #0aa;
-        --main-link-visited-color: #a81a55;
         --main-link-visited-hover-color: #a81a55;
         --main-border-color: #666;
         --main-box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
@@ -50,7 +47,6 @@ body.light {
     --main-text-color: #333;
     --main-link-color: #00f;
     --main-link-hover-color: #00a;
-    --main-link-visited-color: #551a8b;
     --main-link-visited-hover-color: #551a8b;
     --main-border-color: #ccc;
     --main-box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
@@ -61,7 +57,6 @@ body.dark {
     --main-text-color: #f0f0f0;
     --main-link-color: #0ff;
     --main-link-hover-color: #0aa;
-    --main-link-visited-color: #a81a55;
     --main-link-visited-hover-color: #a81a55;
     --main-border-color: #666;
     --main-box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
@@ -78,7 +73,7 @@ a {
         color: var(--main-link-color);
     }
     &:visited:hover {
-        color: var(--main-link-visited-hover-color);
+        color: var(--main-link-hover-color);
     }
     &:focus {
         outline: 2px solid var(--main-link-color);
@@ -131,10 +126,10 @@ nav {
                     color: var(--main-link-hover-color);
                 }
                 &:visited {
-                    color: var(--main-link-visited-color);
+                    color: var(--main-link-color);
                 }
                 &:visited:hover {
-                    color: var(--main-link-visited-hover-color);
+                    color: var(--main-link-hover-color);
                 }
                 &:focus {
                     outline: 2px solid var(--main-link-color);
