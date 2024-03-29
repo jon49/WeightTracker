@@ -73,7 +73,9 @@ const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, stats
 
 <template id=chart-rate-template>
     <div><canvas id=chart-rate></canvas></div>
-</template>`
+</template>
+
+<chart-page></chart-page>`
 
 async function weeksToGo(
     userSettings: UserSettings | undefined,

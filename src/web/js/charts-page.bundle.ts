@@ -38,16 +38,19 @@ const chartFunc = {
 let charts: Map<string, any> | null
 let chartButtons: HTMLElement | null
 let chartsLocation: HTMLElement | null
-// @ts-ignore
-window.app.scripts.set("/web/js/charts-page.bundle.js", {
-    load: () => {
+
+customElements.define("chart-page",
+class ChartPage extends HTMLElement {
+    constructor() {
+        super()
         if (charts) return
         charts = new Map()
         chartButtons = getById("create-chart")
         chartsLocation = getById("charts-location")
         chartButtons?.addEventListener("click", chartButtonClickListener)
-    },
-    unload: () => {
+    }
+
+    disconnectedCallback() {
         for (let chart of charts?.values() ?? []) {
             chart.destroy()
         }
