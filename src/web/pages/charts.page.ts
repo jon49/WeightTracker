@@ -46,7 +46,7 @@ const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, stats
     </table>
 </div>
 
-<div id=create-chart class=flex>
+<div id=create-chart class="flex justify-start">
     <button id=chart-weight-btn>History</button>
     <button id=chart-weight-average-btn>Average</button>
     <button id=chart-histogram-btn>Histogram</button>
