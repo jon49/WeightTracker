@@ -20,7 +20,10 @@ async function render() {
     }
     const selected = isSelected<DurationUnit>(data.durationUnit)
     return html`<h2>Chart Settings</h2>
-<form method=POST onchange="this.requestSubmit()">
+<form
+    method=post
+    action="/web/charts/edit"
+    onchange="this.requestSubmit()">
     <input type=hidden name=_rev value="${chartSettings?._rev ?? 0}">
     <input name=duration type=number placeholder="Number of months" required value="${data.duration}">
     <select name=durationUnit required>
