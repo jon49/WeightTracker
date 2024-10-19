@@ -4,16 +4,16 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "bun ./node_modules/@jon49/sw/tasks/start.ts dev",
-    "serve": "bun ./node_modules/@jon49/sw/tasks/start.ts server",
-    "build": "bun ./node_modules/@jon49/sw/tasks/start.ts prod",
+    "start": "node --experimental-strip-types ./node_modules/@jon49/sw/tasks/start.ts --env=dev -p 3000",
+    "serve": "node --experimental-strip-types ./node_modules/@jon49/sw/tasks/start.ts --env=server --target=../weight-server",
+    "build": "node --experimental-strip-types ./node_modules/@jon49/sw/tasks/start.ts --env=prod",
     "check": "tsc --noEmit"
   },
   "author": "Jon Nyman",
   "license": "ISC",
   "dependencies": {
     "@cloudfour/elastic-textarea": "^1.0.7",
-    "@jon49/sw": "^0.11.2",
+    "@jon49/sw": "^0.12.0",
     "@jon49/web": "^0.4.0",
     "@ungap/custom-elements": "^1.3.0",
     "form-subscribe": "^0.1.0",
@@ -24,7 +24,6 @@
     "simple-input-formatter": "^0.3.6"
   },
   "devDependencies": {
-    "esbuild": "^0.20.0",
     "typescript": "^5.3.3"
   }
 }
