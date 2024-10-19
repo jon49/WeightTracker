@@ -65,10 +65,17 @@ async function chartButtonClickListener(ev: Event) {
     if (!el || !(el instanceof HTMLButtonElement)) return
     el.classList.add("hidden")
     const baseId = el.id.slice(0, -4)
+    let $template = getById(`${baseId}-template`)
+    if (!($template instanceof HTMLTemplateElement)) return
+    chartsLocation?.prepend($template.content.cloneNode(true))
     // @ts-ignore
-    chartsLocation.prepend(getById(`${baseId}-template`).content.cloneNode(true))
+    let func = chartFunc[baseId]
+    if (!(func instanceof Function)) return
+    let $id = document.getElementById(baseId)
+    if (!($id instanceof HTMLCanvasElement)) return
+    let config = await func()
     // @ts-ignore
-    charts.set(baseId, new Chart(baseId, await chartFunc[baseId]()))
+    charts?.set(baseId, new Chart($id, config))
 }
 
 async function weightAverageChartData() {
@@ -163,12 +170,10 @@ async function histogram() {
     if (!startDate) return
     const rawValues = await getWeightData(startDate)
     if (!rawValues) return
-    const values = {}
+    const values: any = {}
     for (let val of rawValues) {
         let weight
-        // @ts-ignore
-        if (weight = val?.weight | 0) {
-            // @ts-ignore
+        if (weight = (val?.weight || 0) | 0) {
             values[weight] = (values[weight] | 0) + 1
         }
     }
@@ -178,7 +183,6 @@ async function histogram() {
     const length = +keys[keys.length - 1] - +keys[0] + 1
     const start = +keys[0]
     for (var i = 0; i < length; i++) {
-        // @ts-ignore
         values[i + start] = values[i + start] ?? 0
     }
 
