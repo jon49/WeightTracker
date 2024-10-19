@@ -168,7 +168,7 @@ const route: RoutePage = {
         let data = await setupStats()
         return layout({
             main: render(data),
-            scripts: ["/web/js/charts-page.bundle.js"],
+            scripts: ["/web/js/chart.min.js", "/web/js/charts-page.bundle.js"],
             title: "Charts",
         })
     }
