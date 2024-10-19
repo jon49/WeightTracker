@@ -20,7 +20,7 @@
     "noFallthroughCasesInSwitch": true,
 
     "outDir": "./temp/sw",
-    "skipLibCheck": true,
+    "skipLibCheck": true
   },
   "compileOnSave": true,
   "include": ["src/**/*.ts", "src/**/*.js", "src/sw/js/lib/db.min.js"],
