@@ -8,8 +8,6 @@ import * as validation from "promise-validation"
 import * as validators from "@jon49/sw/validation.js"
 import * as charts from "../js/charts-shared.js"
 
-self.app = self.app || {}
-
 let app = {
     charts,
     db,
