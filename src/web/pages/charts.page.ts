@@ -53,26 +53,31 @@ const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, stats
     <button id=chart-sleep-btn>Sleep</button>
     <button id=chart-rate-btn>Rate</button>
 </div>
-<div id=charts-location></div>
+
+<div id=charts-location>
+    <div>
+      <canvas id="myChart"></canvas>
+    </div>
+</div>
 
 <template id=chart-weight-template>
-    <div><canvas id=chart-weight></canvas></div>
+    <div class=t-pad><canvas id=chart-weight></canvas></div>
 </template>
 
 <template id=chart-weight-average-template>
-    <div><canvas id=chart-weight-average></canvas></div>
+    <div class=t-pad><canvas id=chart-weight-average></canvas></div>
 </template>
 
 <template id=chart-histogram-template>
-    <div><canvas id=chart-histogram></canvas></div>
+    <div class=t-pad><canvas id=chart-histogram></canvas></div>
 </template>
 
 <template id=chart-sleep-template>
-    <div><canvas id=chart-sleep></canvas></div>
+    <div class=t-pad><canvas id=chart-sleep></canvas></div>
 </template>
 
 <template id=chart-rate-template>
-    <div><canvas id=chart-rate></canvas></div>
+    <div class=t-pad><canvas id=chart-rate></canvas></div>
 </template>
 
 <chart-page></chart-page>`
