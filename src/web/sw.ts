@@ -1,8 +1,7 @@
 import { ValidationResult } from "promise-validation"
 import { getResponse, options } from "@jon49/sw/routes.js"
 
-// @ts-ignore
-let version: string = self.app?.version ?? "unknown"
+let version: string = self.app.version
 
 self.addEventListener('message', async function (event) {
     if (event.data === "skipWaiting") {

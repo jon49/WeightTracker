@@ -1,7 +1,5 @@
 import { Route } from "@jon49/sw/routes.js"
 
-self.app = self.app || {}
-
 const routes : Route[] = [
     { route: /\/api\/data\/$/,
       file: "/web/api/data.page.js" },
