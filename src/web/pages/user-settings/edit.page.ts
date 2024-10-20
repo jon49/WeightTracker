@@ -1,5 +1,5 @@
-import { UserSettings, Settings } from "../../server/db.js"
-import { RoutePage, RoutePostHandler } from "@jon49/sw/routes.js"
+import type { UserSettings, Settings } from "../../server/db.js"
+import type { RoutePage, RoutePostHandler } from "@jon49/sw/routes.js"
 
 const {
     db,
@@ -17,7 +17,7 @@ async function render() {
     let [userSettings, settings] =
         await Promise.all([db.get("user-settings"), db.get("settings")])
     let { earliestDate, height, goalWeight } = userSettings ?? <UserSettings>{}
-    settings = settings ?? <Settings>{}
+    settings = settings ?? {} as Settings
 
     return html`
 <h2>User Settings</h2>
@@ -48,7 +48,14 @@ const userSettingsValidator = {
 const postHandlers: RoutePostHandler = {
     async userSettings({ data }) {
         let o = await validateObject(data, userSettingsValidator)
-        await db.set("user-settings", o)
+        let original = await db.get("user-settings")
+        if (!original) {
+            original = { _rev: 0 } as UserSettings
+        }
+        if (!("_ref" in original)) {
+            original._rev = 0
+        }
+        await db.set("user-settings", { ...original, ...o })
         return { status: 204 }
     },
 

@@ -55,7 +55,7 @@ const route: RoutePage = {
         const maybeDurationUnit = o.durationUnit
         const durationUnit = units.find(x => x === maybeDurationUnit) ?? "month"
         const settings: ChartSettings = { duration, durationUnit, _rev: o._rev }
-        await db.set("chart-settings", settings)
+        await db.set("chart-settings", settings, false)
         return { status: 204 }
     }
 }
