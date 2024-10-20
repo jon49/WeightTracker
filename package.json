@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=dev -p 3000",
     "serve": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=server --target=../weight-server",
-    "build": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=prod",
+    "build": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=prod --target=deploy",
     "check": "tsc --noEmit"
   },
   "author": "Jon Nyman",
