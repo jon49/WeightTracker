@@ -50,7 +50,7 @@ const postHandlers: RoutePostHandler = {
         let o = await validateObject(data, userSettingsValidator)
         let original = await db.get("user-settings")
         if (!original) {
-            original = { _rev: 0 } as UserSettings
+            original = {} as UserSettings
         }
         if (!("_ref" in original)) {
             original._rev = 0
