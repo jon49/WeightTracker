@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=dev -p 3000",
-    "serve": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=server --target=../weight-server",
+    "start": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=dev -p 8008",
+    "server": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=server --target=./server/public",
     "build": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=prod --target=deploy",
     "check": "tsc --noEmit"
   },
@@ -13,7 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@cloudfour/elastic-textarea": "^1.0.7",
-    "@jon49/sw": "^0.12.9",
+    "@jon49/sw": "^0.12.11",
     "@jon49/web": "^0.4.0",
     "@ungap/custom-elements": "^1.3.0",
     "form-subscribe": "^0.1.0",
