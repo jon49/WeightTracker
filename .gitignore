@@ -3,3 +3,4 @@ public
 deploy
 node_modules
 src/web/entry-points.ts
+config.json
