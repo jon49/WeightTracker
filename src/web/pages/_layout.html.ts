@@ -20,6 +20,10 @@ export function syncCountView(count: number) {
     return html`&#128259; ${when(count, count => html`(${count})`)}`
 }
 
+export function loginView() {
+    return html`<a id=auth-link href="/login">Login</a>`
+}
+
 const {
     version
 } = self.app
@@ -73,8 +77,8 @@ const render = async (
                </form>
 
                 ${isLoggedIn
-                    ? html`<a href="/login?logout">Logout</a>`
-                    : html`<a href="/login">Login</a>`}
+                    ? html`<a id=auth-link href="/login?logout">Logout</a>`
+                    : loginView()}
             </div>
         </div>
         <nav id=nav-main>
@@ -116,7 +120,21 @@ const render = async (
         data-match="detail: {method:'post'}"
 
         hf-scroll-ignore
-        hf-target="#sync-count"></form>
+        hf-target="#sync-count">
+    </form>
+
+    <form
+        action="/web/auth-view/"
+
+        hidden
+        is=form-subscribe
+        data-event="hf:response-error"
+        data-match="detail: {xhr: { response: { status: 401 }}}"
+
+        hf-scroll-ignore
+        hf-swap=outerHTML
+        hf-target="#auth-link">
+    </form>
 
     <script src="/web/js/app.bundle.js"></script>
     <div id=scripts>${(scripts ?? []).map(x => html`<script src="${x}" ${when(!x.includes('.min.'), 'type=module')}></script>`)}</div>
