@@ -38,6 +38,11 @@ const postHandlers : RoutePostHandler = {
                 return {
                     status: 401,
                     message: "You are not logged in!" }
+            case 503:
+                return {
+                    status: 503,
+                    message: "Hold your horses! You are syncing too fast!"
+                }
             default:
                 return {
                     status: 500,
