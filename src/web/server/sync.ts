@@ -28,7 +28,9 @@ export default async function sync() {
     })
 
     let newData : ResponseData
-    if (res.status >= 200 && res.status <= 299 && res.headers.get("Content-Type")?.startsWith("application/json")) {
+    if (res.status >= 200
+        && res.status <= 299
+        && res.headers.get("Content-Type")?.startsWith("application/json")) {
         newData = await res.json()
     } else {
         if (res.status === 401) {
