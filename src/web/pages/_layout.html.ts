@@ -84,7 +84,7 @@ const render = async (
         <nav id=nav-main>
             <ul>
                 <li><a href="/web/entries">Entries</a></li>
-                <li><a href="/web/entries/edit">Add/Edit</a></li>
+                <li><a href="/web/entries/edit">Entry</a></li>
                 <li><a href="/web/charts">Charts</a></li>
                 <li><a href="/web/user-settings/edit">User Settings</a></li>
                 ${when(nav?.length, () =>
