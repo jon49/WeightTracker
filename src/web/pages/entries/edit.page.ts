@@ -1,5 +1,5 @@
-import { WeightData } from "../../server/db.js"
-import { RouteGetHandler, RoutePage, RoutePostHandler } from "@jon49/sw/routes.js"
+import type { WeightData } from "../../server/db.js"
+import type { RouteGetHandler, RoutePage, RoutePostHandler } from "@jon49/sw/routes.js"
 
 let {
     db,
@@ -25,7 +25,7 @@ async function render(query: any) {
     let url = `/web/entries/edit?date=`
 
     return html`
-<h2>Add/Edit Entry</h2>
+<h2>Edit Entry</h2>
 <form
     action="/web/entries/edit?handler=date"
     hf-target="#entry-form"

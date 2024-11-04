@@ -28,7 +28,7 @@ const routes : Route[] = [
 ]
 
 let app = {
-    version: "v114",
+    version: "v115",
     routes,
 }
 
