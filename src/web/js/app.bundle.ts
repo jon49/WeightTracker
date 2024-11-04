@@ -7,6 +7,10 @@ import "@jon49/web/x-toaster.js"
 
 const doc = document
 
+if (doc.location.search.includes("login=success")) {
+    doc.location = `/web/${doc.location.hash}`
+}
+
 // @ts-ignore
 doc.addEventListener("user-messages", (e: CustomEvent) => {
     let template = doc.getElementById("toast-template")
