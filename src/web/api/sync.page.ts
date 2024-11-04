@@ -1,4 +1,4 @@
-import { RoutePage, RoutePostHandler } from "@jon49/sw/routes.js"
+import type { RoutePage, RoutePostHandler } from "@jon49/sw/routes.js"
 import sync from "../server/sync.js"
 
 const {
@@ -24,6 +24,7 @@ const postHandlers : RoutePostHandler = {
         switch (result.status) {
             case 200:
                 return {
+                    message: "Synced!",
                     status: 200,
                     events: { refresh: true }
                 }

@@ -1,9 +1,11 @@
-import { getMany, setMany, set, update } from "./db.js"
-import db from "./global-model.js"
+const {
+    globalDb: db,
+    db: { getMany, setMany, set, update },
+} = self.app
 
 export default async function sync() {
     let isLoggedIn = await db.isLoggedIn()
-    if (!isLoggedIn) return { status: 403 }
+    if (!isLoggedIn) return { status: 401 }
 
     let keys = await db.updated()
     const items = await getMany(keys)
@@ -33,7 +35,7 @@ export default async function sync() {
         && res.headers.get("Content-Type")?.startsWith("application/json")) {
         newData = await res.json()
     } else {
-        if (res.status === 401) {
+        if ([401, 403].includes(res.status)) {
             await db.setLoggedIn(false)
             return { status: 401 }
         }
