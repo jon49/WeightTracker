@@ -61,7 +61,6 @@ const render = async (
     <link rel="manifest" href="/web/manifest.json">
 </head>
 <body $${when(theme, x => `class=${x}`)} $${bodyAttr}>
-    <script> window.app = { scripts: new Map() } </script>
     <div id=head>$${head}</div>
     <header>
         <div id=sw-message></div>
@@ -135,16 +134,7 @@ const render = async (
         hf-target="#auth-link">
     </form>
 
-    <script src="/web/js/app.bundle.js"></script>
-
-    <iframe
-        hidden
-        name=htmz
-        onload="window.htmz?.(this)"
-        hf-select="title,#head,#nav-main,main,#errors,#toasts,#scripts">
-        >
-    </iframe>
-
+    <script src="/web/js/app.bundle.js" type=module></script>
     <div id=scripts>${(scripts ?? []).map(x => html`<script src="${x}" ${when(!x.includes('.min.'), 'type=module')}></script>`)}</div>
 </body>
 </html>`

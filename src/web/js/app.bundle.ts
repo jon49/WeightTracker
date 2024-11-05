@@ -1,3 +1,4 @@
+import "@jon49/web/htmz-spa.ts"
 import "html-form"
 import "form-subscribe"
 import "./_sw-loader.js"
@@ -5,24 +6,6 @@ import "@jon49/web/x-dialog.js"
 import "@jon49/web/x-toaster.js"
 
 const doc = document
-const w = window
-
-let ignoreHTMZ = true
-// @ts-ignore
-w.htmz =
-function htmz(frame: HTMLIFrameElement) {
-    if (ignoreHTMZ) {
-        ignoreHTMZ = false
-        return
-    }
-    setTimeout(() => {
-        let dom = (frame.contentDocument?.querySelectorAll("head>template")[0] as HTMLTemplateElement)?.content
-        if (!dom) return
-        let select = frame.getAttribute('hf-select')
-        // @ts-ignore
-        w.htmf.selectSwap(select, dom, true)
-    });
-}
 
 if (doc.location.search.includes("login=success")) {
     doc.location.href = "/web/"
