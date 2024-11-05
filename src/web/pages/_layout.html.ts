@@ -102,6 +102,7 @@ const render = async (
     <footer><p>${version}</p></footer>
 
     <form
+        id=refresh-form
         is=form-subscribe
         data-event="refresh"
         hf-ignore

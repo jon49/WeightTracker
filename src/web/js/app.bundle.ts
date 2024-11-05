@@ -1,4 +1,4 @@
-import "@jon49/web/htmz-spa.ts"
+import { hook } from "@jon49/web/htmz-spa.ts"
 import "html-form"
 import "form-subscribe"
 import "./_sw-loader.js"
@@ -6,6 +6,13 @@ import "@jon49/web/x-dialog.js"
 import "@jon49/web/x-toaster.js"
 
 const doc = document
+
+let $refresh = doc.getElementById("refresh-form")
+if ($refresh instanceof HTMLFormElement) {
+    hook.cb = (frame) => {
+        $refresh.action = frame.contentDocument?.location.href ?? "/web/"
+    }
+}
 
 if (doc.location.search.includes("login=success")) {
     doc.location.href = "/web/"
