@@ -66,7 +66,7 @@ const render = async (
     <header>
         <div id=sw-message></div>
         <div class=flex>
-            <a href="/web"><img style="height:2.25em;" src="/web/images/weight.svg"></img></a>
+            <a href="/web" target=htmz><img style="height:2.25em;" src="/web/images/weight.svg"></img></a>
             <div class=flex>
                 <form method=post action="/web/api/settings?handler=theme" class=inline>
                     ${themeView(theme)}
@@ -83,12 +83,12 @@ const render = async (
         </div>
         <nav id=nav-main>
             <ul>
-                <li><a href="/web/entries">Entries</a></li>
-                <li><a href="/web/entries/edit">Entry</a></li>
-                <li><a href="/web/charts">Charts</a></li>
-                <li><a href="/web/user-settings/edit">User Settings</a></li>
+                <li><a href="/web/entries" target=htmz>Entries</a></li>
+                <li><a href="/web/entries/edit" target=htmz>Entry</a></li>
+                <li><a href="/web/charts" target=htmz>Charts</a></li>
+                <li><a href="/web/user-settings/edit" target=htmz>User Settings</a></li>
                 ${when(nav?.length, () =>
-                       nav?.map(x => html`<li><a href="$${x.url}">${x.name}</a></li>`))}
+                       nav?.map(x => html`<li><a href="$${x.url}" target=htmz>${x.name}</a></li>`))}
             </ul>
         </nav>
     </header>
@@ -103,12 +103,10 @@ const render = async (
     <footer><p>${version}</p></footer>
 
     <form
-        id=href
-
         is=form-subscribe
         data-event="refresh"
-
-        hf-select="title,#head,#nav-main,main,#errors,#toasts,#scripts">
+        hf-ignore
+        target=htmz>
     </form>
 
     <form
@@ -137,6 +135,15 @@ const render = async (
     </form>
 
     <script src="/web/js/app.bundle.js"></script>
+
+    <iframe
+        hidden
+        name=htmz
+        onload="window.htmz?.(this)"
+        hf-select="title,#head,#nav-main,main,#errors,#toasts,#scripts">
+        >
+    </iframe>
+
     <div id=scripts>${(scripts ?? []).map(x => html`<script src="${x}" ${when(!x.includes('.min.'), 'type=module')}></script>`)}</div>
 </body>
 </html>`
