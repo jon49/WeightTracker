@@ -24,13 +24,8 @@ function htmz(frame: HTMLIFrameElement) {
     });
 }
 
-let search = doc.location.search
-if (search.includes("login=success") || search.includes("refresh=hard")) {
-    let url = new URL(doc.location.href)
-    url.search = ""
-    url.hash = ""
-    url.pathname = "/web/"
-    history.pushState(null, "", url.href)
+if (doc.location.search.includes("login=success")) {
+    doc.location.href = "/web/"
 }
 
 // @ts-ignore

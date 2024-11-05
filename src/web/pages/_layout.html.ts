@@ -66,7 +66,7 @@ const render = async (
     <header>
         <div id=sw-message></div>
         <div class=flex>
-            <a href="/web" target=htmz><img style="height:2.25em;" src="/web/images/weight.svg"></img></a>
+            <a href="/web?hz" target=htmz><img style="height:2.25em;" src="/web/images/weight.svg"></img></a>
             <div class=flex>
                 <form method=post action="/web/api/settings?handler=theme" class=inline>
                     ${themeView(theme)}
@@ -83,12 +83,12 @@ const render = async (
         </div>
         <nav id=nav-main>
             <ul>
-                <li><a href="/web/entries" target=htmz>Entries</a></li>
-                <li><a href="/web/entries/edit" target=htmz>Entry</a></li>
-                <li><a href="/web/charts" target=htmz>Charts</a></li>
-                <li><a href="/web/user-settings/edit" target=htmz>User Settings</a></li>
+                <li><a href="/web/entries?hz" target=htmz>Entries</a></li>
+                <li><a href="/web/entries/edit?hz" target=htmz>Entry</a></li>
+                <li><a href="/web/charts?hz" target=htmz>Charts</a></li>
+                <li><a href="/web/user-settings/edit?hz" target=htmz>User Settings</a></li>
                 ${when(nav?.length, () =>
-                       nav?.map(x => html`<li><a href="$${x.url}" target=htmz>${x.name}</a></li>`))}
+                       nav?.map(x => html`<li><a href="$${x.url}?hz" target=htmz>${x.name}</a></li>`))}
             </ul>
         </nav>
     </header>
@@ -107,6 +107,7 @@ const render = async (
         data-event="refresh"
         hf-ignore
         target=htmz>
+        <input type=hidden name=hz>
     </form>
 
     <form

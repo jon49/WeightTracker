@@ -17,7 +17,7 @@ async function getChartSettings() {
 const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, statsData: StatsData }) => html`
 <h2>Charts</h2>
 
-<a href="/web/charts/edit" target=htmz>Edit Chart Settings</a>
+<a href="/web/charts/edit?hz" target=htmz>Edit Chart Settings</a>
 <div>
     <h3>${statsHeaderText}</h3>
     <table>

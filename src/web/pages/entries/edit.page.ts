@@ -22,14 +22,12 @@ async function render(query: any) {
     let data = <WeightData>(await db.get<WeightData | undefined>(date)) ?? { date }
     cleanWeightData(data)
 
-    let url = `/web/entries/edit?date=`
-
     return html`
 <h2>Edit Entry</h2>
 <form
     action="/web/entries/edit?handler=date"
     hf-target="#entry-form"
-    onchange="app.updateUrl('${url}' + this.date.value); this.requestSubmit()">
+    onchange="this.requestSubmit()">
     <label>Date
     <input name=date type=date required value="${date}"></label>
 </form>
