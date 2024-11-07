@@ -1,4 +1,5 @@
-import { hook } from "@jon49/web/htmz-spa.ts"
+import "@jon49/web/htmz-spa.ts"
+import "@jon49/web/htmz-refresh-page.ts"
 import "html-form"
 import "form-subscribe"
 import "./_sw-loader.js"
@@ -6,13 +7,6 @@ import "@jon49/web/x-dialog.js"
 import "@jon49/web/x-toaster.js"
 
 const doc = document
-
-let $refresh = doc.getElementById("refresh-form")
-if ($refresh instanceof HTMLFormElement) {
-    hook.cb = (frame) => {
-        $refresh.action = frame.contentDocument?.location.href ?? "/web/"
-    }
-}
 
 if (doc.location.search.includes("login=success")) {
     doc.location.href = "/web/"
@@ -44,7 +38,7 @@ function appendMessage(
     if (!(clone instanceof DocumentFragment)) return
     let first = clone.firstElementChild
     if (!first) return
-    first.setAttribute("data-timeout", ""+(1e3 + wordCount * 400))
+    first.setAttribute("data-timeout", "" + (1e3 + wordCount * 400))
     let messageEl = first.querySelector(".message")
     if (!messageEl) return
     if (isHtml) {

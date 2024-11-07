@@ -102,15 +102,6 @@ const render = async (
     <footer><p>${version}</p></footer>
 
     <form
-        id=refresh-form
-        is=form-subscribe
-        data-event="refresh"
-        hf-ignore
-        target=htmz>
-        <input type=hidden name=hz>
-    </form>
-
-    <form
         id=get-sync-count-form
         action="/web/api/sync?handler=count"
 
