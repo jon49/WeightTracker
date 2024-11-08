@@ -25,7 +25,7 @@
     }
 
     /**
-     * @param {HTMLElement} el 
+     * @param {HTMLElement} el
      * @returns number
      */
     function getSnackBarDuration(el) {
@@ -33,7 +33,7 @@
     }
 
     // Also known as "Toast" and "Snackbar"
-    customElements.define("snack-bar", 
+    customElements.define("snack-bar",
         class Snackbar extends HTMLElement {
             connectedCallback() {
                 const timeout = (getSnackBarDuration(this) || getSnackBarDuration(document.documentElement) || 3) + 0.1

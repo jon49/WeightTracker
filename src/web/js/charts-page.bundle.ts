@@ -1,81 +1,93 @@
 import { ChartSettings, UserSettings, WeightData } from "../server/db.js"
 import { avg, dateFill, dateToString, reduceSlice, stdev } from "./utils.js"
-import { getById } from "./dom-utils.js"
 import { getWeeklyData, getStartDate, setChartSettingDefaults } from "./charts-shared.js"
+import "./charts/_chart-button.js"
 
 const red = "#ff6384", blue = "#6391ff", green = "#63ff83"
 
-async function api<T>(url: string) : Promise<T> {
-    url = `/web/api/${url}`
-    let res = await fetch(url)
-    if (res.ok && res.headers.get("Content-Type") === "application/json") {
-        let obj = await res.json()
-        return <T>obj
-    }
-    console.error(res);
-    return Promise.reject(res.statusText)
-}
-
-function getWeightData(start: string | Date) {
-    let s = start instanceof Date ? dateToString(start) : start
-    return api<WeightData[] | undefined>(`data?start=${s}`)
-}
-
-async function getChartSettings() {
-    let chartSettings = await api<ChartSettings>("chart-settings")
-    return setChartSettingDefaults(chartSettings)
-}
-
-const chartFunc = {
-    "chart-weight": weightData,
-    "chart-weight-average": weightAverageChartData,
-    "chart-histogram": histogram,
-    "chart-sleep": sleep,
-    "chart-rate": rate,
-}
-
-let charts: Map<string, any> | null
-let chartButtons: HTMLElement | null
-let chartsLocation: HTMLElement | null
-
-customElements.define("chart-page",
-class ChartPage extends HTMLElement {
+class HistoryChart extends HTMLElement {
+    chart: any | undefined | null
     constructor() {
         super()
-        if (charts) return
-        charts = new Map()
-        chartButtons = getById("create-chart")
-        chartsLocation = getById("charts-location")
-        chartButtons?.addEventListener("click", chartButtonClickListener)
+        createChart(this, weightData())
     }
 
     disconnectedCallback() {
-        for (let chart of charts?.values() ?? []) {
-            chart.destroy()
-        }
-        charts = null
-        chartButtons?.removeEventListener("click", chartButtonClickListener)
-        chartButtons = null
-        chartsLocation = null
+        cleanUp(this)
     }
-})
+}
 
-async function chartButtonClickListener(ev: Event) {
-    let el = ev.target
-    if (!el || !(el instanceof HTMLButtonElement)) return
-    el.classList.add("hidden")
-    const baseId = el.id.slice(0, -4)
-    let $template = getById(`${baseId}-template`)
-    if (!($template instanceof HTMLTemplateElement)) return
-    chartsLocation?.prepend($template.content.cloneNode(true))
-    // @ts-ignore
-    let func = chartFunc[baseId]
-    if (!(func instanceof Function)) return
-    let $id = document.getElementById(baseId)
-    if (!($id instanceof HTMLCanvasElement)) return
-    let config = await func()
-    // @ts-ignore
-    charts?.set(baseId, new Chart($id, config))
+customElements.define("chart-history", HistoryChart)
+
+class AverageChart extends HTMLElement {
+    chart: any | undefined | null
+    constructor() {
+        super()
+        createChart(this, weightAverageChartData())
+    }
+
+    disconnectedCallback() {
+        cleanUp(this)
+    }
+}
+
+customElements.define("chart-average", AverageChart)
+
+class HistogramChart extends HTMLElement {
+    chart: any | undefined | null
+    constructor() {
+        super()
+        createChart(this, histogram())
+    }
+
+    disconnectedCallback() {
+        cleanUp(this)
+    }
+}
+
+customElements.define("chart-histogram", HistogramChart)
+
+class SleepChart extends HTMLElement {
+    chart: any | undefined | null
+    constructor() {
+        super()
+        createChart(this, sleep())
+    }
+
+    disconnectedCallback() {
+        cleanUp(this)
+    }
+}
+
+customElements.define("chart-sleep", SleepChart)
+
+class RateChart extends HTMLElement {
+    chart: any | undefined | null
+    constructor() {
+        super()
+        createChart(this, rate())
+    }
+
+    disconnectedCallback() {
+        cleanUp(this)
+    }
+}
+
+customElements.define("chart-rate", RateChart)
+
+function createChart(ctx: HTMLElement & { chart?: any }, config: Promise<any>) {
+    config.then(config => {
+        if (!config) return
+        let canvas = document.createElement("canvas")
+        ctx.append(canvas)
+        // @ts-ignore
+        ctx.chart = new Chart(canvas, config)
+    })
+}
+
+function cleanUp(ctx: { chart?: any }) {
+    ctx.chart?.destroy()
+    ctx.chart = null
 }
 
 async function weightAverageChartData() {
@@ -335,3 +347,25 @@ async function sleep() {
         }
     }
 }
+
+async function api<T>(url: string) : Promise<T> {
+    url = `/web/api/${url}`
+    let res = await fetch(url)
+    if (res.ok && res.headers.get("Content-Type") === "application/json") {
+        let obj = await res.json()
+        return <T>obj
+    }
+    console.error(res);
+    return Promise.reject(res.statusText)
+}
+
+function getWeightData(start: string | Date) {
+    let s = start instanceof Date ? dateToString(start) : start
+    return api<WeightData[] | undefined>(`data?start=${s}`)
+}
+
+async function getChartSettings() {
+    let chartSettings = await api<ChartSettings>("chart-settings")
+    return setChartSettingDefaults(chartSettings)
+}
+

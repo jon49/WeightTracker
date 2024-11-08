@@ -15,9 +15,8 @@ async function getChartSettings() {
 }
 
 const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, statsData: StatsData }) => html`
-<h2>Charts</h2>
+<h2>Charts <a href="/web/charts/edit?hz" target=htmz title="Edit Chart Settings" aria-label="Edit Chart Settings">&#9881;</a></h2>
 
-<a href="/web/charts/edit?hz" target=htmz>Edit Chart Settings</a>
 <div>
     <h3>${statsHeaderText}</h3>
     <table>
@@ -39,19 +38,29 @@ const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, stats
                 <td>${statsData.std}</td>
                 <td>${statsData.goalWeight}</td>
                 <td>${statsData.weight}</td>
-                <td>${statsData.rate}</td> 
-                <td>${statsData.sleep}</td> 
+                <td>${statsData.rate}</td>
+                <td>${statsData.sleep}</td>
             </tr>
         </tbody>
     </table>
 </div>
 
 <div id=create-chart class="flex justify-start">
-    <button id=chart-weight-btn>History</button>
-    <button id=chart-weight-average-btn>Average</button>
-    <button id=chart-histogram-btn>Histogram</button>
-    <button id=chart-sleep-btn>Sleep</button>
-    <button id=chart-rate-btn>Rate</button>
+    <chart-button data-chart=chart-history data-target="#charts-location">
+        <button>History</button>
+    </chart-button>
+    <chart-button data-chart=chart-average data-target="#charts-location">
+        <button>Average</button>
+    </chart-button>
+    <chart-button data-chart=chart-histogram data-target="#charts-location">
+        <button>Histogram</button>
+    </chart-button>
+    <chart-button data-chart=chart-sleep data-target="#charts-location">
+        <button>Sleep</button>
+    </chart-button>
+    <chart-button data-chart=chart-rate data-target="#charts-location">
+        <button>Rate</button>
+    </chart-button>
 </div>
 
 <div id=charts-location>
@@ -168,7 +177,10 @@ const route: RoutePage = {
         let data = await setupStats()
         return layout({
             main: render(data),
-            scripts: ["/web/js/chart.min.js", "/web/js/charts-page.bundle.js"],
+            scripts: [
+                "/web/js/chart.min.js",
+                "/web/js/charts-page.bundle.js",
+            ],
             title: "Charts",
         })
     }
