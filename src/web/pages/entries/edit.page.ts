@@ -9,8 +9,17 @@ let {
     validation: { createDateString, createPositiveNumber, createPositiveWholeNumber, createStringInfinity, createTimeString, maybe, reject, validateObject },
 } = self.app
 
+const dateValidator = {
+    date: createDateString("Date"),
+}
+
+const queryDateValidator = {
+    date: maybe(dateValidator.date),
+}
+
 async function render(query: any) {
-    let { date } = await validateObject(query, { date: maybe(createDateString("Query Date")) })
+    console.log("DATE", query.date)
+    let { date } = await validateObject(query, queryDateValidator)
     if (!date) {
         let d = new Date()
         // If it's after 8 PM then set to the next day
@@ -25,7 +34,7 @@ async function render(query: any) {
     return html`
 <h2>Edit Entry</h2>
 <form
-    action="/web/entries/edit?handler=date"
+    action="/web/entries/edit?pushUrl"
     hf-target="#entry-form"
     onchange="this.requestSubmit()">
     <label>Date
@@ -86,10 +95,6 @@ function getBedtime(bedtime: string | undefined) {
     <label>Bedtime${bedtime?.endsWith("M") ? ` (${bedtime})` : ""}
         <input style="min-width:214px" name=bedtime type=time value="${bedtime}">
     </label>`
-}
-
-const dateValidator = {
-    date: createDateString("Date"),
 }
 
 const weightDataValidator = {
@@ -162,13 +167,13 @@ const postHandlers : RoutePostHandler = {
 }
 
 const getHandlers: RouteGetHandler = {
-    async date({ query }) {
-        let { date } = await validateObject(query, dateValidator)
-        let data = (await db.get<WeightData | undefined>(date)) ?? { date, _rev: 0 }
-        return getEntryForm(data)
-    },
+    async get({ query, req }) {
+        if (req.headers.get("HF-Request") === "true") {
+            let { date } = await validateObject(query, dateValidator)
+            let data = (await db.get<WeightData | undefined>(date)) ?? { date, _rev: 0 }
+            return getEntryForm(data)
+        }
 
-    async get({ query }) {
         return layout({
             main: await render(query),
             title: "Edit Entry"
