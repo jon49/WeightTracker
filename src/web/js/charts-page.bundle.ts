@@ -78,10 +78,12 @@ customElements.define("chart-rate", RateChart)
 function createChart(ctx: HTMLElement & { chart?: any }, config: Promise<any>) {
     config.then(config => {
         if (!config) return
-        let canvas = document.createElement("canvas")
-        ctx.append(canvas)
+        let div = document.createElement("div")
+        div.innerHTML = `<canvas></canvas>`
+        div.classList.add("t-pad")
+        ctx.append(div)
         // @ts-ignore
-        ctx.chart = new Chart(canvas, config)
+        ctx.chart = new Chart(div.firstElementChild, config)
     })
 }
 

@@ -63,33 +63,8 @@ const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, stats
     </chart-button>
 </div>
 
-<div id=charts-location>
-    <div>
-      <canvas id="myChart"></canvas>
-    </div>
-</div>
-
-<template id=chart-weight-template>
-    <div class=t-pad><canvas id=chart-weight></canvas></div>
-</template>
-
-<template id=chart-weight-average-template>
-    <div class=t-pad><canvas id=chart-weight-average></canvas></div>
-</template>
-
-<template id=chart-histogram-template>
-    <div class=t-pad><canvas id=chart-histogram></canvas></div>
-</template>
-
-<template id=chart-sleep-template>
-    <div class=t-pad><canvas id=chart-sleep></canvas></div>
-</template>
-
-<template id=chart-rate-template>
-    <div class=t-pad><canvas id=chart-rate></canvas></div>
-</template>
-
-<chart-page></chart-page>`
+<div id=charts-location></div>
+`
 
 async function weeksToGo(
     userSettings: UserSettings | undefined,
