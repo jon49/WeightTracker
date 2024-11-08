@@ -49,7 +49,9 @@ async function render(query: any) {
         data.push(d)
     }
 
-    return html`
+    return {
+        year,
+        main: html`
 <h2 id="top">Entries — ${year}</h2>
 
 <div class="flex justify-start wrap">
@@ -66,7 +68,7 @@ async function render(query: any) {
 </table>
 
 <a href="#" class="back-to-top button">Back to Top</a>`
-
+    }
 }
 
 async function getData(year: number) : Promise<TableData> {
@@ -117,11 +119,12 @@ interface TableData {
 
 const route: RoutePage = {
     async get({ query }) {
+        let { year, main } = await render(query)
         return layout({
-            main: await render(query),
+            main,
             head,
             bodyAttr: `data-mpa-scroll-to="#top"`,
-            title: "Entries",
+            title: `Entries — ${year}`,
         })
     }
 }
