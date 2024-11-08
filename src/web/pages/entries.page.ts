@@ -50,10 +50,14 @@ async function render(query: any) {
     }
 
     return html`
-<h2 id="top">Entries</h2>
+<h2 id="top">Entries — ${year}</h2>
 
 <div class="flex justify-start wrap">
-    ${years.reverse().map((year: string) => html`<a href="/web/entries?year=${year}&hz" target=htmz>${year}</a>`)}
+    ${years.reverse().map((x: string) =>
+        x === ""+year
+            ? html`<span>${x}</span>`
+        : html`<a href="/web/entries?year=${x}&hz" target=htmz>${x}</a>`
+    )}
 </div>
 
 <table>
