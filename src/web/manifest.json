@@ -15,6 +15,6 @@
         }
     ],
     "start_url": "/web/entries/edit",
+    "scope": "/web",
     "display": "standalone"
 }
-
