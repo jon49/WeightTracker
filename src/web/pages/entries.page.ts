@@ -23,7 +23,7 @@ function rowView(o: WeightData) {
                 : null
 
     return html`<tr>
-        <td><a href="/web/entries/edit?date=$${date}&hz" target=htmz>$${date}</a></td>
+        <td><a href="/web/entries/edit?date=$${date}">$${date}</a></td>
         <td>${weight}</td>
         <td>${cleanBedtime(bedtime)}</td>
         <td>${sleep}</td>
@@ -58,7 +58,7 @@ async function render(query: any) {
     ${years.reverse().map((x: string) =>
             x === "" + year
                 ? html`<span>${x}</span>`
-                : html`<a href="/web/entries?year=${x}&hz" target=htmz>${x}</a>`
+                : html`<a href="/web/entries?year=${x}">${x}</a>`
         )}
 </div>
 

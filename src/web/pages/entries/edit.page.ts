@@ -33,9 +33,8 @@ async function render(query: any) {
     return html`
 <h2>Edit Entry</h2>
 <form
-    action="/web/entries/edit?pushUrl"
-    hf-target="#entry-form"
-    onchange="this.requestSubmit()">
+    action="/web/entries/edit"
+    onchange="this.submit()">
     <label>Date
     <input name=date type=date required value="${date}"></label>
 </form>

@@ -2,8 +2,6 @@ import html from "html-template-tag-stream"
 import db from "../server/global-model.js"
 import { when } from "@jon49/sw/utils.js"
 import { Theme } from "../api/settings.page.js"
-import htmz from "@jon49/web/htmz-spa.ts"
-import refresh from "@jon49/web/htmz-refresh-page.ts"
 
 const defaultTheme = "⛅",
     lightTheme = "&#127774;",
@@ -67,7 +65,7 @@ const render = async (
     <header>
         <div id=sw-message></div>
         <div class=flex>
-            <a href="/web?hz" target=htmz><img style="height:2.25em;" src="/web/images/weight.svg"></img></a>
+            <a href="/web/entries/edit"><img style="height:2.25em;" src="/web/images/weight.svg"></img></a>
             <div class=flex>
                 <form method=post action="/web/api/settings?handler=theme" class=inline>
                     ${themeView(theme)}
@@ -84,12 +82,12 @@ const render = async (
         </div>
         <nav id=nav-main>
             <ul>
-                <li><a href="/web/entries?hz" target=htmz>Entries</a></li>
-                <li><a href="/web/entries/edit?hz" target=htmz>Entry</a></li>
-                <li><a href="/web/charts?hz" target=htmz>Charts</a></li>
-                <li><a href="/web/user-settings/edit?hz" target=htmz>User Settings</a></li>
+                <li><a href="/web/entries">Entries</a></li>
+                <li><a href="/web/entries/edit">Entry</a></li>
+                <li><a href="/web/charts">Charts</a></li>
+                <li><a href="/web/user-settings/edit">User Settings</a></li>
                 ${when(nav?.length, () =>
-                nav?.map(x => html`<li><a href="$${x.url}?hz" target=htmz>${x.name}</a></li>`))}
+                nav?.map(x => html`<li><a href="$${x.url}">${x.name}</a></li>`))}
             </ul>
         </nav>
     </header>
@@ -130,9 +128,6 @@ const render = async (
 
     <script src="/web/js/app.bundle.js" type=module></script>
 
-    $${htmz}
-    $${refresh}
-
     <div id=scripts>${(scripts ?? []).map(x => html`<script src="${x}" ${when(!x.includes('.min.'), 'type=module')}></script>`)}</div>
 </body>
 </html>`
@@ -153,4 +148,3 @@ export interface LayoutTemplateArguments {
     scripts?: string[]
     nav?: Nav[]
 }
-
