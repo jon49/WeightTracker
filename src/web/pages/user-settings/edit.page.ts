@@ -26,16 +26,16 @@ async function render() {
 <button>Clear All Data</button>
 </form>
 
-<br>
-
 <form method=post action="/web/user-settings/edit?handler=userSettings" onchange="this.requestSubmit()">
     <input name=earliestDate type=hidden value="${earliestDate}">
-    <label>Height (inches):<br>
-        <input name=height type=number step=any value="${height ? formatNumber(height) : null}">
-    </label><br><br>
-    <label>Goal Weight:<br>
-        <input name=goalWeight type=number step=any value="${goalWeight ? formatNumber(goalWeight) : null}">
-    </label><br><br>
+    <div class=grid>
+        <label>Height (inches):
+            <input name=height type=number step=any value="${height ? formatNumber(height) : null}">
+        </label>
+        <label>Goal Weight:
+            <input name=goalWeight type=number step=any value="${goalWeight ? formatNumber(goalWeight) : null}">
+        </label>
+    </div>
 </form>`
 }
 

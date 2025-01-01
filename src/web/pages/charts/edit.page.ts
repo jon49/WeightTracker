@@ -25,12 +25,14 @@ async function render() {
     action="/web/charts/edit"
     onchange="this.requestSubmit()">
     <input type=hidden name=_rev value="${chartSettings?._rev ?? 0}">
-    <input name=duration type=number placeholder="Number of months" required value="${data.duration}">
-    <select name=durationUnit required>
-        <option value=month ${selected("month")}>Month(s)</option>
-        <option value=week ${selected("week")}>Week(s)</option>
-        <option value=year ${selected("year")}>Year(s)</option>
-    </select><br><br>
+    <fieldset class="grid naked">
+        <input name=duration type=number placeholder="Number of months" required value="${data.duration}">
+        <select name=durationUnit required>
+            <option value=month ${selected("month")}>Month(s)</option>
+            <option value=week ${selected("week")}>Week(s)</option>
+            <option value=year ${selected("year")}>Year(s)</option>
+        </select>
+    </fieldset>
 </form>`
 }
 

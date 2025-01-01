@@ -12,7 +12,7 @@
 }
 
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 body {
@@ -66,21 +66,30 @@ a {
     color: var(--main-link-color);
     text-decoration: none;
     transition: color var(--main-transition);
+
     &:hover {
         color: var(--main-link-hover-color);
     }
+
     &:visited {
         color: var(--main-link-color);
     }
+
     &:visited:hover {
         color: var(--main-link-hover-color);
     }
+
     &:focus {
         outline: 2px solid var(--main-link-color);
     }
 }
 
-button, input[type="submit"], input[type="reset"], input[type="button"], .button {
+button,
+input[type="submit"],
+input[type="reset"],
+input[type="button"],
+.button {
+    display: block;
     background-color: var(--main-bg-color);
     cursor: pointer;
     color: var(--main-text-color);
@@ -90,9 +99,11 @@ button, input[type="submit"], input[type="reset"], input[type="button"], .button
     padding: 0.5em 1em;
     font-size: var(--font-size);
     transition: background-color var(--main-transition), color var(--main-transition);
+
     &:hover {
         background-color: var(--main-border-color);
     }
+
     &:focus {
         outline: 2px solid var(--main-link-color);
     }
@@ -112,25 +123,31 @@ header {
 nav {
     background-color: var(--main-bg-color);
     color: var(--main-text-color);
+
     ul {
         list-style-type: none;
         padding: 0;
         display: flex;
         justify-content: space-between;
+
         li {
             a {
                 color: var(--main-link-color);
                 text-decoration: none;
                 transition: color var(--main-transition);
+
                 &:hover {
                     color: var(--main-link-hover-color);
                 }
+
                 &:visited {
                     color: var(--main-link-color);
                 }
+
                 &:visited:hover {
                     color: var(--main-link-hover-color);
                 }
+
                 &:focus {
                     outline: 2px solid var(--main-link-color);
                 }
@@ -139,7 +156,8 @@ nav {
     }
 }
 
-input, textarea {
+input,
+textarea {
     background-color: var(--main-bg-color);
     color: var(--main-text-color);
     border: 1px solid var(--main-border-color);
@@ -148,8 +166,11 @@ input, textarea {
     display: block;
     padding: 0.5em;
     margin-top: 0.2em;
+    margin-bottom: 32px;
     font-size: var(--font-size);
     transition: background-color var(--main-transition), color var(--main-transition);
+    width: 100%;
+
     &:focus {
         outline: 2px solid var(--main-link-color);
     }
@@ -163,9 +184,12 @@ select {
     box-shadow: var(--main-box-shadow);
     display: block;
     padding: 0.5em;
-    margin-top: 0.2em;
+    margin-top: 5px;
+    margin-bottom: 32px;
     font-size: var(--font-size);
     transition: background-color var(--main-transition), color var(--main-transition);
+    width: 100%;
+
     &:focus {
         outline: 2px solid var(--main-link-color);
     }
@@ -173,13 +197,12 @@ select {
 
 label {
     display: block;
-    margin-bottom: 0.5em;
 }
 
 button {
     display: block;
-    margin-top: 1em;
-    margin-bottom: 1em;
+    margin: 16px 0 16px 0;
+    width: 100%;
 }
 
 header {
@@ -190,10 +213,13 @@ table {
     border-collapse: collapse;
     width: 100%;
     margin-top: 1em;
-    th, td {
+
+    th,
+    td {
         border: 1px solid var(--main-border-color);
         padding: 0.5em;
     }
+
     th {
         background-color: var(--main-border-color);
     }
@@ -241,3 +267,25 @@ table {
     padding-top: 1em;
 }
 
+/** Grid from PicoCSS */
+.grid {
+    grid-column-gap: 16px;
+    grid-row-gap: 16px;
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+    .grid {
+        grid-template-columns: repeat(auto-fit, minmax(0%, 1fr));
+    }
+}
+
+.grid>* {
+    min-width: 0;
+}
+
+fieldset.naked {
+    border: none;
+    padding: 0;
+}

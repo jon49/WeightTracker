@@ -18,7 +18,6 @@ const queryDateValidator = {
 }
 
 async function render(query: any) {
-    console.log("DATE", query.date)
     let { date } = await validateObject(query, queryDateValidator)
     if (!date) {
         let d = new Date()
@@ -55,16 +54,18 @@ function getEntryForm(o: WeightData) {
 <input name=date type=hidden value=${date}>
 <input name=_rev type=hidden value=${_rev}>
 
-<label>Weight
-<input name=weight type=number step=any value="${weight}"></label>
+<fieldset class="grid naked">
+    <label>Weight
+    <input name=weight type=number step=any value="${weight}"></label>
+    <label>Waist Size (cm)
+        <input name=waist type=number step=any value="${waist}">
+    </label>
+</fieldset>
+
 <button class=hidden></button>
 
 ${getBedtime(bedtime)}
 ${getWakeUp(bedtime, sleep)}
-
-<label>Waist Size (cm)
-    <input name=waist type=number step=any value="${waist}">
-</label>
 
 <label>Comment
     <elastic-textarea>
@@ -77,9 +78,9 @@ ${getWakeUp(bedtime, sleep)}
 function getWakeUp(bedtime: string | undefined, sleep: number | undefined) {
     return !bedtime
         ? null
-    : !sleep
-        ? html`<button id=wake-up hf-target="#wake-up" hf-swap=outerHTML formaction="/web/entries/edit?handler=wakeUp">Wake Up</button>`
-    : html`
+        : !sleep
+            ? html`<button id=wake-up hf-target="#wake-up" hf-swap=outerHTML formaction="/web/entries/edit?handler=wakeUp">Wake Up</button>`
+            : html`
         <label>Hours Slept
             <input id=wake-up-time name=sleep type=number step=any value="${sleep}">
         </label>`
@@ -108,7 +109,7 @@ const weightDataValidator = {
     _rev: createPositiveWholeNumber("Revision"),
 }
 
-const postHandlers : RoutePostHandler = {
+const postHandlers: RoutePostHandler = {
     async post({ data }) {
         let o = await validateObject(data, weightDataValidator)
 
@@ -121,12 +122,14 @@ const postHandlers : RoutePostHandler = {
             return !earliestDate
                 ? (shouldSyncUserSettings.sync = true, {
                     ...settings,
-                    earliestDate: o.date })
+                    earliestDate: o.date
+                })
                 : new Date(earliestDate) < new Date(o.date)
                     ? settings
                     : (shouldSyncUserSettings.sync = true, {
                         ...settings,
-                        earliestDate: o.date })
+                        earliestDate: o.date
+                    })
         }, shouldSyncUserSettings)
 
         return getEntryForm(o)
@@ -181,7 +184,7 @@ const getHandlers: RouteGetHandler = {
     },
 }
 
-const routes : RoutePage = {
+const routes: RoutePage = {
     get: getHandlers,
     post: postHandlers
 }

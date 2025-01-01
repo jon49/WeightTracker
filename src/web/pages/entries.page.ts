@@ -13,14 +13,14 @@ interface WeightDataYear extends WeightData { year: string }
 
 function rowView(o: WeightData) {
     cleanWeightData(o)
-    let {date, weight, bedtime, sleep, waist, comments} = o
-    let c : string[] = comments?.split('\n') ?? []
+    let { date, weight, bedtime, sleep, waist, comments } = o
+    let c: string[] = comments?.split('\n') ?? []
     let comment =
         c.length > 1
             ? c.map(x => html`${x}<br>`)
-        : c.length === 1
-            ? c[0]
-        : null
+            : c.length === 1
+                ? c[0]
+                : null
 
     return html`<tr>
         <td><a href="/web/entries/edit?date=$${date}&hz" target=htmz>$${date}</a></td>
@@ -39,9 +39,9 @@ const entriesValidator = {
 async function render(query: any) {
     let { year } = await validateObject(query, entriesValidator)
     year ??= new Date().getFullYear()
-    let data : WeightDataYear[] = []
-    const [ yearList, dataList ] = await Promise.all([getYears(), getData(year)])
-    const years = yearList.map(x => ""+x)
+    let data: WeightDataYear[] = []
+    const [yearList, dataList] = await Promise.all([getYears(), getData(year)])
+    const years = yearList.map(x => "" + x)
     for (let index = 0; index < dataList.data.length; index++) {
         let d = <WeightDataYear>dataList.data[index];
         if (!d) continue
@@ -56,10 +56,10 @@ async function render(query: any) {
 
 <div class="flex justify-start wrap">
     ${years.reverse().map((x: string) =>
-        x === ""+year
-            ? html`<span>${x}</span>`
-        : html`<a href="/web/entries?year=${x}&hz" target=htmz>${x}</a>`
-    )}
+            x === "" + year
+                ? html`<span>${x}</span>`
+                : html`<a href="/web/entries?year=${x}&hz" target=htmz>${x}</a>`
+        )}
 </div>
 
 <table>
@@ -71,7 +71,7 @@ async function render(query: any) {
     }
 }
 
-async function getData(year: number) : Promise<TableData> {
+async function getData(year: number): Promise<TableData> {
     const start = new Date()
     start.setDate(1)
     start.setMonth(0)
@@ -80,11 +80,11 @@ async function getData(year: number) : Promise<TableData> {
     end.setMonth(11)
     end.setDate(31)
     const dates = dateFill(start, end)
-    const data : WeightData[] = await getMany(dates)
-    return {dates, data}
+    const data: WeightData[] = await getMany(dates)
+    return { dates, data }
 }
 
-async function getYears() : Promise<number[]> {
+async function getYears(): Promise<number[]> {
     const thisYear = new Date().getFullYear()
     const settings = await get("user-settings")
     const startYearString = +(settings?.earliestDate?.slice(0, 4) ?? dateToString(new Date()))
