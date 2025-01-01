@@ -47,6 +47,20 @@ class HistogramChart extends HTMLElement {
 
 customElements.define("chart-histogram", HistogramChart)
 
+class BedtimeChart extends HTMLElement {
+    chart: any | undefined | null
+    constructor() {
+        super()
+        createChart(this, bedtime())
+    }
+
+    disconnectedCallback() {
+        cleanUp(this)
+    }
+}
+
+customElements.define("chart-bedtime", BedtimeChart)
+
 class SleepChart extends HTMLElement {
     chart: any | undefined | null
     constructor() {
@@ -105,36 +119,36 @@ async function weightAverageChartData() {
     const pointRadius =
         labels.length < 500
             ? 2
-        : labels.length > 750
-            ? 1
-        : 0
+            : labels.length > 750
+                ? 1
+                : 0
     const data = {
         labels,
         normalized: true,
         parsing: false,
         spanGaps: false,
-        datasets: [ {
-                label: "Max",
-                data: maxValues,
-                pointRadius,
-                borderWidth,
-                backgroundColor: red,
-                borderColor: red
-            }, {
-                label: "Average",
-                data: avgValues,
-                pointRadius,
-                borderWidth,
-                backgroundColor: green,
-                borderColor: green
-            }, {
-                label: "Min",
-                data: minValues,
-                pointRadius,
-                borderWidth,
-                backgroundColor: blue,
-                borderColor: blue
-            }
+        datasets: [{
+            label: "Max",
+            data: maxValues,
+            pointRadius,
+            borderWidth,
+            backgroundColor: red,
+            borderColor: red
+        }, {
+            label: "Average",
+            data: avgValues,
+            pointRadius,
+            borderWidth,
+            backgroundColor: green,
+            borderColor: green
+        }, {
+            label: "Min",
+            data: minValues,
+            pointRadius,
+            borderWidth,
+            backgroundColor: blue,
+            borderColor: blue
+        }
         ]
     }
 
@@ -155,7 +169,7 @@ async function weightData() {
     const pointRadius =
         labels.length < 500
             ? 2
-        : 1
+            : 1
     const data = {
         labels: labels,
         normalized: true,
@@ -231,13 +245,13 @@ async function rate() {
         acc.date = val
         const v =
             <number[]>rawValues.slice(index, index + 7)
-            .filter(x => x?.weight)
-            .map(x => x?.weight)
+                .filter(x => x?.weight)
+                .map(x => x?.weight)
         acc.avg = avg(v) || null
         return acc
     }, () => <{ date: string, avg: number | null }>({}))
     const length = averages.length
-    const values: { x?: string, pos?: number|null, neg?: number|null, avgAll?: number, avgNeg?: number }[] = new Array(length - 1)
+    const values: { x?: string, pos?: number | null, neg?: number | null, avgAll?: number, avgNeg?: number }[] = new Array(length - 1)
     let allTotal = 0
     let negTotal = 0
     let count = 0
@@ -275,14 +289,14 @@ async function rate() {
             label: "Overall Weight Change",
             backgroundColor: green,
             borderColor: green,
-            data: new Array(length - 1).fill(allTotal/(count||1)),
+            data: new Array(length - 1).fill(allTotal / (count || 1)),
             borderWidth: 1,
             pointRadius,
         }, {
             label: "Overall Weight Loss",
             backgroundColor: red,
             borderColor: red,
-            data: new Array(length - 1).fill(negTotal/(count||1)),
+            data: new Array(length - 1).fill(negTotal / (count || 1)),
             borderWidth: 1,
             pointRadius,
         }]
@@ -294,6 +308,65 @@ async function rate() {
     }
 }
 
+async function bedtime() {
+    const chartSettings = await getChartSettings()
+    const startDate = getStartDate(chartSettings.duration, chartSettings.durationUnit)
+    const dates = dateFill(startDate, new Date())
+    const rawValues = await getWeightData(startDate)
+    if (!rawValues) return
+    const values = reduceSlice(dates, 7, (acc, val, index) => {
+        if (acc.date) return acc
+        acc.date = val
+        const v = rawValues.slice(index, index + 7).map(x => {
+            let bedtime = x?.bedtime?.split(":")
+            if (!bedtime) return null
+            return +bedtime[0] + +bedtime[1] / 60
+        })
+        acc.avg = avg(v) || null
+        acc.std = stdev(v) || null
+        return acc
+    }, () => <{ date: string | null, avg: number | null, std: number | null }>({}))
+
+    const labels = values.map(x => x.date)
+    const data = {
+        labels: labels,
+        normalized: true,
+        parsing: false,
+        spanGaps: false,
+        datasets: [{
+            label: "Average Bedtime for Week",
+            backgroundColor: red,
+            borderColor: red,
+            data: values.map(x => x.avg),
+            borderWidth: 1,
+            yAxisID: "A",
+        }, {
+            label: "Standard Deviation",
+            backgroundColor: "rgba(0, 255, 0, 0.1)",
+            borderColor: "rgba(0, 255, 0, 0.1)",
+            data: values.map(x => x.std),
+            borderWidth: 1,
+            yAxisID: "B",
+        }]
+    }
+
+    return {
+        type: "bar",
+        data,
+        options: {
+            scales: {
+                A: {
+                    position: 'left',
+                    suggestedMin: 0,
+                },
+                B: {
+                    position: 'right',
+                    suggestedMin: 0,
+                },
+            }
+        }
+    }
+}
 async function sleep() {
     const chartSettings = await getChartSettings()
     const startDate = getStartDate(chartSettings.duration, chartSettings.durationUnit)
@@ -307,7 +380,7 @@ async function sleep() {
         acc.avg = avg(v) || null
         acc.std = stdev(v) || null
         return acc
-    }, () => <{ date: string|null, avg: number|null, std: number|null }>({}))
+    }, () => <{ date: string | null, avg: number | null, std: number | null }>({}))
 
     const labels = values.map(x => x.date)
     const data = {
@@ -350,7 +423,7 @@ async function sleep() {
     }
 }
 
-async function api<T>(url: string) : Promise<T> {
+async function api<T>(url: string): Promise<T> {
     url = `/web/api/${url}`
     let res = await fetch(url)
     if (res.ok && res.headers.get("Content-Type") === "application/json") {

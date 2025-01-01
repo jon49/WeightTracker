@@ -27,13 +27,13 @@ export function getPreviousDay(date: Date, targetDay: number) {
 }
 
 export function dateToString(date: Date) {
-    return `${date.getFullYear()}-${(date.getMonth()+1+"").padStart(2, "0")}-${(date.getDate()+"").padStart(2, "0")}`
+    return `${date.getFullYear()}-${(date.getMonth() + 1 + "").padStart(2, "0")}-${(date.getDate() + "").padStart(2, "0")}`
 }
 
 export function dateFill(from: Date, to: Date): string[] {
     from = new Date(from)
     // 1e3*60*60*24 == 86,400,000 ms to days
-    const count = Math.ceil((+to - +from)/864e5 + 1)
+    const count = Math.ceil((+to - +from) / 864e5 + 1)
     const dates = new Array(count)
     for (let index = 0; index < count; index++) {
         dates[index] = dateToString(from)
@@ -48,19 +48,19 @@ export function round(number: number, precision: number) {
 }
 
 export function reduceSlice<T, S>(data: T[], step: number, f: (acc: S, val: T, index: number) => S, init: () => S): S[] {
-  const length = data.length
-  const arr = new Array(Math.ceil(length/step))
-  for (let index = 0; index < length; index += step) {
-    let acc = init instanceof Function ? init() : init
-    for (let i = index; i < step + index && i < length; i++) {
-      acc = f(acc, data[i], i)
+    const length = data.length
+    const arr = new Array(Math.ceil(length / step))
+    for (let index = 0; index < length; index += step) {
+        let acc = init instanceof Function ? init() : init
+        for (let i = index; i < step + index && i < length; i++) {
+            acc = f(acc, data[i], i)
+        }
+        arr[(index / step)] = acc
     }
-    arr[(index/step)] = acc
-  }
-  return arr
+    return arr
 }
 
-export function avg(numbers: (number|undefined)[] | null | undefined): number | undefined {
+export function avg(numbers: (number | undefined | null)[] | null | undefined): number | undefined {
     if ((numbers?.length ?? 0) < 1) return undefined
 
     let sum = 0
@@ -77,7 +77,7 @@ export function avg(numbers: (number|undefined)[] | null | undefined): number | 
     return sum / count
 }
 
-export function stdev(numbers: (number|undefined)[] | undefined): number | undefined {
+export function stdev(numbers: (number | undefined | null)[] | undefined): number | undefined {
     if ((numbers?.length ?? 0) < 1) return undefined
     numbers = numbers!.filter(x => x)
     let average = avg(numbers)
@@ -86,18 +86,18 @@ export function stdev(numbers: (number|undefined)[] | undefined): number | undef
     return averages ? Math.sqrt(averages) : undefined
 }
 
-export function isNil(value : unknown) : value is undefined | null {
+export function isNil(value: unknown): value is undefined | null {
     return value === undefined || value === null
 }
 
 export function formatNumber(number: number | undefined, precision?: number): string | undefined {
     if (!number || Number.isNaN(number)) return
-    if (isNil(precision)) return ""+number
+    if (isNil(precision)) return "" + number
     let multiplier = Math.pow(10, precision)
     return (Math.round(number * multiplier) / multiplier).toFixed(precision)
 }
 
-export function setDefaults<T>(o: T | undefined, defaults: [keyof T, T[keyof T]][]) : T {
+export function setDefaults<T>(o: T | undefined, defaults: [keyof T, T[keyof T]][]): T {
     if (!o) {
         o = <T>{}
     }
@@ -110,8 +110,8 @@ export function setDefaults<T>(o: T | undefined, defaults: [keyof T, T[keyof T]]
 }
 
 export const isSelected =
-    <T extends string>(currentValue: string|undefined) =>
-    (value: T) => value === currentValue ? "selected" : null
+    <T extends string>(currentValue: string | undefined) =>
+        (value: T) => value === currentValue ? "selected" : null
 
 export function toNumber(s: unknown) {
     // @ts-ignore

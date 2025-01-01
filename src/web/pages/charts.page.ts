@@ -55,6 +55,9 @@ const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, stats
     <chart-button data-chart=chart-histogram data-target="#charts-location">
         <button>Histogram</button>
     </chart-button>
+    <chart-button data-chart=chart-bedtime data-target="#charts-location">
+        <button>Bedtime</button>
+    </chart-button>
     <chart-button data-chart=chart-sleep data-target="#charts-location">
         <button>Sleep</button>
     </chart-button>
