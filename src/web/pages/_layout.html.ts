@@ -39,7 +39,6 @@ const render = async (
         scripts,
         nav,
         title,
-        bodyAttr,
     }: LayoutTemplateArguments) => {
     const [isLoggedIn, updated, { theme }] = await Promise.all([
         db.isLoggedIn(),
@@ -50,7 +49,7 @@ const render = async (
 
     return html`
 <!DOCTYPE html>
-<html>
+<html $${when(theme, x => x === "neither" ? null : `data-theme=${x}`)}>
  <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -60,7 +59,7 @@ const render = async (
     <link href="/web/css/app.css" rel=stylesheet>
     <link rel="manifest" href="/web/manifest.json">
 </head>
-<body $${when(theme, x => `class=${x}`)} $${bodyAttr}>
+<body>
     <div id=head>$${head}</div>
 
     <div id=sw-message class=container></div>

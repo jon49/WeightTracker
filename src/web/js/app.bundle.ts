@@ -50,8 +50,7 @@ function appendMessage(
 // @ts-ignore
 doc.addEventListener("app-theme", (e: CustomEvent) => {
     let theme = e.detail.theme;
-    ["light", "dark"].forEach(x => doc.body.classList.remove(x))
-    if (theme === "neither") return
-    doc.body.classList.add(theme)
+    let docElement = doc.documentElement
+    theme === "neither" ? docElement.removeAttribute("data-theme") : docElement.setAttribute("data-theme", theme)
 })
 
