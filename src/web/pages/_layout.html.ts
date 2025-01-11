@@ -81,7 +81,7 @@ const render = async (
                 </form>
 
                     ${isLoggedIn
-            ? html`<a id=auth-link href="/login?logout">Logout</a>`
+            ? html`<a id=auth-link href="/login?logout" role=button>Logout</a>`
             : loginView()}
                 </li>
             </ul>
