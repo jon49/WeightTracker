@@ -62,25 +62,33 @@ const render = async (
 </head>
 <body $${when(theme, x => `class=${x}`)} $${bodyAttr}>
     <div id=head>$${head}</div>
-    <header>
-        <div id=sw-message></div>
-        <div class=flex>
-            <a href="/web/entries/edit"><img style="height:2.25em;" src="/web/images/weight.svg"></img></a>
-            <div class=flex>
-                <form method=post action="/web/api/settings?handler=theme" class=inline>
-                    ${themeView(theme)}
+
+    <div id=sw-message class=container></div>
+    <header class="container">
+        <nav role=navigation>
+            <ul>
+                <li>
+                    <a href="/web/entries/edit"><img style="height:2.25em;" src="/web/images/weight.svg"></img></a>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <form method=post action="/web/api/settings?handler=theme" class=inline>
+                        ${themeView(theme)}
+                    </form>
+
+                <form method=post action="/web/api/sync?handler=force" class=inline>
+                    <button id=sync-count class=bg>${syncCountView(updatedCount)}</button>
                 </form>
 
-               <form method=post action="/web/api/sync?handler=force" class=inline>
-                   <button id=sync-count class=bg>${syncCountView(updatedCount)}</button>
-               </form>
-
-                ${isLoggedIn
+                    ${isLoggedIn
             ? html`<a id=auth-link href="/login?logout">Logout</a>`
             : loginView()}
-            </div>
-        </div>
-        <nav id=nav-main>
+                </li>
+            </ul>
+        </nav>
+
+        <nav role=navigation>
             <ul>
                 <li><a href="/web/entries">Entries</a></li>
                 <li><a href="/web/entries/edit">Entry</a></li>
@@ -91,7 +99,8 @@ const render = async (
             </ul>
         </nav>
     </header>
-    <main>
+
+    <main class="container">
         ${main}
     </main>
 
@@ -99,7 +108,7 @@ const render = async (
     <div id=toasts></div>
     <div id=dialogs></div>
 
-    <footer><p>${version}</p></footer>
+    <footer class="container"><p>${version}</p></footer>
 
     <form
         id=get-sync-count-form

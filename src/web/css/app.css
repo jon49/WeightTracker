@@ -1,291 +1,44 @@
-:root {
-    --main-bg-color: #F0f0f0;
-    --main-text-color: #333;
-    --main-link-color: #00f;
-    --main-link-hover-color: #00a;
-    --main-border-color: #ccc;
-    --main-border-radius: 5px;
-    --main-box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-    --main-transition: 0.3s;
-    /* https://css-tricks.com/linearly-scale-font-size-with-css-clamp-based-on-the-viewport/ */
-    --font-size: clamp(1rem, 0.1818rem + 3.6364vw, 1.75rem);
-}
-
-* {
-    box-sizing: border-box;
-}
+@import url("/web/css/pico.min.css") layer;
 
 body {
-    font-family: sans-serif;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1em 20em 1em;
-    background-color: var(--main-bg-color);
-    color: var(--main-text-color);
-    font-size: var(--font-size);
-    transition: background-color var(--main-transition), color var(--main-transition);
+    padding: 1em 0.5em 50vh 0.5em;
 }
 
-footer {
-    font-size: 0.5em;
+.inline {
+    display: inline;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --main-bg-color: #333;
-        --main-text-color: #f0f0f0;
-        --main-link-color: #0ff;
-        --main-link-hover-color: #0aa;
-        --main-link-visited-hover-color: #a81a55;
-        --main-border-color: #666;
-        --main-box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
-    }
+.rtl {
+    direction: rtl;
 }
 
-body.light {
-    --main-bg-color: #f0f0f0;
-    --main-text-color: #333;
-    --main-link-color: #00f;
-    --main-link-hover-color: #00a;
-    --main-link-visited-hover-color: #551a8b;
-    --main-border-color: #ccc;
-    --main-box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+.grid-row-1 {
+    grid-row: 1;
 }
 
-body.dark {
-    --main-bg-color: #333;
-    --main-text-color: #f0f0f0;
-    --main-link-color: #0ff;
-    --main-link-hover-color: #0aa;
-    --main-link-visited-hover-color: #a81a55;
-    --main-border-color: #666;
-    --main-box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+.m-0 {
+    margin: 0;
 }
 
-a {
-    color: var(--main-link-color);
-    text-decoration: none;
-    transition: color var(--main-transition);
-
-    &:hover {
-        color: var(--main-link-hover-color);
-    }
-
-    &:visited {
-        color: var(--main-link-color);
-    }
-
-    &:visited:hover {
-        color: var(--main-link-hover-color);
-    }
-
-    &:focus {
-        outline: 2px solid var(--main-link-color);
-    }
+.w-auto {
+    width: auto;
 }
 
-button,
-input[type="submit"],
-input[type="reset"],
-input[type="button"],
-.button {
-    display: block;
-    background-color: var(--main-bg-color);
-    cursor: pointer;
-    color: var(--main-text-color);
-    border: 1px solid var(--main-border-color);
-    border-radius: var(--main-border-radius);
-    box-shadow: var(--main-box-shadow);
-    padding: 0.5em 1em;
-    font-size: var(--font-size);
-    transition: background-color var(--main-transition), color var(--main-transition);
-
-    &:hover {
-        background-color: var(--main-border-color);
-    }
-
-    &:focus {
-        outline: 2px solid var(--main-link-color);
-    }
+.h-fit-content {
+    height: fit-content;
 }
 
-input[type="reset"] {
-    background-color: var(--main-text-color);
-    color: var(--main-bg-color);
-}
-
-header {
-    nav {
-        border-bottom: 1px solid var(--main-border-color);
-    }
-}
-
-nav {
-    background-color: var(--main-bg-color);
-    color: var(--main-text-color);
-
-    ul {
-        list-style-type: none;
-        padding: 0;
-        display: flex;
-        justify-content: space-between;
-
-        li {
-            a {
-                color: var(--main-link-color);
-                text-decoration: none;
-                transition: color var(--main-transition);
-
-                &:hover {
-                    color: var(--main-link-hover-color);
-                }
-
-                &:visited {
-                    color: var(--main-link-color);
-                }
-
-                &:visited:hover {
-                    color: var(--main-link-hover-color);
-                }
-
-                &:focus {
-                    outline: 2px solid var(--main-link-color);
-                }
-            }
-        }
-    }
-}
-
-input,
-textarea {
-    background-color: var(--main-bg-color);
-    color: var(--main-text-color);
-    border: 1px solid var(--main-border-color);
-    border-radius: var(--main-border-radius);
-    box-shadow: var(--main-box-shadow);
-    display: block;
-    padding: 0.5em;
-    margin-top: 0.2em;
-    margin-bottom: 32px;
-    font-size: var(--font-size);
-    transition: background-color var(--main-transition), color var(--main-transition);
-    width: 100%;
-
-    &:focus {
-        outline: 2px solid var(--main-link-color);
-    }
-}
-
-select {
-    background-color: var(--main-bg-color);
-    color: var(--main-text-color);
-    border: 1px solid var(--main-border-color);
-    border-radius: var(--main-border-radius);
-    box-shadow: var(--main-box-shadow);
-    display: block;
-    padding: 0.5em;
-    margin-top: 5px;
-    margin-bottom: 32px;
-    font-size: var(--font-size);
-    transition: background-color var(--main-transition), color var(--main-transition);
-    width: 100%;
-
-    &:focus {
-        outline: 2px solid var(--main-link-color);
-    }
-}
-
-label {
-    display: block;
-}
-
-button {
-    display: block;
-    margin: 16px 0 16px 0;
-    width: 100%;
-}
-
-header {
-    margin-top: 1em;
-}
-
-table {
-    border-collapse: collapse;
-    width: 100%;
-    margin-top: 1em;
-
-    th,
-    td {
-        border: 1px solid var(--main-border-color);
-        padding: 0.5em;
-    }
-
-    th {
-        background-color: var(--main-border-color);
-    }
-}
-
-.hidden {
-    display: none;
+.self-center {
+    align-self: center;
 }
 
 .flex {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1em;
-}
-
-.justify-start {
-    justify-content: flex-start;
-}
-
-.wrap {
+    justify-items: start;
     flex-wrap: wrap;
+    gap: 5px;
 }
 
-.inline {
-    display: inline-block;
-}
-
-.toast {
-    background-color: var(--main-bg-color);
-    backdrop-filter: blur(5px);
-    color: var(--main-text-color);
-    border: 1px solid var(--main-border-color);
-    border-radius: var(--main-border-radius);
-    box-shadow: var(--main-box-shadow);
-    padding: 0.5em;
-    font-size: var(--font-size);
-    transition: background-color var(--main-transition), color var(--main-transition);
-    max-width: 80vw;
-    position: fixed;
-    bottom: 1rem;
-}
-
-.t-pad {
-    padding-top: 1em;
-}
-
-/** Grid from PicoCSS */
-.grid {
-    grid-column-gap: 16px;
-    grid-row-gap: 16px;
-    display: grid;
-    grid-template-columns: 1fr;
-}
-
-@media (min-width: 768px) {
-    .grid {
-        grid-template-columns: repeat(auto-fit, minmax(0%, 1fr));
-    }
-}
-
-.grid>* {
-    min-width: 0;
-}
-
-fieldset.naked {
-    border: none;
-    padding: 0;
+.gap-10 {
+    gap: 10px;
 }

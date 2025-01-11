@@ -45,7 +45,7 @@ const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, stats
     </table>
 </div>
 
-<div id=create-chart class="flex justify-start">
+<div id=create-chart class="flex">
     <chart-button data-chart=chart-history data-target="#charts-location">
         <button>History</button>
     </chart-button>

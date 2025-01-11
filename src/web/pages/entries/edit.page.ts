@@ -53,7 +53,12 @@ function getEntryForm(o: WeightData) {
 <input name=date type=hidden value=${date}>
 <input name=_rev type=hidden value=${_rev}>
 
-<fieldset class="grid naked">
+<fieldset class="grid">
+${getWakeUp(bedtime, sleep)}
+${getBedtime(bedtime)}
+</fieldset>
+
+<fieldset class="grid">
     <label>Weight
     <input name=weight type=number step=any value="${weight}"></label>
     <label>Waist Size (cm)
@@ -61,10 +66,7 @@ function getEntryForm(o: WeightData) {
     </label>
 </fieldset>
 
-<button class=hidden></button>
-
-${getBedtime(bedtime)}
-${getWakeUp(bedtime, sleep)}
+<button hidden></button>
 
 <label>Comment
     <elastic-textarea>
@@ -78,7 +80,7 @@ function getWakeUp(bedtime: string | undefined, sleep: number | undefined) {
     return !bedtime
         ? null
         : !sleep
-            ? html`<button id=wake-up hf-target="#wake-up" hf-swap=outerHTML formaction="/web/entries/edit?handler=wakeUp">Wake Up</button>`
+            ? html`<button id=wake-up class="h-fit-content self-center" hf-target="#wake-up" hf-swap=outerHTML formaction="/web/entries/edit?handler=wakeUp">Wake Up</button>`
             : html`
         <label>Hours Slept
             <input id=wake-up-time name=sleep type=number step=any value="${sleep}">
@@ -87,13 +89,13 @@ function getWakeUp(bedtime: string | undefined, sleep: number | undefined) {
 
 function getBedtime(bedtime: string | undefined) {
     if (!bedtime) {
-        return html`<button formaction="/web/entries/edit?handler=startSleep">
+        return html`<button class="w-100" formaction="/web/entries/edit?handler=startSleep">
         Bedtime
         </button>`
     }
     return html`
-    <label>Bedtime${bedtime?.endsWith("M") ? ` (${bedtime})` : ""}
-        <input style="min-width:214px" name=bedtime type=time value="${bedtime}">
+    <label class="grid-row-1">Bedtime${bedtime?.endsWith("M") ? ` (${bedtime})` : ""}
+        <input name=bedtime type=time value="${bedtime}">
     </label>`
 }
 
