@@ -62,10 +62,12 @@ async function render(query: any) {
         )}
 </div>
 
-<table>
-    <thead><tr><th>Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><th>Weight</th><th>Bedtime</th><th>Hours Slept</th><th>Waist (cm)</th><th>Comments</th></tr></thead>
-    <tbody>${data.reverse().map(rowView)}</tbody>
-</table>
+<div class="overflow-auto">
+    <table>
+        <thead><tr><th>Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><th>Weight</th><th>Bedtime</th><th>Hours Slept</th><th>Waist (cm)</th><th>Comments</th></tr></thead>
+        <tbody>${data.reverse().map(rowView)}</tbody>
+    </table>
+</div>
 
 <a href="#" class="back-to-top" role="button" style="opacity:0.75;">Back to Top</a>`
     }
