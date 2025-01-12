@@ -42,3 +42,17 @@ body {
 .gap-10 {
     gap: 10px;
 }
+
+.toast {
+    max-width: 80vw;
+    height: fit-content;
+    min-height: auto;
+    top: auto;
+    bottom: 10px;
+    background-color: var(--pico-primary-background);
+    opacity: 0.95;
+}
+
+.toast p {
+    margin-top: var(--pico-typography-spacing-vertical);
+}
