@@ -3,17 +3,13 @@ import { getResponse, options } from "@jon49/sw/routes.js"
 
 let version: string = self.app.version
 
-self.addEventListener("install", (e: Event) => {
-    console.log("Service worker installed.")
-
+self.addEventListener("install", (e: Event) =>
     // @ts-ignore
-    e.waitUntil(caches.open(version).then(async cache => {
-        console.log("Caching files.")
+    e.waitUntil(caches.open(version).then(cache =>
         // @ts-ignore
-        return cache.addAll(self.app.links.map(x => x.file))
-    }))
-
-})
+        cache.addAll(self.app.links.map(x => x.file))
+    ).catch(e => console.error(e)))
+)
 
 function handleErrors(errors: any) {
     if (errors instanceof ValidationResult) {
