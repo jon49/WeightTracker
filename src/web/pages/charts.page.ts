@@ -19,6 +19,7 @@ const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, stats
 
 <div>
     <h3>${statsHeaderText}</h3>
+<div class="overflow-auto">
     <table>
         <thead>
             <tr>
@@ -43,6 +44,7 @@ const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, stats
             </tr>
         </tbody>
     </table>
+</div>
 </div>
 
 <div id=create-chart class="flex">
