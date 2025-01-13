@@ -43,6 +43,11 @@ body {
     gap: 10px;
 }
 
+.char-10 {
+    display: inline-block;
+    min-width: 10ch;
+}
+
 .toast {
     max-width: 80vw;
     height: fit-content;

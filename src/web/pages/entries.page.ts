@@ -64,7 +64,7 @@ async function render(query: any) {
 
 <div class="overflow-auto">
     <table>
-        <thead><tr><th>Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><th>Weight</th><th>Bedtime</th><th>Hours Slept</th><th>Waist (cm)</th><th>Comments</th></tr></thead>
+        <thead><tr><th><span class="char-10">Date</span></th><th>Weight</th><th>Bedtime</th><th>Hours Slept</th><th>Waist (cm)</th><th>Comments</th></tr></thead>
         <tbody>${data.reverse().map(rowView)}</tbody>
     </table>
 </div>
