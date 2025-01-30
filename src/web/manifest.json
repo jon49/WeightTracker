@@ -1,7 +1,7 @@
 {
     "name": "Weight Tracker",
-    "background_color": "#333",
-    "theme_color": "#f0f0f0",
+    "background_color": "#13171f",
+    "theme_color": "#524ed2",
     "icons": [
         {
             "src": "/web/images/weight.ico",
@@ -14,7 +14,7 @@
             "type": "image/png"
         }
     ],
-    "start_url": "/web/entries/edit",
+    "start_url": "/web/entries/edit/",
     "scope": "/web",
     "display": "standalone"
 }
