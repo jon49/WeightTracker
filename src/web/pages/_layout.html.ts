@@ -112,6 +112,7 @@ const render = async (
     <form
         id=get-sync-count-form
         action="/web/api/sync?handler=count"
+        hidden
 
         is=form-subscribe
         data-event="hf:completed"
@@ -132,6 +133,15 @@ const render = async (
         hf-scroll-ignore
         hf-swap=outerHTML
         hf-target="#auth-link">
+    </form>
+
+    <form
+        hidden
+
+        is=form-subscribe
+        data-event="refresh"
+        data-action="window.location.href = window.location.href"
+        >
     </form>
 
     <script src="/web/js/app.bundle.js" type=module></script>
