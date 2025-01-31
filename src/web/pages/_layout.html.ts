@@ -140,7 +140,7 @@ const render = async (
 
         is=form-subscribe
         data-event="refresh"
-        data-action="window.location.href = window.location.href"
+        data-action="setTimeout(() => location.reload(), 1e3)"
         >
     </form>
 
