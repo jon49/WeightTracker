@@ -1,7 +1,7 @@
 import { get as get1, getMany, setMany, set as set1, update as update1, clear } from "idb-keyval"
 import { Theme } from "../api/settings.page.js"
 
-const get : DBGet = get1
+const get: DBGet = get1
 
 const _updated =
     async (key: IDBValidKey) => {
@@ -38,7 +38,7 @@ function update<T>(key: string, f: (val: T) => T, options?: { sync: boolean }): 
 async function update(key: string, f: (v: any) => any, options = { sync: true }) {
     await update1(key, f)
     if (options.sync) {
-        let o : any = await get(key)
+        let o: any = await get(key)
         if (o && "_rev" in o) {
             await _updated(key)
         }
@@ -72,6 +72,7 @@ export interface UserSettings extends Revision {
     earliestDate: string | undefined
     height: number | undefined
     goalWeight: number | undefined
+    bedtime?: string
 }
 
 export type DurationUnit = "month" | "year" | "week"
@@ -94,7 +95,7 @@ export interface Revision {
     _rev: number
 }
 
-export type FormReturn<T> = { [key in keyof T]: string|undefined }
-export interface UserSettingsForm extends FormReturn<UserSettings> {}
-export interface WeightDataForm extends FormReturn<WeightData> {}
-export interface ChartSettingsForm extends FormReturn<ChartSettings> {}
+export type FormReturn<T> = { [key in keyof T]: string | undefined }
+export interface UserSettingsForm extends FormReturn<UserSettings> { }
+export interface WeightDataForm extends FormReturn<WeightData> { }
+export interface ChartSettingsForm extends FormReturn<ChartSettings> { }
