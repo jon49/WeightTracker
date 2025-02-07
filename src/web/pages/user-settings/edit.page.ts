@@ -16,7 +16,7 @@ const {
 async function render() {
     let [userSettings, settings] =
         await Promise.all([db.get("user-settings"), db.get("settings")])
-    let { earliestDate, height, goalWeight } = userSettings ?? <UserSettings>{}
+    let { earliestDate, height, goalWeight, bedtime } = userSettings ?? <UserSettings>{}
     settings = settings ?? {} as Settings
 
     return html`
@@ -36,6 +36,10 @@ async function render() {
             <input name=goalWeight type=number step=any value="${goalWeight ? formatNumber(goalWeight) : null}">
         </label>
     </div>
+    <label>
+        Bedtime:
+        <input name=bedtime type=time value="${bedtime}">
+    </label>
 </form>`
 }
 
@@ -43,6 +47,7 @@ const userSettingsValidator = {
     earliestDate: maybe(createDateString("Earliest Date")),
     height: maybe(createPositiveNumber("Height")),
     goalWeight: maybe(createPositiveNumber("Goal Weight")),
+    bedtime: maybe(createDateString("Bedtime")),
 }
 
 const postHandlers: RoutePostHandler = {
