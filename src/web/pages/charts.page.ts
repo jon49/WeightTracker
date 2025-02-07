@@ -23,24 +23,24 @@ const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, stats
     <table>
         <thead>
             <tr>
+                <th>Weight</th>
+                <th>Rate</th>
                 <th>BMI Prime</th>
+                <th>Sleep</th>
                 <th>Weeks to Go</th>
                 <th>&sigma;</th>
                 <th>Goal</th>
-                <th>Weight</th>
-                <th>Rate</th>
-                <th>Sleep</th>
             </tr>
         </thead>
         <tbody>
             <tr>
+                <td>${statsData.weight}</td>
+                <td>${statsData.rate}</td>
                 <td>${statsData.bmiPrime}</td>
+                <td>${statsData.sleep}</td>
                 <td>${statsData.weeksToGo}</td>
                 <td>${statsData.std}</td>
                 <td>${statsData.goalWeight}</td>
-                <td>${statsData.weight}</td>
-                <td>${statsData.rate}</td>
-                <td>${statsData.sleep}</td>
             </tr>
         </tbody>
     </table>
