@@ -39,7 +39,7 @@ async function render() {
     </div>
     <label>
         Bedtime:
-        <input name=bedtime type=time value="${bedtime}" onchange="this.requestSubmit()">
+        <input name=bedtime type=time value="${bedtime}">
     </label>
 </form>`
 }
