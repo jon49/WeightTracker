@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "tsx --test  $(find src -type f -name '*.test.ts')",
     "start": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=dev -p 8008",
     "server": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=server --target=./server/public",
     "build": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=prod --target=deploy",
@@ -24,6 +24,7 @@
     "simple-input-formatter": "^0.3.6"
   },
   "devDependencies": {
+    "@types/node": "^22.13.1",
     "tsx": "^4.19.1",
     "typescript": "^5.3.3"
   }

@@ -2,6 +2,7 @@ import { ChartSettings, UserSettings, WeightData } from "../server/db.js"
 import { avg, dateFill, dateToString, reduceSlice, stdev } from "./utils.js"
 import { getWeeklyData, getStartDate, setChartSettingDefaults } from "./charts-shared.js"
 import "./charts/_chart-button.js"
+import { bedtimeSuccess, timeToNumber } from "./charts/_utils.js"
 
 const red = "#ff6384", blue = "#6391ff", green = "#63ff83"
 
@@ -309,23 +310,24 @@ async function rate() {
 }
 
 async function bedtime() {
-    const chartSettings = await getChartSettings()
-    const startDate = getStartDate(chartSettings.duration, chartSettings.durationUnit)
+    const bedtimeGoal = (await api<UserSettings>("user-settings"))?.bedtime
+    const {duration, durationUnit} = await getChartSettings()
+    const startDate = getStartDate(duration, durationUnit)
     const dates = dateFill(startDate, new Date())
     const rawValues = await getWeightData(startDate)
     if (!rawValues) return
+
     const values = reduceSlice(dates, 7, (acc, val, index) => {
         if (acc.date) return acc
         acc.date = val
-        const v = rawValues.slice(index, index + 7).map(x => {
-            let bedtime = x?.bedtime?.split(":")
-            if (!bedtime) return null
-            return +bedtime[0] + +bedtime[1] / 60
-        })
-        acc.avg = avg(v) || null
-        acc.std = stdev(v) || null
+        const bedtimesForWeek = rawValues
+            .slice(index, index + 7)
+            .filter(x => x?.bedtime)
+            .map(x => timeToNumber(x.bedtime as string))
+        acc.std = stdev(bedtimesForWeek) || null
+        acc.success = avg(bedtimeSuccess(bedtimesForWeek, timeToNumber(bedtimeGoal ?? "22:00"))) || null
         return acc
-    }, () => <{ date: string | null, avg: number | null, std: number | null }>({}))
+    }, () => <{ date: string | null, std: number | null, success: number | null }>({}))
 
     const labels = values.map(x => x.date)
     const data = {
@@ -334,10 +336,10 @@ async function bedtime() {
         parsing: false,
         spanGaps: false,
         datasets: [{
-            label: "Average Bedtime for Week",
+            label: "Bedtime Success",
             backgroundColor: red,
             borderColor: red,
-            data: values.map(x => x.avg),
+            data: values.map(x => x.success),
             borderWidth: 1,
             yAxisID: "A",
         }, {
@@ -357,7 +359,7 @@ async function bedtime() {
             scales: {
                 A: {
                     position: 'left',
-                    suggestedMin: 0,
+                    min: 0.5,
                 },
                 B: {
                     position: 'right',
@@ -367,6 +369,7 @@ async function bedtime() {
         }
     }
 }
+
 async function sleep() {
     const chartSettings = await getChartSettings()
     const startDate = getStartDate(chartSettings.duration, chartSettings.durationUnit)
