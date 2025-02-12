@@ -7,13 +7,12 @@ const defaultTheme = "⛅",
     lightTheme = "&#127774;",
     darkTheme = "&#127762;"
 
-export function themeView(theme: Theme | undefined) {
-    let image = theme === "light"
+export function themeImage(theme: Theme | undefined) {
+    return html`$${theme === "light"
         ? lightTheme
         : theme === "dark"
             ? darkTheme
-            : defaultTheme
-    return html`<button class="bg">$${image}</button>`
+            : defaultTheme}`
 }
 
 export function syncCountView(count: number) {
@@ -68,13 +67,14 @@ const render = async (
             </ul>
             <ul>
                 <li>
-                    <form method=post action="/web/api/settings?handler=theme" class=inline>
-                        ${themeView(theme)}
-                    </form>
+                    <button form=post-form formaction="/web/api/settings?handler=theme" class="bg">$${themeImage(theme)}</button>
 
-                <form method=post action="/web/api/sync?handler=force" class=inline>
-                    <button id=sync-count class=bg>${syncCountView(updatedCount)}</button>
-                </form>
+                    <button
+                        id=sync-count
+                        form=post-form
+                        formaction="/web/api/sync?handler=force"
+                        class=bg
+                        >${syncCountView(updatedCount)}</button>
 
                     ${isLoggedIn
             ? html`<a id=auth-link href="/login?logout" role=button>Logout</a>`
@@ -139,6 +139,8 @@ const render = async (
         data-action="setTimeout(() => location.reload(), 1e3)"
         >
     </form>
+
+    <form id=post-form method=post hidden></form>
 
     <script src="/web/js/app.bundle.js" type=module></script>
 
