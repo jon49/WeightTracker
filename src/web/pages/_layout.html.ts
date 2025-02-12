@@ -24,10 +24,6 @@ export function loginView() {
     return html`<a id=auth-link href="/login">Login</a>`
 }
 
-const {
-    version
-} = self.app
-
 interface Nav {
     name: string
     url: string
@@ -107,7 +103,7 @@ const render = async (
     <div id=toasts></div>
     <div id=dialogs></div>
 
-    <footer class="container"><p>${version}</p></footer>
+    <footer class="container"></footer>
 
     <form
         id=get-sync-count-form
