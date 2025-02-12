@@ -8,6 +8,7 @@ const {
     utils: { formatNumber },
     validation: {
         createDateString,
+        createTimeString,
         createPositiveNumber,
         maybe,
         validateObject },
@@ -38,7 +39,7 @@ async function render() {
     </div>
     <label>
         Bedtime:
-        <input name=bedtime type=time value="${bedtime}">
+        <input name=bedtime type=time value="${bedtime}" onchange="this.requestSubmit()">
     </label>
 </form>`
 }
@@ -47,7 +48,7 @@ const userSettingsValidator = {
     earliestDate: maybe(createDateString("Earliest Date")),
     height: maybe(createPositiveNumber("Height")),
     goalWeight: maybe(createPositiveNumber("Goal Weight")),
-    bedtime: maybe(createDateString("Bedtime")),
+    bedtime: maybe(createTimeString("Bedtime")),
 }
 
 const postHandlers: RoutePostHandler = {
