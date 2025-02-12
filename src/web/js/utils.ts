@@ -90,9 +90,6 @@ export function isNil(value: unknown): value is undefined | null {
     return value == null
 }
 
-export function hoursAfterGoalTime(time: string, goalTime: string) {
-}
-
 export function formatNumber(number: number | undefined, precision?: number): string | undefined {
     if (!number || Number.isNaN(number)) return
     if (isNil(precision)) return "" + number
