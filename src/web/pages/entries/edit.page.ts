@@ -39,7 +39,12 @@ async function render(query: any) {
     <input name=date type=date required value="${date}"></label>
 </form>
 
-<form id=entry-form method=post action="/web/entries/edit" onchange="this.requestSubmit()">
+<form
+    id=entry-form
+    method=post
+    action="/web/entries/edit"
+    hf-target="#entry-form"
+    onchange="this.requestSubmit()">
     ${getEntryForm(data)}
 </form>
 <script src="/web/js/elastic-textarea.js" defer></script>
