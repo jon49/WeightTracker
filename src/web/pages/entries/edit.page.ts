@@ -43,7 +43,7 @@ async function render(query: any) {
     id=entry-form
     method=post
     action="/web/entries/edit"
-    hf-target="#entry-form"
+    hf-target="this"
     onchange="this.requestSubmit()">
     ${getEntryForm(data)}
 </form>
