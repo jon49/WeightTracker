@@ -70,6 +70,20 @@ const render = async (
                     <button form=post-form formaction="/web/api/settings?handler=theme" class="bg">$${themeImage(theme)}</button>
 
                     <button
+                        form=post-form
+                        formaction="/web/api/sync?handler=count"
+                        formmethod=get
+                        hidden
+
+                        traits=x-subscribe
+                        data-event="hf:completed"
+                        data-match="detail: {method:'post'}"
+
+                        hf-scroll-ignore
+                        hf-target="#sync-count">
+                    </button>
+
+                    <button
                         id=sync-count
                         form=post-form
                         formaction="/web/api/sync?handler=force"
@@ -99,30 +113,17 @@ const render = async (
         ${main}
     </main>
 
-    <template id=toast-template><dialog class=toast is=x-toaster open><p class=message></p></dialog></template>
+    <template id=toast-template><dialog class=toast traits=x-toaster open><p class=message></p></dialog></template>
     <div id=toasts></div>
     <div id=dialogs></div>
 
     <footer class="container"></footer>
 
     <form
-        id=get-sync-count-form
-        action="/web/api/sync?handler=count"
-        hidden
-
-        is=form-subscribe
-        data-event="hf:completed"
-        data-match="detail: {method:'post'}"
-
-        hf-scroll-ignore
-        hf-target="#sync-count">
-    </form>
-
-    <form
         action="/web/auth-view/"
 
         hidden
-        is=form-subscribe
+        traits=x-subscribe
         data-event="hf:response-error"
         data-match="detail: {xhr: { response: { status: 401 }}}"
 
@@ -134,7 +135,7 @@ const render = async (
     <form
         hidden
 
-        is=form-subscribe
+        traits=x-subscribe
         data-event="refresh"
         data-action="setTimeout(() => location.reload(), 1e3)"
         >

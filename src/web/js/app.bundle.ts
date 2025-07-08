@@ -1,7 +1,7 @@
 import "html-form"
+import "html-traits"
 import "form-subscribe"
 import "./_sw-loader.js"
-import "@jon49/web/x-dialog.js"
 import "@jon49/web/x-toaster.js"
 
 const doc = document
