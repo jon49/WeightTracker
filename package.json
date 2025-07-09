@@ -14,7 +14,7 @@
   "dependencies": {
     "@cloudfour/elastic-textarea": "^1.0.7",
     "@jon49/sw": "^0.13.3",
-    "@jon49/web": "^0.8.0",
+    "@jon49/web": "^0.8.1",
     "form-subscribe": "^0.2.1",
     "html-form": "^0.10.3",
     "html-template-tag-stream": "^3.0.0",
