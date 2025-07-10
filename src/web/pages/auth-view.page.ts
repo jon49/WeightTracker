@@ -1,4 +1,4 @@
-import type { RoutePage } from "@jon49/sw/routes.js"
+import type { RoutePage } from "@jon49/sw/routes.middleware.js"
 
 let {
     page: { loginView },

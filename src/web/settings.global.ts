@@ -1,4 +1,4 @@
-import { Route } from "@jon49/sw/routes.js"
+import { Route } from "@jon49/sw/routes.middleware.js"
 
 const routes: Route[] = [
   {

@@ -1,5 +1,5 @@
 import type { UserSettings, Settings } from "../../server/db.js"
-import type { RoutePage, RoutePostHandler } from "@jon49/sw/routes.js"
+import type { RoutePage, RoutePostHandler } from "@jon49/sw/routes.middleware.js"
 
 const {
     db,

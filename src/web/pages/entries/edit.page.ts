@@ -1,5 +1,5 @@
 import type { WeightData } from "../../server/db.js"
-import type { RouteGetHandler, RoutePage, RoutePostHandler } from "@jon49/sw/routes.js"
+import type { RouteGetHandler, RoutePage, RoutePostHandler } from "@jon49/sw/routes.middleware.js"
 
 let {
     db,

@@ -1,4 +1,4 @@
-import type { RoutePage, RoutePostHandler } from "@jon49/sw/routes.js"
+import type { RoutePage, RoutePostHandler } from "@jon49/sw/routes.middleware.js"
 import sync from "../server/sync.js"
 
 const {

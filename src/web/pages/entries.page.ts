@@ -1,5 +1,5 @@
 import { WeightData } from "../server/db.js"
-import { RoutePage } from "@jon49/sw/routes.js"
+import { RoutePage } from "@jon49/sw/routes.middleware.js"
 
 let {
     html,

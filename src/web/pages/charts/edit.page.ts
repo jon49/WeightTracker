@@ -1,4 +1,4 @@
-import { RoutePage } from "@jon49/sw/routes.js"
+import { RoutePage } from "@jon49/sw/routes.middleware.js"
 import { ChartSettings } from "../../server/db.js"
 
 let {

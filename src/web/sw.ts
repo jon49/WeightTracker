@@ -1,7 +1,14 @@
 import { ValidationResult } from "promise-validation"
-import { getResponse, options } from "@jon49/sw/routes.js"
+import { useRoutes, options } from "@jon49/sw/routes.middleware.js"
+import { useHtmf } from "@jon49/sw/htmf.middleware.js"
+import { useResponse } from "@jon49/sw/response.middleware.js"
+import { swFramework } from "@jon49/sw/web-framework.js"
 
 let version: string = self.app.version
+
+swFramework.use(useRoutes)
+swFramework.use(useHtmf)
+swFramework.use(useResponse)
 
 self.addEventListener("install", (e: Event) =>
     // @ts-ignore
@@ -24,7 +31,7 @@ self.addEventListener("fetch", (e: FetchEvent) => {
     if (!options.handleErrors) {
         options.handleErrors = handleErrors
     }
-    e.respondWith(getResponse(e))
+    e.respondWith(swFramework.start(e))
 })
 
 // @ts-ignore
