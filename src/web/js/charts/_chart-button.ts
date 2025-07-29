@@ -1,8 +1,10 @@
-customElements.define("chart-button",
-class extends HTMLElement {
-    constructor() {
-        super()
-        this.addEventListener("click", this)
+// @ts-ignore
+window.defineTrait("chart-button",
+class {
+    el: HTMLButtonElement
+    constructor(el: HTMLButtonElement) {
+        el.addEventListener("click", this)
+        this.el = el
     }
 
     handleEvent(event: Event) {
@@ -12,17 +14,14 @@ class extends HTMLElement {
     }
 
     createChart() {
-        let chart = this.dataset.chart
+        let chart = this.el.dataset.chart
         if (!chart) {
             console.warn(`No chart specified.`)
             return
         }
-        let target = document.querySelector(this.dataset.target ?? "")
-        if (!target) {
-            console.warn(`No chart target specified.`)
-            return
-        }
+        let target = document.getElementById("charts-location")
+        if (!target) return
         target.prepend(document.createElement(chart))
-        this.remove()
+        this.el.remove()
     }
 })

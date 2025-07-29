@@ -48,24 +48,12 @@ const render = ({ statsHeaderText, statsData }: { statsHeaderText: string, stats
 </div>
 
 <div id=create-chart class="flex">
-    <chart-button data-chart=chart-history data-target="#charts-location">
-        <button>History</button>
-    </chart-button>
-    <chart-button data-chart=chart-average data-target="#charts-location">
-        <button>Average</button>
-    </chart-button>
-    <chart-button data-chart=chart-histogram data-target="#charts-location">
-        <button>Histogram</button>
-    </chart-button>
-    <chart-button data-chart=chart-bedtime data-target="#charts-location">
-        <button>Bedtime</button>
-    </chart-button>
-    <chart-button data-chart=chart-sleep data-target="#charts-location">
-        <button>Sleep</button>
-    </chart-button>
-    <chart-button data-chart=chart-rate data-target="#charts-location">
-        <button>Rate</button>
-    </chart-button>
+    <button traits=chart-button data-chart=chart-history>History</button>
+    <button traits=chart-button data-chart=chart-average>Average</button>
+    <button traits=chart-button data-chart=chart-histogram>Histogram</button>
+    <button traits=chart-button data-chart=chart-bedtime>Bedtime</button>
+    <button traits=chart-button data-chart=chart-sleep>Sleep</button>
+    <button traits=chart-button data-chart=chart-rate>Rate</button>
 </div>
 
 <div id=charts-location></div>
