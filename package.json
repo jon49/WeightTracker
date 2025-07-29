@@ -18,7 +18,7 @@
     "form-subscribe": "^0.2.1",
     "html-form": "^0.10.3",
     "html-template-tag-stream": "^3.0.0",
-    "html-traits": "^0.0.2",
+    "html-traits": "^0.0.3",
     "idb-keyval": "^6.2.2",
     "promise-validation": "^4.0.1",
     "simple-input-formatter": "^0.3.6"
