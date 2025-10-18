@@ -4,7 +4,7 @@ import { Settings, get, set, update } from "./db.js"
 function parseKey(key: unknown): string | number {
     return typeof key === "string" && key.startsWith("[")
         ? JSON.parse(key)
-        : key
+        : key as string | number
 }
 
 const settingDefaults: Settings = {
