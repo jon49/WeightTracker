@@ -1,6 +1,10 @@
 import type { RoutePage, RoutePostHandler } from "@jon49/sw/routes.middleware.js"
 import sync from "../server/sync.js"
 
+const { html } = self.app
+
+let refresh = html`<x-refresh hz-target="#temp" hz-swap="append"></x-refresh>`
+
 const postHandlers : RoutePostHandler = {
     async post() {
         let result = await sync()
@@ -8,7 +12,7 @@ const postHandlers : RoutePostHandler = {
             case 200:
                 return {
                     status: 200,
-                    events: { refresh: true }
+                    body: refresh
                 }
             default:
                 return { status: 204, message: "" }
@@ -21,13 +25,13 @@ const postHandlers : RoutePostHandler = {
                 return {
                     message: "Synced!",
                     status: 200,
-                    events: { refresh: true }
+                    body: refresh
                 }
             case 204:
                 return {
                     message: "Synced!",
                     response: null,
-                    events: { refresh: true }
+                    body: refresh
                 }
             case 401:
             case 403:

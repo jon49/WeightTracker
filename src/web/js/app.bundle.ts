@@ -43,3 +43,12 @@ customElements.define("x-theme", class extends HTMLElement {
     this.remove()
   }
 })
+
+customElements.define("x-refresh", class extends HTMLElement {
+constructor() {
+  super()
+  setTimeout(() => {
+    document.location.reload()
+  }, 250)
+}
+})
