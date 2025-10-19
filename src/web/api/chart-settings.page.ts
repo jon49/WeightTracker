@@ -1,4 +1,4 @@
-import { RoutePage } from "@jon49/sw/routes.middleware.js"
+import type { RoutePage } from "@jon49/sw/routes.middleware.js"
 
 const {
     db,

@@ -1,13 +1,33 @@
 import { ValidationResult } from "promise-validation"
 import { useRoutes, options } from "@jon49/sw/routes.middleware.js"
-import { useHtmf } from "@jon49/sw/htmf.middleware.js"
 import { useResponse } from "@jon49/sw/response.middleware.js"
 import { swFramework } from "@jon49/sw/web-framework.js"
+import html from "html-template-tag-stream"
+import { loginView, syncCountView } from "./pages/_layout.html.js"
+import globalDB from "./server/global-model.js"
 
 let version: string = self.app.version
 
 swFramework.use(useRoutes)
-swFramework.use(useHtmf)
+swFramework.use(async function useHtmz(req, res, ctx): Promise<void> {
+    if (req.method !== "POST") return
+
+    let updated = await globalDB.updated()
+
+    let messages = (ctx.messages || []) as string[]
+
+    if (res.error) {
+        messages.push(res.error)
+    }
+
+    res.body = html`${res.body}
+<div id=toasts>
+    ${messages.map(x => html`<dialog class=toast traits=x-toaster open><p class=message>${x}</p></dialog>`)}
+</div>
+${res.status === 401 ? html`${loginView()}` : null}
+${syncCountView(updated.length)}
+`
+})
 swFramework.use(useResponse)
 
 self.addEventListener("install", (e: Event) =>

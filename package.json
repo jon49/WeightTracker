@@ -12,11 +12,8 @@
   "author": "Jon Nyman",
   "license": "ISC",
   "dependencies": {
-    "@cloudfour/elastic-textarea": "^1.0.7",
     "@jon49/sw": "^0.14.3",
     "@jon49/web": "^0.9.1",
-    "form-subscribe": "^0.2.1",
-    "html-form": "^0.10.3",
     "html-template-tag-stream": "^3.0.0",
     "html-traits": "^0.0.3",
     "idb-keyval": "^6.2.2",

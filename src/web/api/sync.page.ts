@@ -1,11 +1,6 @@
 import type { RoutePage, RoutePostHandler } from "@jon49/sw/routes.middleware.js"
 import sync from "../server/sync.js"
 
-const {
-    globalDb: db,
-    page: { syncCountView },
-} = self.app
-
 const postHandlers : RoutePostHandler = {
     async post() {
         let result = await sync()
@@ -54,10 +49,6 @@ const postHandlers : RoutePostHandler = {
 }
 
 const router: RoutePage = {
-    get: async () => {
-        let updated = await db.updated()
-        return syncCountView(updated.length)
-    },
     post: postHandlers
 }
 

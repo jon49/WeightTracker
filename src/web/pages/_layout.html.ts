@@ -7,16 +7,24 @@ const defaultTheme = "⛅",
     lightTheme = "&#127774;",
     darkTheme = "&#127762;"
 
-export function themeImage(theme: Theme | undefined) {
-    return html`$${theme === "light"
+export function themeView(theme: Theme | undefined) {
+    return html`<button id=themeView form=post formaction="/web/api/settings?handler=theme" class="bg">$${
+    theme === "light"
         ? lightTheme
         : theme === "dark"
             ? darkTheme
-            : defaultTheme}`
+            : defaultTheme
+    }</button>`
 }
 
 export function syncCountView(count: number) {
-    return html`&#128259; ${when(count, count => html`(${count})`)}`
+    return html`
+    <button
+        id=syncCount
+        form=post
+        formaction="/web/api/sync?handler=force"
+        class=bg
+        >&#128259; ${when(count, count => html`(${count})`)}</button>`
 }
 
 export function loginView() {
@@ -67,10 +75,10 @@ const render = async (
             </ul>
             <ul>
                 <li>
-                    <button form=post-form formaction="/web/api/settings?handler=theme" class="bg">$${themeImage(theme)}</button>
+                    ${themeView(theme)}
 
                     <button
-                        form=post-form
+                        form=post
                         formaction="/web/api/sync?handler=count"
                         formmethod=get
                         hidden
@@ -83,12 +91,7 @@ const render = async (
                         hf-target="#sync-count">
                     </button>
 
-                    <button
-                        id=sync-count
-                        form=post-form
-                        formaction="/web/api/sync?handler=force"
-                        class=bg
-                        >${syncCountView(updatedCount)}</button>
+                    ${syncCountView(updatedCount)}
 
                     ${isLoggedIn
             ? html`<a id=auth-link href="/login?logout" role=button>Logout</a>`
@@ -113,39 +116,16 @@ const render = async (
         ${main}
     </main>
 
-    <template id=toast-template><dialog class=toast traits=x-toaster open><p class=message></p></dialog></template>
     <div id=toasts></div>
-    <div id=dialogs></div>
+    <div id=temp></div>
 
     <footer class="container"></footer>
 
-    <form
-        action="/web/auth-view/"
-
-        hidden
-        traits=x-subscribe
-        data-event="hf:response-error"
-        data-match="detail: {xhr: { response: { status: 401 }}}"
-
-        hf-scroll-ignore
-        hf-swap=outerHTML
-        hf-target="#auth-link">
-    </form>
-
-    <form
-        hidden
-
-        traits=x-subscribe
-        data-event="refresh"
-        data-action="setTimeout(() => location.reload(), 1e3)"
-        >
-    </form>
-
-    <form id=post-form method=post hidden></form>
+    <form id=post method=post target=htmz hidden></form>
 
     <script src="/web/js/app.bundle.js" type=module></script>
 
-    <div id=scripts>${(scripts ?? []).map(x => html`<script src="${x}" ${when(!x.includes('.min.'), 'type=module')}></script>`)}</div>
+    ${(scripts ?? []).map(x => html`<script src="${x}" ${when(!x.includes('.min.'), 'type=module')}></script>`)}
 </body>
 </html>`
 }

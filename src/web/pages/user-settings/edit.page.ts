@@ -23,11 +23,11 @@ async function render() {
     return html`
 <h2>User Settings</h2>
 
-<form method=post action="/web/user-settings/edit?handler=clearData">
+<form method=post action="?handler=clearData" target=htmz>
 <button>Clear All Data</button>
 </form>
 
-<form method=post action="/web/user-settings/edit?handler=userSettings" onchange="this.requestSubmit()">
+<form method=post action="?handler=userSettings" onchange="this.submit()" target=htmz>
     <input name=earliestDate type=hidden value="${earliestDate}">
     <div class=grid>
         <label>Height (inches):
@@ -62,12 +62,12 @@ const postHandlers: RoutePostHandler = {
             original._rev = 0
         }
         await db.set("user-settings", { ...original, ...o })
-        return { status: 204 }
+        return { status: 200 }
     },
 
     async clearData() {
         await db.clear()
-        return { status: 204 }
+        return { status: 200 }
     }
 }
 

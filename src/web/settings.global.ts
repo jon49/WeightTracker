@@ -45,10 +45,6 @@ const routes: Route[] = [
     route: /\/web\/?$/,
     file: "/web/pages/index.page.js"
   },
-  {
-    route: /\/web\/auth-view\/?$/,
-    file: "/web/pages/auth-view.page.js"
-  }
 ]
 
 let app = {

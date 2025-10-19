@@ -39,14 +39,8 @@ async function render(query: any) {
     <input name=date type=date required value="${date}"></label>
 </form>
 
-<form
-    id=entry-form
-    method=post
-    action="/web/entries/edit"
-    hf-target="this"
-    onchange="this.requestSubmit()">
-    ${getEntryForm(data)}
-</form>
+${getEntryForm(data)}
+
 <script src="/web/js/elastic-textarea.js" defer></script>
 `
 }
@@ -55,6 +49,9 @@ function getEntryForm(o: WeightData) {
     cleanWeightData(o)
     let { date, bedtime, sleep, weight, waist, comments, _rev } = o
     return html`
+
+<form id=entryForm method=post target="htmz" onchange="this.submit()">
+
 <input name=date type=hidden value=${date}>
 <input name=_rev type=hidden value=${_rev}>
 
@@ -78,23 +75,23 @@ ${getBedtime(bedtime)}
         <textarea name=comments>${comments}</textarea>
     </elastic-textarea>
 </label>
-`
+</form>`
 }
 
 function getWakeUp(bedtime: string | undefined, sleep: number | undefined) {
     return !bedtime
         ? null
         : !sleep
-            ? html`<button id=wake-up class="h-fit-content self-center" hf-target="#wake-up" hf-swap=outerHTML formaction="/web/entries/edit?handler=wakeUp">Wake Up</button>`
+            ? html`<button id=wake-up class="h-fit-content self-center" formaction="?handler=wakeUp">Wake Up</button>`
             : html`
-        <label>Hours Slept
+        <label hz-target="#wake-up">Hours Slept
             <input id=wake-up-time name=sleep type=number step=any value="${sleep}">
         </label>`
 }
 
 function getBedtime(bedtime: string | undefined) {
     if (!bedtime) {
-        return html`<button class="w-100" formaction="/web/entries/edit?handler=startSleep">
+        return html`<button class="w-100" formaction="?handler=startSleep">
         Bedtime
         </button>`
     }

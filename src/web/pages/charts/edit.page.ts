@@ -23,7 +23,8 @@ async function render() {
 <form
     method=post
     action="/web/charts/edit"
-    onchange="this.requestSubmit()">
+    target=htmz
+    onchange="this.submit()">
     <input type=hidden name=_rev value="${chartSettings?._rev ?? 0}">
     <fieldset class="grid">
         <input name=duration type=number placeholder="Number of months" required value="${data.duration}">
@@ -58,7 +59,7 @@ const route: RoutePage = {
         const durationUnit = units.find(x => x === maybeDurationUnit) ?? "month"
         const settings: ChartSettings = { duration, durationUnit, _rev: o._rev }
         await db.set("chart-settings", settings, false)
-        return { status: 204 }
+        return { status: 200 }
     }
 }
 
