@@ -1,4 +1,4 @@
-import { RoutePage, RoutePostHandler } from "@jon49/sw/routes.middleware.js"
+import type { RoutePage, RoutePostHandler } from "@jon49/sw/routes.middleware.js"
 
 const {
     globalDb: db,
@@ -34,4 +34,3 @@ const route: RoutePage = {
 }
 
 export default route
-

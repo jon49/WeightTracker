@@ -77,20 +77,6 @@ const render = async (
                 <li>
                     ${themeView(theme)}
 
-                    <button
-                        form=post
-                        formaction="/web/api/sync?handler=count"
-                        formmethod=get
-                        hidden
-
-                        traits=x-subscribe
-                        data-event="hf:completed"
-                        data-match="detail: {method:'post'}"
-
-                        hf-scroll-ignore
-                        hf-target="#sync-count">
-                    </button>
-
                     ${syncCountView(updatedCount)}
 
                     ${isLoggedIn
