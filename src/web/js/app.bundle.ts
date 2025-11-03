@@ -47,6 +47,6 @@ constructor() {
   super()
   setTimeout(() => {
     document.location.reload()
-  }, 250)
+  }, 500)
 }
 })
