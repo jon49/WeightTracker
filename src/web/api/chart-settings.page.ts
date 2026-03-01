@@ -1,15 +1,12 @@
-import type { RoutePage } from "@jon49/sw/routes.middleware.js"
+import type { RoutePage } from "@jon49/sw/routes.middleware.js";
 
-const {
-    db,
-} = self.app
+const { db } = self.app;
 
 const route: RoutePage = {
-    async get() {
-        let chartSettings = await db.get("chart-settings")
-        return { json: chartSettings ?? null }
-    }
-}
+  async get() {
+    let chartSettings = await db.get("chart-settings");
+    return { json: chartSettings ?? null };
+  },
+};
 
-export default route
-
+export default route;

@@ -1,33 +1,33 @@
-import { Route } from "@jon49/sw/routes.middleware.js"
+import { Route } from "@jon49/sw/routes.middleware.js";
 
 const routes: Route[] = [
   {
     route: /\/api\/data\/$/,
-    file: "/web/api/data.page.js"
+    file: "/web/api/data.page.js",
   },
   {
     route: /\/api\/user-settings\/$/,
-    file: "/web/api/user-settings.page.js"
+    file: "/web/api/user-settings.page.js",
   },
   {
     route: /\/api\/chart-settings\/$/,
-    file: "/web/api/chart-settings.page.js"
+    file: "/web/api/chart-settings.page.js",
   },
   {
     route: /\/api\/sync\/$/,
-    file: "/web/api/sync.page.js"
+    file: "/web/api/sync.page.js",
   },
   {
     route: /\/api\/settings\/$/,
-    file: "/web/api/settings.page.js"
+    file: "/web/api/settings.page.js",
   },
   {
     route: /\/user-settings\/edit\/$/,
-    file: "/web/pages/user-settings/edit.page.js"
+    file: "/web/pages/user-settings/edit.page.js",
   },
   {
     route: /\/charts\/edit\/$/,
-    file: "/web/pages/charts/edit.page.js"
+    file: "/web/pages/charts/edit.page.js",
   },
   {
     route: /\/charts\/$/,
@@ -35,23 +35,23 @@ const routes: Route[] = [
   },
   {
     route: /\/entries\/edit\/$/,
-    file: "/web/pages/entries/edit.page.js"
+    file: "/web/pages/entries/edit.page.js",
   },
   {
     route: /\/entries\/$/,
-    file: "/web/pages/entries.page.js"
+    file: "/web/pages/entries.page.js",
   },
   {
     route: /\/web\/?$/,
-    file: "/web/pages/index.page.js"
+    file: "/web/pages/index.page.js",
   },
-]
+];
 
 let app = {
   version: "v127",
   routes,
-}
+};
 
-export type SettingsApp = typeof app
+export type SettingsApp = typeof app;
 
-Object.assign(self.app, app)
+Object.assign(self.app, app);

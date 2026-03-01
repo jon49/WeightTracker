@@ -1,25 +1,25 @@
-import { RoutePage } from "@jon49/sw/routes.middleware.js"
-import { ChartSettings } from "../../server/db.js"
+import { RoutePage } from "@jon49/sw/routes.middleware.js";
+import { ChartSettings } from "../../server/db.js";
 
 let {
-    db,
-    html,
-    layout,
-    utils: { formatNumber, isSelected, toNumber },
-    validation: { createPositiveNumber, createPositiveWholeNumber, createString25, validateObject },
-} = self.app
+  db,
+  html,
+  layout,
+  utils: { formatNumber, isSelected, toNumber },
+  validation: { createPositiveNumber, createPositiveWholeNumber, createString25, validateObject },
+} = self.app;
 
-const units = ["month", "year", "week"] as const
-export type DurationUnit = typeof units[number]
+const units = ["month", "year", "week"] as const;
+export type DurationUnit = (typeof units)[number];
 
 async function render() {
-    let chartSettings = await db.get("chart-settings")
-    let data = {
-        duration: formatNumber(chartSettings?.duration, 0),
-        durationUnit: chartSettings?.durationUnit
-    }
-    const selected = isSelected<DurationUnit>(data.durationUnit)
-    return html`<h2>Chart Settings</h2>
+  let chartSettings = await db.get("chart-settings");
+  let data = {
+    duration: formatNumber(chartSettings?.duration, 0),
+    durationUnit: chartSettings?.durationUnit,
+  };
+  const selected = isSelected<DurationUnit>(data.durationUnit);
+  return html`<h2>Chart Settings</h2>
 <form
     method=post
     action="/web/charts/edit"
@@ -34,33 +34,32 @@ async function render() {
             <option value=year ${selected("year")}>Year(s)</option>
         </select>
     </fieldset>
-</form>`
+</form>`;
 }
 
 let settingsValidator = {
-    duration: createPositiveNumber("Duration"),
-    durationUnit: createString25("Duration Unit"),
-    _rev: createPositiveWholeNumber("_rev")
-}
+  duration: createPositiveNumber("Duration"),
+  durationUnit: createString25("Duration Unit"),
+  _rev: createPositiveWholeNumber("_rev"),
+};
 
 const route: RoutePage = {
-    async get() {
-        return layout({
-            main: await render(),
-            title: "Chart Settings",
-        })
-    },
+  async get() {
+    return layout({
+      main: await render(),
+      title: "Chart Settings",
+    });
+  },
 
-    async post({ data }) {
-        const o =
-            await validateObject(data, settingsValidator)
-        const duration = toNumber(o.duration) || 9
-        const maybeDurationUnit = o.durationUnit
-        const durationUnit = units.find(x => x === maybeDurationUnit) ?? "month"
-        const settings: ChartSettings = { duration, durationUnit, _rev: o._rev }
-        await db.set("chart-settings", settings, false)
-        return { status: 200 }
-    }
-}
+  async post({ data }) {
+    const o = await validateObject(data, settingsValidator);
+    const duration = toNumber(o.duration) || 9;
+    const maybeDurationUnit = o.durationUnit;
+    const durationUnit = units.find((x) => x === maybeDurationUnit) ?? "month";
+    const settings: ChartSettings = { duration, durationUnit, _rev: o._rev };
+    await db.set("chart-settings", settings, false);
+    return { status: 200 };
+  },
+};
 
-export default route
+export default route;

@@ -1,23 +1,22 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-    <head>
-        <title>Reset Password</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="/web/css/app.css" rel="stylesheet">
-    </head>
-    <body>
+  <head>
+    <title>Reset Password</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="/web/css/app.css" rel="stylesheet" />
+  </head>
+  <body>
+    <h1>Reset Password</h1>
+    <main>
+      <p>A token is required to reset the password. Invalid URL.</p>
+    </main>
 
-        <h1>Reset Password</h1>
-        <main>
-            <p>A token is required to reset the password. Invalid URL.</p>
-        </main>
-
-<script>
-(() => {
-    let token = new URL(location.href).searchParams.get('token')
-    if (!token) return
-    document.querySelector('main').innerHTML = `
+    <script>
+      (() => {
+        let token = new URL(location.href).searchParams.get("token");
+        if (!token) return;
+        document.querySelector("main").innerHTML = `
 <form method="post" action="/api/authentication/reset-password">
     <input type=hidden name=token value="${token}">
     <div>
@@ -29,12 +28,10 @@
         <input type="password" name="passwordConfirm" id="passwordConfirm" required>
     </div>
     <button type="submit">Reset Password</button>
-</form>`
-})()
-</script>
-    
+</form>`;
+      })();
+    </script>
+
     <script src="/js/app.js"></script>
-
-    </body>
+  </body>
 </html>
-

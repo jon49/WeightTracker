@@ -1,58 +1,50 @@
-import html from "html-template-tag-stream"
-import db from "../server/global-model.js"
-import { when } from "@jon49/sw/utils.js"
-import { Theme } from "../api/settings.page.js"
+import html from "html-template-tag-stream";
+import db from "../server/global-model.js";
+import { when } from "@jon49/sw/utils.js";
+import { Theme } from "../api/settings.page.js";
 
 const defaultTheme = "⛅",
-    lightTheme = "&#127774;",
-    darkTheme = "&#127762;"
+  lightTheme = "&#127774;",
+  darkTheme = "&#127762;";
 
 export function themeView(theme: Theme | undefined) {
-    return html`<button id=themeView form=post formaction="/web/api/settings?handler=theme" class="bg">$${
-    theme === "light"
-        ? lightTheme
-        : theme === "dark"
-            ? darkTheme
-            : defaultTheme
-    }</button>`
+  return html`<button id=themeView form=post formaction="/web/api/settings?handler=theme" class="bg">$${
+    theme === "light" ? lightTheme : theme === "dark" ? darkTheme : defaultTheme
+  }</button>`;
 }
 
 export function syncCountView(count: number) {
-    return html`
+  return html`
     <button
         id=syncCount
         form=post
         formaction="/web/api/sync?handler=force"
         class=bg
-        >&#128259; ${when(count, count => html`(${count})`)}</button>`
+        >&#128259; ${when(count, (count) => html`(${count})`)}</button>`;
 }
 
 export function loginView() {
-    return html`<a id=auth-link href="/login">Login</a>`
+  return html`
+    <a id="auth-link" href="/login">Login</a>
+  `;
 }
 
 interface Nav {
-    name: string
-    url: string
+  name: string;
+  url: string;
 }
 
-const render = async (
-    { main,
-        head,
-        scripts,
-        nav,
-        title,
-    }: LayoutTemplateArguments) => {
-    const [isLoggedIn, updated, { theme }] = await Promise.all([
-        db.isLoggedIn(),
-        db.updated(),
-        db.settings()
-    ])
-    const updatedCount = updated.length
+const render = async ({ main, head, scripts, nav, title }: LayoutTemplateArguments) => {
+  const [isLoggedIn, updated, { theme }] = await Promise.all([
+    db.isLoggedIn(),
+    db.updated(),
+    db.settings(),
+  ]);
+  const updatedCount = updated.length;
 
-    return html`
+  return html`
 <!DOCTYPE html>
-<html $${when(theme, x => x === "neither" ? null : `data-theme=${x}`)}>
+<html $${when(theme, (x) => (x === "neither" ? null : `data-theme=${x}`))}>
  <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -79,9 +71,13 @@ const render = async (
 
                     ${syncCountView(updatedCount)}
 
-                    ${isLoggedIn
-            ? html`<a id=auth-link href="/login?logout" role=button>Logout</a>`
-            : loginView()}
+                    ${
+                      isLoggedIn
+                        ? html`
+                            <a id="auth-link" href="/login?logout" role="button">Logout</a>
+                          `
+                        : loginView()
+                    }
                 </li>
             </ul>
         </nav>
@@ -93,7 +89,8 @@ const render = async (
                 <li><a href="/web/charts">Charts</a></li>
                 <li><a href="/web/user-settings/edit">User Settings</a></li>
                 ${when(nav?.length, () =>
-                nav?.map(x => html`<li><a href="$${x.url}">${x.name}</a></li>`))}
+                  nav?.map((x) => html`<li><a href="$${x.url}">${x.name}</a></li>`),
+                )}
             </ul>
         </nav>
     </header>
@@ -111,23 +108,22 @@ const render = async (
 
     <script src="/web/js/app.bundle.js" type=module></script>
 
-    ${(scripts ?? []).map(x => html`<script src="${x}" ${when(!x.includes('.min.'), 'type=module')}></script>`)}
+    ${(scripts ?? []).map((x) => html`<script src="${x}" ${when(!x.includes(".min."), "type=module")}></script>`)}
 </body>
-</html>`
+</html>`;
+};
+
+export default async function layout(o: LayoutTemplateArguments) {
+  return render(o);
 }
 
-export default
-    async function layout(o: LayoutTemplateArguments) {
-    return render(o)
-}
-
-export type Layout = typeof layout
+export type Layout = typeof layout;
 
 export interface LayoutTemplateArguments {
-    title: string
-    head?: string
-    bodyAttr?: string
-    main?: AsyncGenerator<any, void, unknown>
-    scripts?: string[]
-    nav?: Nav[]
+  title: string;
+  head?: string;
+  bodyAttr?: string;
+  main?: AsyncGenerator<any, void, unknown>;
+  scripts?: string[];
+  nav?: Nav[];
 }

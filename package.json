@@ -1,16 +1,18 @@
 {
   "name": "weight",
   "version": "1.0.0",
+  "license": "ISC",
+  "author": "Jon Nyman",
   "type": "module",
   "scripts": {
     "test": "tsx --test  $(find src -type f -name '*.test.ts')",
     "start": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=dev -p 8008",
     "server": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=server --target=./server/public",
     "build": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=prod --target=deploy",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
   },
-  "author": "Jon Nyman",
-  "license": "ISC",
   "dependencies": {
     "@jon49/sw": "^0.14.3",
     "@jon49/web": "^0.9.1",
@@ -22,6 +24,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.0.10",
+    "oxfmt": "^0.35.0",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"
   }

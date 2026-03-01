@@ -23,9 +23,11 @@
     "skipLibCheck": true
   },
   "compileOnSave": true,
-  "include": ["src/**/*.ts", "src/**/*.js", "src/sw/js/lib/db.min.js", "src/web/pages/charts/utils.test.ts"],
-  "exclude": [
-    "node_modules", "src/**/*spec.ts"
-  ]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.js",
+    "src/sw/js/lib/db.min.js",
+    "src/web/pages/charts/utils.test.ts"
+  ],
+  "exclude": ["node_modules", "src/**/*spec.ts"]
 }
-

@@ -1,12 +1,21 @@
 {
-    "cSpell.words": [
-        "colspan",
-        "datetime",
-        "debouncer",
-        "hellip",
-        "HTMF",
-        "stdev"
-    ],
-    "liveServer.settings.root": "/public",
-    "liveServer.settings.port": 31176,
+  "editor.formatOnSave": true,
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "editor.detectIndentation": false,
+  "[javascript]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  },
+  "[typescript]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  },
+  "[json]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  },
+  "cSpell.words": ["colspan", "datetime", "debouncer", "hellip", "HTMF", "stdev"],
+  "liveServer.settings.root": "/public",
+  "liveServer.settings.port": 31176
 }

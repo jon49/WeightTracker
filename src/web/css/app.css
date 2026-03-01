@@ -1,63 +1,63 @@
 @import url("/web/css/pico.min.css") layer;
 
 body {
-    padding: 1em 0.5em 50vh 0.5em;
+  padding: 1em 0.5em 50vh 0.5em;
 }
 
 .inline {
-    display: inline;
+  display: inline;
 }
 
 .rtl {
-    direction: rtl;
+  direction: rtl;
 }
 
 .grid-row-1 {
-    grid-row: 1;
+  grid-row: 1;
 }
 
 .m-0 {
-    margin: 0;
+  margin: 0;
 }
 
 .w-auto {
-    width: auto;
+  width: auto;
 }
 
 .h-fit-content {
-    height: fit-content;
+  height: fit-content;
 }
 
 .self-center {
-    align-self: center;
+  align-self: center;
 }
 
 .flex {
-    display: flex;
-    justify-items: start;
-    flex-wrap: wrap;
-    gap: 5px;
+  display: flex;
+  justify-items: start;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
 .gap-10 {
-    gap: 10px;
+  gap: 10px;
 }
 
 .char-10 {
-    display: inline-block;
-    min-width: 10ch;
+  display: inline-block;
+  min-width: 10ch;
 }
 
 .toast {
-    max-width: 80vw;
-    height: fit-content;
-    min-height: auto;
-    top: auto;
-    bottom: 10px;
-    background-color: var(--pico-primary-background);
-    opacity: 0.95;
+  max-width: 80vw;
+  height: fit-content;
+  min-height: auto;
+  top: auto;
+  bottom: 10px;
+  background-color: var(--pico-primary-background);
+  opacity: 0.95;
 }
 
 .toast p {
-    margin-top: var(--pico-typography-spacing-vertical);
+  margin-top: var(--pico-typography-spacing-vertical);
 }

@@ -13,4 +13,3 @@ more user friendly.
 
 The app can be found for free and without even logging in at <https://weight.jnyman.com/web/>.
 Note that logging in will make it so you can back up your data.
-

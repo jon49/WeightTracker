@@ -1,20 +1,20 @@
 {
-    "name": "Weight Tracker",
-    "background_color": "#13171f",
-    "theme_color": "#524ed2",
-    "icons": [
-        {
-            "src": "/web/images/weight.ico",
-            "sizes": "16x16",
-            "type": "image/ico"
-        },
-        {
-            "src": "/web/images/weight.png",
-            "sizes": "any",
-            "type": "image/png"
-        }
-    ],
-    "start_url": "/web/entries/edit/",
-    "scope": "/web",
-    "display": "standalone"
+  "name": "Weight Tracker",
+  "background_color": "#13171f",
+  "theme_color": "#524ed2",
+  "icons": [
+    {
+      "src": "/web/images/weight.ico",
+      "sizes": "16x16",
+      "type": "image/ico"
+    },
+    {
+      "src": "/web/images/weight.png",
+      "sizes": "any",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/web/entries/edit/",
+  "scope": "/web",
+  "display": "standalone"
 }

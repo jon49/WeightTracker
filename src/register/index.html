@@ -1,17 +1,17 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-    <head>
-        <title>Register</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="/web/css/app.css" rel="stylesheet">
-    </head>
-    <body>
-        <h1>Register</h1>
-        <main></main>
+  <head>
+    <title>Register</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="/web/css/app.css" rel="stylesheet" />
+  </head>
+  <body>
+    <h1>Register</h1>
+    <main></main>
 
-<script>
-    document.querySelector('main').innerHTML = `
+    <script>
+      document.querySelector("main").innerHTML = `
     <form id=register-form action="/api/authentication/register" method=post>
         <div>
             <label for="email">Email</label>
@@ -27,28 +27,25 @@
         </div>
         <button>Register</button>
     </form>
-    <p>Already registered? <a href="/login">Login here.</a></p>`
-</script>
+    <p>Already registered? <a href="/login">Login here.</a></p>`;
+    </script>
 
-<script>
-    document.getElementById("register-form")
-    .addEventListener("change", e => {
+    <script>
+      document.getElementById("register-form").addEventListener("change", (e) => {
         if (!e.target.name.includes("assword")) {
-            return
+          return;
         }
-        let form = e.target.form
-        let password = form.password
-        let confirm = form.passwordConfirm
+        let form = e.target.form;
+        let password = form.password;
+        let confirm = form.passwordConfirm;
         if (password.value === confirm.value) {
-            confirm.setCustomValidity('')
+          confirm.setCustomValidity("");
         } else {
-            confirm.setCustomValidity('Passwords do not match.')
+          confirm.setCustomValidity("Passwords do not match.");
         }
-    })
-</script>
+      });
+    </script>
 
     <script src="/js/app.js"></script>
-
-    </body>
+  </body>
 </html>
-
