@@ -14,10 +14,9 @@
     "fmt:check": "oxfmt --check"
   },
   "dependencies": {
-    "@jon49/sw": "^0.14.3",
-    "@jon49/web": "^0.9.1",
-    "html-template-tag-stream": "^3.0.0",
-    "html-traits": "^0.0.3",
+    "@jon49/sw": "^0.15.1",
+    "@jon49/web": "^0.11.0",
+    "html-template-tag-stream": "^4.0.1",
     "idb-keyval": "^6.2.2",
     "promise-validation": "^4.0.1",
     "simple-input-formatter": "^0.3.6"

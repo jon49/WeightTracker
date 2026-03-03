@@ -7,7 +7,7 @@ const {
   layout,
   utils: { formatNumber },
   validation: { createDateString, createTimeString, createPositiveNumber, maybe, validateObject },
-} = self.app;
+} = self.sw;
 
 async function render() {
   let [userSettings, settings] = await Promise.all([db.get("user-settings"), db.get("settings")]);

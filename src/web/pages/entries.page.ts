@@ -7,7 +7,7 @@ let {
   db: { get, getMany },
   utils: { dateFill, dateToString, cleanWeightData },
   validation: { createPositiveNumber, maybe, validateObject },
-} = self.app;
+} = self.sw;
 
 interface WeightDataYear extends WeightData {
   year: string;
@@ -53,10 +53,10 @@ async function render(query: any) {
 
 <div class="flex gap-10">
     ${years
-      .reverse()
-      .map((x: string) =>
-        x === "" + year ? html`<span>${x}</span>` : html`<a href="/web/entries?year=${x}">${x}</a>`,
-      )}
+        .reverse()
+        .map((x: string) =>
+          x === "" + year ? html`<span>${x}</span>` : html`<a href="/web/entries?year=${x}">${x}</a>`,
+        )}
 </div>
 
 <div class="overflow-auto">

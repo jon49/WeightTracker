@@ -7,7 +7,7 @@ let {
   html,
   layout,
   utils: { avg, dateAdd, dateFill, formatNumber, getPreviousDay, isNil, setDefaults, stdev },
-} = self.app;
+} = self.sw;
 
 async function getChartSettings() {
   let rawChartSettings = await get("chart-settings");

@@ -16,7 +16,7 @@ let {
     reject,
     validateObject,
   },
-} = self.app;
+} = self.sw;
 
 const dateValidator = {
   date: createDateString("Date"),
@@ -137,17 +137,17 @@ const postHandlers: RoutePostHandler = {
         const earliestDate = settings?.earliestDate;
         return !earliestDate
           ? ((shouldSyncUserSettings.sync = true),
-            {
-              ...settings,
-              earliestDate: o.date,
-            })
+          {
+            ...settings,
+            earliestDate: o.date,
+          })
           : new Date(earliestDate) < new Date(o.date)
             ? settings
             : ((shouldSyncUserSettings.sync = true),
-              {
-                ...settings,
-                earliestDate: o.date,
-              });
+            {
+              ...settings,
+              earliestDate: o.date,
+            });
       },
       shouldSyncUserSettings,
     );

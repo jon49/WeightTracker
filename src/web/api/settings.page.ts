@@ -4,7 +4,7 @@ const {
   globalDb: db,
   html,
   page: { themeView },
-} = self.app;
+} = self.sw;
 
 const themes = ["dark", "light", "neither"] as const;
 export type Theme = (typeof themes)[number];

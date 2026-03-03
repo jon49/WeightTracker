@@ -4,7 +4,7 @@ const {
   db,
   utils: { dateFill },
   validation: { createDateString, validateObject },
-} = self.app;
+} = self.sw;
 
 const startQuery = {
   start: createDateString("Query Start"),

@@ -54,4 +54,4 @@ let app = {
 
 export type SettingsApp = typeof app;
 
-Object.assign(self.app, app);
+Object.assign(self.sw, app);

@@ -6,7 +6,7 @@ import html from "html-template-tag-stream";
 import { loginView, syncCountView } from "./pages/_layout.html.js";
 import globalDB from "./server/global-model.js";
 
-let version: string = self.app.version;
+let version: string = self.sw.version;
 
 swFramework.use(useRoutes);
 swFramework.use(async function useHtmz(req, res, ctx): Promise<void> {
@@ -37,7 +37,7 @@ self.addEventListener("install", (e: Event) =>
       .open(version)
       .then((cache) =>
         // @ts-ignore
-        cache.addAll(self.app.links.map((x) => x.file)),
+        cache.addAll(self.sw.links.map((x) => x.file)),
       )
       .catch((e) => console.error(e)),
   ),

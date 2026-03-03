@@ -21,4 +21,4 @@ let app = {
 
 export type SharedApp = typeof app;
 
-Object.assign(self.app, app);
+Object.assign(self.sw, app);

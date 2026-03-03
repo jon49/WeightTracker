@@ -1,7 +1,7 @@
 import type { RoutePage, RoutePostHandler } from "@jon49/sw/routes.middleware.js";
 import sync from "../server/sync.js";
 
-const { html } = self.app;
+const { html } = self.sw;
 
 let refresh = html`
   <x-refresh hz-target="#temp" hz-swap="append"></x-refresh>

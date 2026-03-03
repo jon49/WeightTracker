@@ -7,7 +7,7 @@ let {
   layout,
   utils: { formatNumber, isSelected, toNumber },
   validation: { createPositiveNumber, createPositiveWholeNumber, createString25, validateObject },
-} = self.app;
+} = self.sw;
 
 const units = ["month", "year", "week"] as const;
 export type DurationUnit = (typeof units)[number];

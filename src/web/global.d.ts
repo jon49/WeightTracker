@@ -3,8 +3,8 @@ import { SettingsApp } from "./settings.global.ts";
 
 declare global {
   interface Window {
-    app: App;
+    sw: App;
   }
 }
 
-export interface App extends SettingsApp, SharedApp {}
+export interface App extends SettingsApp, SharedApp { }
