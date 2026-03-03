@@ -18,8 +18,7 @@
     "@jon49/web": "^0.11.1",
     "html-template-tag-stream": "^4.0.1",
     "idb-keyval": "^6.2.2",
-    "promise-validation": "^4.0.1",
-    "simple-input-formatter": "^0.3.6"
+    "promise-validation": "^4.0.1"
   },
   "devDependencies": {
     "@types/node": "^24.0.10",
