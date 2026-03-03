@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@jon49/sw": "^0.15.1",
-    "@jon49/web": "^0.11.0",
+    "@jon49/web": "^0.11.1",
     "html-template-tag-stream": "^4.0.1",
     "idb-keyval": "^6.2.2",
     "promise-validation": "^4.0.1",
