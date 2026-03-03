@@ -57,12 +57,12 @@ const render = ({
 </div>
 
 <div id=create-chart class="flex">
-    <button traits=chart-button data-chart=chart-history>History</button>
-    <button traits=chart-button data-chart=chart-average>Average</button>
-    <button traits=chart-button data-chart=chart-histogram>Histogram</button>
-    <button traits=chart-button data-chart=chart-bedtime>Bedtime</button>
-    <button traits=chart-button data-chart=chart-sleep>Sleep</button>
-    <button traits=chart-button data-chart=chart-rate>Rate</button>
+    <button _click=chartButton data-chart=chart-history>History</button>
+    <button _click=chartButton data-chart=chart-average>Average</button>
+    <button _click=chartButton data-chart=chart-histogram>Histogram</button>
+    <button _click=chartButton data-chart=chart-bedtime>Bedtime</button>
+    <button _click=chartButton data-chart=chart-sleep>Sleep</button>
+    <button _click=chartButton data-chart=chart-rate>Rate</button>
 </div>
 
 <div id=charts-location></div>

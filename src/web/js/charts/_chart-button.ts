@@ -1,29 +1,14 @@
-// @ts-ignore
-window.defineTrait(
-  "chart-button",
-  class {
-    el: HTMLButtonElement;
-    constructor(el: HTMLButtonElement) {
-      el.addEventListener("click", this);
-      this.el = el;
-    }
+window.app.chartButton = (e, el) => {
+  e.preventDefault()
+  e.stopPropagation()
 
-    handleEvent(event: Event) {
-      event.preventDefault();
-      event.stopPropagation();
-      this.createChart();
-    }
-
-    createChart() {
-      let chart = this.el.dataset.chart;
-      if (!chart) {
-        console.warn(`No chart specified.`);
-        return;
-      }
-      let target = document.getElementById("charts-location");
-      if (!target) return;
-      target.prepend(document.createElement(chart));
-      this.el.remove();
-    }
-  },
-);
+  let chart = el.dataset.chart;
+  if (!chart) {
+    console.warn(`No chart specified.`);
+    return;
+  }
+  let target = document.getElementById("charts-location");
+  if (!target) return;
+  target.prepend(document.createElement(chart));
+  el.remove();
+}

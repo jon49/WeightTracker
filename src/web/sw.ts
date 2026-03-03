@@ -22,7 +22,7 @@ swFramework.use(async function useHtmz(req, res, ctx): Promise<void> {
 
   res.body = html`${res.body}
 <div id=toasts>
-    ${messages.map((x) => html`<dialog class=toast traits=x-toaster open><p class=message>${x}</p></dialog>`)}
+    ${messages.map((x) => html`<dialog class=toast _load=toast open><p class=message>${x}</p></dialog>`)}
 </div>
 ${res.status === 401 ? html`${loginView()}` : null}
 ${syncCountView(updated.length)}
