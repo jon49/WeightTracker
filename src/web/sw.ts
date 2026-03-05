@@ -1,5 +1,4 @@
-import { ValidationResult } from "promise-validation";
-import { useRoutes, options } from "@jon49/sw/routes.middleware.js";
+import { useRoutes } from "@jon49/sw/routes.middleware.js";
 import { useResponse } from "@jon49/sw/response.middleware.js";
 import { swFramework } from "@jon49/sw/web-framework.js";
 import html from "html-template-tag-stream";
@@ -43,21 +42,8 @@ self.addEventListener("install", (e: Event) =>
   ),
 );
 
-function handleErrors(errors: any) {
-  if (errors instanceof ValidationResult) {
-    // @ts-ignore
-    return errors.reasons.map((x) => x.reason);
-  }
-  return [];
-}
-
 // @ts-ignore
-self.addEventListener("fetch", (e: FetchEvent) => {
-  if (!options.handleErrors) {
-    options.handleErrors = handleErrors;
-  }
-  e.respondWith(swFramework.start(e));
-});
+self.addEventListener("fetch", (e: FetchEvent) => e.respondWith(swFramework.start(e)))
 
 // @ts-ignore
 self.addEventListener("activate", async (e: ExtendableEvent) => {
