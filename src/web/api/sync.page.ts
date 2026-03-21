@@ -3,9 +3,7 @@ import sync from "../server/sync.js";
 
 const { html } = self.sw;
 
-let refresh = html`
-  <x-refresh hz-target="#temp" hz-swap="append"></x-refresh>
-`;
+let refresh = html`<i hz-target="#temp" hz-swap="append" _load=refresh></i>`;
 
 const postHandlers: RoutePostHandler = {
   async post() {
@@ -40,6 +38,11 @@ const postHandlers: RoutePostHandler = {
         return {
           status: 401,
           message: "You are not logged in!",
+        };
+      case 502:
+        return {
+          status: 502,
+          message: "The server is currently down. Try again later.",
         };
       case 503:
         return {
