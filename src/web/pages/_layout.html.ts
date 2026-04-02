@@ -8,9 +8,8 @@ const defaultTheme = "⛅",
   darkTheme = "&#127762;";
 
 export function themeView(theme: Theme | undefined) {
-  return html`<button id=themeView form=post formaction="/web/api/settings?handler=theme" class="bg">$${
-    theme === "light" ? lightTheme : theme === "dark" ? darkTheme : defaultTheme
-  }</button>`;
+  return html`<button id=themeView form=post formaction="/web/api/settings?handler=theme" class="bg">$${theme === "light" ? lightTheme : theme === "dark" ? darkTheme : defaultTheme
+    }</button>`;
 }
 
 export function syncCountView(count: number) {
@@ -34,7 +33,7 @@ interface Nav {
   url: string;
 }
 
-const render = async ({ main, head, scripts, nav, title }: LayoutTemplateArguments) => {
+const render = async ({ main, head, scripts, nav, title, cssLinks }: LayoutTemplateArguments) => {
   const [isLoggedIn, updated, { theme }] = await Promise.all([
     db.isLoggedIn(),
     db.updated(),
@@ -52,6 +51,7 @@ const render = async ({ main, head, scripts, nav, title }: LayoutTemplateArgumen
     <title>${title} - Weight</title>
     <link rel="icon" type="image/x-icon" href="/web/images/weight.ico">
     <link href="/web/css/app.css" rel=stylesheet>
+    ${when(cssLinks?.length, () => cssLinks?.map((x) => html`<link rel="stylesheet" href="$${x}">`))}
     <link rel="manifest" href="/web/manifest.json">
 </head>
 <body>
@@ -71,13 +71,12 @@ const render = async ({ main, head, scripts, nav, title }: LayoutTemplateArgumen
 
                     ${syncCountView(updatedCount)}
 
-                    ${
-                      isLoggedIn
-                        ? html`
+                    ${isLoggedIn
+      ? html`
                             <a id="auth-link" href="/login?logout" role="button">Logout</a>
                           `
-                        : loginView()
-                    }
+      : loginView()
+    }
                 </li>
             </ul>
         </nav>
@@ -89,8 +88,8 @@ const render = async ({ main, head, scripts, nav, title }: LayoutTemplateArgumen
                 <li><a href="/web/charts">Charts</a></li>
                 <li><a href="/web/user-settings/edit">User Settings</a></li>
                 ${when(nav?.length, () =>
-                  nav?.map((x) => html`<li><a href="$${x.url}">${x.name}</a></li>`),
-                )}
+      nav?.map((x) => html`<li><a href="$${x.url}">${x.name}</a></li>`),
+    )}
             </ul>
         </nav>
     </header>
@@ -120,6 +119,7 @@ export default async function layout(o: LayoutTemplateArguments) {
 export type Layout = typeof layout;
 
 export interface LayoutTemplateArguments {
+  cssLinks?: string[]
   title: string;
   head?: string;
   bodyAttr?: string;

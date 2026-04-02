@@ -5,7 +5,7 @@
   "author": "Jon Nyman",
   "type": "module",
   "scripts": {
-    "test": "tsx --test  $(find src -type f -name '*.test.ts')",
+    "test": "npx playwright test",
     "start": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=dev -p 8008",
     "server": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=server --target=./server/public",
     "build": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=prod --target=deploy",
@@ -14,13 +14,14 @@
     "fmt:check": "oxfmt --check"
   },
   "dependencies": {
-    "@jon49/sw": "^0.15.4",
+    "@jon49/sw": "^0.15.6",
     "@jon49/web": "^0.11.1",
     "html-template-tag-stream": "^4.0.1",
     "idb-keyval": "^6.2.2",
     "promise-validation": "^5.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@types/node": "^24.0.10",
     "oxfmt": "^0.35.0",
     "tsx": "^4.20.3",

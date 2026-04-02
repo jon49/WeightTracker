@@ -1,8 +1,9 @@
 import { ChartSettings, UserSettings, WeightData } from "../server/db.js";
 import { avg, dateFill, dateToString, reduceSlice, stdev } from "./utils.js";
-import { getWeeklyData, getStartDate, setChartSettingDefaults } from "./charts-shared.js";
+import { getStartDate, setChartSettingDefaults } from "./charts-shared.js";
 import "./charts/_chart-button.js";
 import { bedtimeSuccess, timeToNumber } from "./charts/_utils.js";
+import "./charts/_chart-frontend.js";
 
 const red = "#ff6384",
   blue = "#6391ff",
@@ -21,20 +22,6 @@ class HistoryChart extends HTMLElement {
 }
 
 customElements.define("chart-history", HistoryChart);
-
-class AverageChart extends HTMLElement {
-  chart: any | undefined | null;
-  constructor() {
-    super();
-    createChart(this, weightAverageChartData());
-  }
-
-  disconnectedCallback() {
-    cleanUp(this);
-  }
-}
-
-customElements.define("chart-average", AverageChart);
 
 class HistogramChart extends HTMLElement {
   chart: any | undefined | null;
@@ -107,54 +94,6 @@ function createChart(ctx: HTMLElement & { chart?: any }, config: Promise<any>) {
 function cleanUp(ctx: { chart?: any }) {
   ctx.chart?.destroy();
   ctx.chart = null;
-}
-
-async function weightAverageChartData() {
-  let chartSettings = await getChartSettings();
-  const weeklyData = await getWeeklyData(chartSettings, getWeightData);
-  if (!weeklyData) return;
-  const { labels, maxValues, minValues, avgValues } = weeklyData;
-
-  const borderWidth = labels.length < 500 ? 2 : 1;
-  const pointRadius = labels.length < 500 ? 2 : labels.length > 750 ? 1 : 0;
-  const data = {
-    labels,
-    normalized: true,
-    parsing: false,
-    spanGaps: false,
-    datasets: [
-      {
-        label: "Max",
-        data: maxValues,
-        pointRadius,
-        borderWidth,
-        backgroundColor: red,
-        borderColor: red,
-      },
-      {
-        label: "Average",
-        data: avgValues,
-        pointRadius,
-        borderWidth,
-        backgroundColor: green,
-        borderColor: green,
-      },
-      {
-        label: "Min",
-        data: minValues,
-        pointRadius,
-        borderWidth,
-        backgroundColor: blue,
-        borderColor: blue,
-      },
-    ],
-  };
-
-  return {
-    type: "line",
-    data,
-    options: {},
-  };
 }
 
 async function weightData() {

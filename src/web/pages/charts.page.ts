@@ -1,12 +1,13 @@
 import { ChartSettings, UserSettings, WeightData } from "../server/db.js";
-import { RoutePage } from "@jon49/sw/routes.middleware.js";
+import { RouteGetHandler, RoutePage } from "@jon49/sw/routes.middleware.js";
+import { createChartHtml } from "./charts/_chart.js";
 
 let {
   charts: { getGoalWeight, getWeeklyData },
   db: { get, getMany },
   html,
   layout,
-  utils: { avg, dateAdd, dateFill, formatNumber, getPreviousDay, isNil, setDefaults, stdev },
+  utils: { avg, dateAdd, dateFill, formatNumber, getPreviousDay, isNil, round, setDefaults, stdev, cssRes },
 } = self.sw;
 
 async function getChartSettings() {
@@ -58,7 +59,7 @@ const render = ({
 
 <div id=create-chart class="flex">
     <button _click=chartButton data-chart=chart-history>History</button>
-    <button _click=chartButton data-chart=chart-average>Average</button>
+    <a id=avg-chart-btn role=button target=htmz href="?handler=averageChart">Average</a>
     <button _click=chartButton data-chart=chart-histogram>Histogram</button>
     <button _click=chartButton data-chart=chart-bedtime>Bedtime</button>
     <button _click=chartButton data-chart=chart-sleep>Sleep</button>
@@ -156,15 +157,248 @@ interface StatsData {
   weight: string | undefined;
 }
 
-const route: RoutePage = {
+const getHanders: RouteGetHandler = {
   get: async () => {
     let data = await setupStats();
     return layout({
       main: render(data),
       scripts: ["/web/js/chart.min.js", "/web/js/charts-page.bundle.js"],
       title: "Charts",
+      cssLinks: [`?handler=css`],
     });
   },
+
+  async averageChart() {
+    const chartSettings = await getChartSettings();
+    const weeklyData = await getWeeklyData(chartSettings, (startDate: Date) =>
+      getMany(dateFill(startDate, new Date())),
+    );
+
+    if (!weeklyData) {
+      return html`<template id="avg-chart-btn"></template>`;
+    }
+
+    const { labels, maxValues, minValues, avgValues } = weeklyData;
+
+    const r = (v: number | null) => v != null ? round(v, 1) : v;
+    const chartHtml = createChartHtml("average-chart", labels, {
+      labels,
+      datasets: [
+        { label: "Max", data: maxValues.map(r), lineColor: "#ff6384" },
+        { label: "Average", data: avgValues.map(r), lineColor: "#63ff83" },
+        { label: "Min", data: minValues.map(r), lineColor: "#6391ff" },
+      ],
+      xPaddingPercent: 5,
+    });
+
+    return html`
+      <template id="avg-chart-btn"></template>
+      <template hz-target="#charts-location" hz-swap="prepend">${chartHtml}</template>
+    `;
+  },
+  css() {
+    return cssRes(`
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  font-family: system-ui, sans-serif;
+  background: canvas;
+  color: canvastext;
+}
+
+.chart {
+  --line-color: rgb(29 78 216);
+  --fill-color: color-mix(in oklab, var(--line-color) 26%, transparent);
+  width: min(92vw, 720px);
+  padding: 1rem;
+  border: 1px solid color-mix(in oklab, canvastext 14%, transparent);
+  border-radius: 12px;
+}
+
+.plot {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  overflow: clip;
+  background:
+    linear-gradient(to top, color-mix(in oklab, canvastext 12%, transparent) 1px, transparent 1px) 0 0 / 100% 20%,
+    linear-gradient(to right, color-mix(in oklab, canvastext 8%, transparent) 1px, transparent 1px) 0 0 / 20% 100%;
+  background-color: color-mix(in oklab, canvas 96%, canvastext 4%);
+}
+
+.y-axis {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3.25rem;
+  margin: 0;
+  padding: 0.3rem 0.35rem;
+  list-style: none;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in oklab, canvastext 76%, transparent);
+  pointer-events: none;
+  background: linear-gradient(to right, color-mix(in oklab, canvas 94%, transparent), transparent);
+  z-index: 2;
+}
+
+.y-axis li {
+  position: absolute;
+  left: 0.35rem;
+  transform: translateY(-50%);
+  line-height: 1;
+  text-shadow: 0 1px 0 color-mix(in oklab, canvas 92%, transparent);
+  white-space: nowrap;
+}
+
+.series {
+  position: absolute;
+  inset: 0;
+  --line-color: rgb(29 78 216);
+  pointer-events: none;
+}
+
+.series-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.series-line-shape {
+  opacity: 1;
+}
+
+.points {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+
+.points li {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+}
+
+.point-btn {
+  width: var(--point-size, 0.7rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: canvas;
+  border: var(--point-border-width, 2px) solid var(--line-color);
+  display: block;
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.point-btn:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--line-color) 55%, white);
+  outline-offset: 2px;
+}
+
+.point-popover {
+  margin: 0;
+  border: 0;
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.8rem;
+  color: white;
+  background: rgb(17 24 39);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.25);
+}
+
+.point-popover::backdrop {
+  background: transparent;
+}
+
+.legend {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.85rem;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.legend-swatch {
+  width: 0.95rem;
+  height: 0.95rem;
+  border-radius: 999px;
+  background: var(--legend-color, currentColor);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, canvas 40%, transparent);
+  flex: 0 0 auto;
+}
+
+.legend-label {
+  line-height: 1;
+}
+
+.labels {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  padding-inline: var(--x-padding, 0%);
+  box-sizing: border-box;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(var(--count, 1), minmax(0, 1fr));
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.labels-angled {
+  margin-top: 0.35rem;
+  min-height: 3.5rem;
+  align-items: start;
+  overflow: clip;
+}
+
+.labels-angled li {
+  justify-self: center;
+  display: inline-block;
+  white-space: nowrap;
+  text-align: left;
+  transform: rotate(-35deg);
+  transform-origin: top right;
+  font-size: 0.72rem;
+}
+
+.labels .is-missing {
+  opacity: 0.55;
+}
+
+.labels .is-sparse {
+  visibility: hidden;
+}
+
+.data {
+  display: none;
+}`)
+  }
+}
+
+const route: RoutePage = {
+  get: getHanders,
 };
 
 export default route;

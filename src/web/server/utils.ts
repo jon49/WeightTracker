@@ -1,7 +1,7 @@
 export const isSelected =
   <T extends string>(currentValue: string | undefined) =>
-  (value: T) =>
-    value === currentValue ? "selected" : null;
+    (value: T) =>
+      value === currentValue ? "selected" : null;
 
 export function cleanHtmlId(s: string) {
   return s.replace(/[\W_-]/g, "-");
@@ -30,4 +30,11 @@ export function getNewId(ids: number[]) {
 
 export function tail<T>(xs: T[]): T {
   return xs.slice(-1)[0];
+}
+
+export function cssRes(css: string) {
+  return {
+    body: css,
+    type: "text/css",
+  }
 }

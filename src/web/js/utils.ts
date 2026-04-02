@@ -1,4 +1,4 @@
-import { WeightData } from "../server/db.js";
+import type { WeightData } from "../server/db.js";
 
 export function cleanWeightData(data: WeightData) {
   let nil = undefined;
@@ -116,8 +116,8 @@ export function setDefaults<T>(o: T | undefined, defaults: [keyof T, T[keyof T]]
 
 export const isSelected =
   <T extends string>(currentValue: string | undefined) =>
-  (value: T) =>
-    value === currentValue ? "selected" : null;
+    (value: T) =>
+      value === currentValue ? "selected" : null;
 
 export function toNumber(s: unknown) {
   // @ts-ignore

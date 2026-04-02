@@ -7,6 +7,7 @@ import * as localUtils from "../js/utils.js";
 import * as validation from "promise-validation";
 import * as validators from "@jon49/sw/validation.js";
 import * as charts from "../js/charts-shared.js";
+import * as serverUtils from "./utils.js";
 
 let app = {
   charts,
@@ -15,7 +16,7 @@ let app = {
   html,
   layout,
   page: { themeView },
-  utils: { ...utils, ...localUtils },
+  utils: { ...utils, ...serverUtils, ...localUtils },
   validation: { ...validation, ...validators },
 };
 
