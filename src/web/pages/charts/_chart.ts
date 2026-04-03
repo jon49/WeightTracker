@@ -92,6 +92,7 @@ type NormalizedDataset = {
   data: (number | null)[];
   lineColor?: string;
   showLines?: boolean;
+  yAxis?: 'left' | 'right';
 };
 
 function createChartModel(labels: string[], values: (number | null)[], options: CreateChartOptions) {
@@ -222,7 +223,8 @@ const normalizeDatasets = ({ datasets, data, showLines }: ChartOptions): Normali
       label: dataset?.label ? String(dataset.label) : `Series ${index + 1}`,
       data: Array.isArray(dataset?.data) ? dataset.data : [],
       lineColor: dataset?.lineColor,
-      showLines: dataset?.showLines ?? showLines
+      showLines: dataset?.showLines ?? showLines,
+      yAxis: dataset?.yAxis,
     }));
   }
 
@@ -261,7 +263,8 @@ const createSeriesHtml = (labels: string[], dataset: NormalizedDataset, index: n
     svgContent = (chart.validPoints as NormalizedPoint[]).map(
       (point) => {
         const barHeight = Math.max(0, baselineY - point.y);
-        return html`<rect class="bar-segment" x="${(point.x - barWidth / 2).toFixed(2)}" y="${point.y.toFixed(2)}" width="${barWidth.toFixed(2)}" height="${barHeight.toFixed(2)}" fill="${seriesColor}" opacity="0.8" pointer-events="auto" cursor="pointer" data-label="${point.label}" data-value="${point.value}"/>`;
+        const barX = point.x - barWidth / 2;
+        return html`<rect class="bar-segment" x="${barX.toFixed(2)}" y="${point.y.toFixed(2)}" width="${barWidth.toFixed(2)}" height="${barHeight.toFixed(2)}" fill="${seriesColor}" opacity="0.8" pointer-events="auto" cursor="pointer" data-label="${point.label}" data-value="${point.value}"/>`;
       }
     );
   } else {
@@ -328,6 +331,7 @@ type ChartOptions = {
     data?: (number | null)[];
     lineColor?: string;
     showLines?: boolean;
+    yAxis?: 'left' | 'right';
   }[];
   data?: (number | null)[];
   showLines?: boolean;
@@ -335,6 +339,70 @@ type ChartOptions = {
   xPaddingPercent: number | string;
   yPaddingPercent?: number | string;
   xLabelMaxVisible?: number | string;
+  yAxes?: {
+    left?: { min?: number; max?: number; exactMin?: number; exactMax?: number };
+    right?: { min?: number; max?: number; exactMin?: number; exactMax?: number };
+  };
+}
+
+type AxisDomain = {
+  minLabel: number;
+  maxLabel: number;
+  midLabel: number;
+  minDomain: number;
+  maxDomain: number;
+};
+
+// Proportional padding so dual y-axes always align their labels
+const TOP_PAD = 0.08;
+const BOTTOM_PAD = 0.03;
+
+function computeAxisDomain(values: number[], axisConfig?: { min?: number; max?: number; exactMin?: number; exactMax?: number }): AxisDomain | null {
+  if (values.length === 0) return null;
+
+  let rawMin = Math.min(...values);
+  let rawMax = Math.max(...values);
+
+  if (Number.isFinite(axisConfig?.min)) rawMin = Math.min(rawMin, axisConfig!.min!);
+  if (Number.isFinite(axisConfig?.max)) rawMax = Math.max(rawMax, axisConfig!.max!);
+
+  const minLabel = Number.isFinite(axisConfig?.exactMin) ? axisConfig!.exactMin! : Math.floor(rawMin / 5) * 5;
+  const maxLabel = Number.isFinite(axisConfig?.exactMax) ? axisConfig!.exactMax! : Math.ceil(rawMax / 5) * 5;
+  const labelRange = maxLabel - minLabel;
+
+  let minDomain: number;
+  let maxDomain: number;
+  if (labelRange === 0) {
+    const fallback = Math.max(Math.abs(maxLabel), 1);
+    minDomain = minLabel - fallback * 0.5;
+    maxDomain = maxLabel + fallback * 0.5;
+  } else {
+    const domainRange = labelRange / (1 - TOP_PAD - BOTTOM_PAD);
+    minDomain = minLabel - BOTTOM_PAD * domainRange;
+    maxDomain = minDomain + domainRange;
+  }
+
+  return {
+    minLabel,
+    maxLabel,
+    midLabel: (minLabel + maxLabel) / 2,
+    minDomain,
+    maxDomain,
+  };
+}
+
+function makeYAxisHtml(domain: AxisDomain, cssClass: string) {
+  const domainRange = domain.maxDomain - domain.minDomain;
+  const clamp = (v: number) => Math.min(100, Math.max(0, v));
+  const tickPos = (value: number) => domainRange > 0 ? clamp(100 - ((value - domain.minDomain) / domainRange) * 100) : 50;
+
+  return html`
+    <ol class="${cssClass}" aria-hidden="true">
+      <li style="top:${tickPos(domain.maxLabel).toFixed(2)}%;">${formatAxisValue(domain.maxLabel)}</li>
+      <li style="top:${tickPos(domain.midLabel).toFixed(2)}%;">${formatAxisValue(domain.midLabel)}</li>
+      <li style="top:${tickPos(domain.minLabel).toFixed(2)}%;">${formatAxisValue(domain.minLabel)}</li>
+    </ol>
+  `;
 }
 
 export const createChartHtml = (targetId: string, labels: string[], options: ChartOptions = {
@@ -343,13 +411,6 @@ export const createChartHtml = (targetId: string, labels: string[], options: Cha
 }) => {
   const normalizedLabels = Array.isArray(labels) ? labels : [];
   const normalizedDatasets = normalizeDatasets(options);
-  const rawPaddingInput = Number.parseFloat(options.yPaddingPercent as string);
-  const normalizedPaddingPercent = Number.isFinite(rawPaddingInput)
-    ? rawPaddingInput > 1
-      ? rawPaddingInput / 100
-      : rawPaddingInput
-    : 0.05;
-  const yPaddingPercent = Math.max(0, normalizedPaddingPercent);
   const rawXPaddingInput = Number.parseFloat(options.xPaddingPercent as string);
   const normalizedXPaddingPercent = Number.isFinite(rawXPaddingInput)
     ? rawXPaddingInput > 1
@@ -359,64 +420,52 @@ export const createChartHtml = (targetId: string, labels: string[], options: Cha
   const xPaddingPercent = Math.max(0, Math.min(0.45, normalizedXPaddingPercent));
   const rawMaxVisibleLabels = Number.parseInt(options.xLabelMaxVisible as string, 10);
   const xLabelMaxVisible = Number.isFinite(rawMaxVisibleLabels) ? Math.max(2, rawMaxVisibleLabels) : 14;
-  const allValues = normalizedDatasets
-    .flatMap((dataset) => (Array.isArray(dataset.data) ? dataset.data : []))
-    .map((value) => Number.parseFloat(value as unknown as string))
-    .filter((value) => Number.isFinite(value));
-  const rawMinValue = allValues.length > 0 ? Math.min(...allValues) : null;
-  const rawMaxValue = allValues.length > 0 ? Math.max(...allValues) : null;
-  let minDomain: number | null = null;
-  let maxDomain: number | null = null;
-  if (allValues.length > 0) {
-    const rawMin = rawMinValue!;
-    const rawMax = rawMaxValue!;
-    const rawRange = rawMax - rawMin;
-    const fallbackRange = Math.max(Math.abs(rawMax), Math.abs(rawMin), 1);
-    const rangeForPadding = rawRange === 0 ? fallbackRange : rawRange;
-    const padding = rangeForPadding * yPaddingPercent;
-    minDomain = Math.floor(rawMin / 5) * 5;
-    maxDomain = Math.ceil(rawMax / 5) * 5;
-  }
-  const minLabel = Number.isFinite(minDomain) ? minDomain! : 0;
-  const maxLabel = Number.isFinite(maxDomain) ? maxDomain! : 0;
-  const midLabel = (minLabel + maxLabel) / 2;
-  // Extend domain past the snapped values so labels aren't clipped at edges
-  if (Number.isFinite(minDomain)) minDomain = minDomain! - 1;
-  if (Number.isFinite(maxDomain)) maxDomain = maxDomain! + 3;
-  const scale =
-    Number.isFinite(minDomain) && Number.isFinite(maxDomain)
-      ? {
-        minValue: minDomain!,
-        maxValue: maxDomain!,
-        xPaddingPercent
-      }
-      : {};
+
+  // Separate datasets by axis
+  const hasRightAxis = normalizedDatasets.some(d => d.yAxis === 'right');
+  const leftDatasets = normalizedDatasets.filter(d => (d.yAxis ?? 'left') === 'left');
+  const rightDatasets = normalizedDatasets.filter(d => d.yAxis === 'right');
+
+  const collectValues = (datasets: NormalizedDataset[]) =>
+    datasets
+      .flatMap(d => d.data)
+      .map(v => Number.parseFloat(v as unknown as string))
+      .filter(v => Number.isFinite(v));
+
+  const leftDomain = computeAxisDomain(collectValues(leftDatasets), options.yAxes?.left);
+  const rightDomain = hasRightAxis ? computeAxisDomain(collectValues(rightDatasets), options.yAxes?.right) : null;
+
+  // If no left datasets, fall back to right domain for the single-axis case
+  const primaryDomain = leftDomain ?? rightDomain;
+
+  const makeScale = (domain: AxisDomain | null) =>
+    domain ? { minValue: domain.minDomain, maxValue: domain.maxDomain, xPaddingPercent } : {};
+
+  const leftScale = makeScale(leftDomain);
+  const rightScale = makeScale(rightDomain);
+
   const chartType = options.chartType ?? 'line';
-  const series = normalizedDatasets.map((dataset, index) => createSeriesHtml(normalizedLabels, dataset, index, scale, chartType));
-  const domainRange = Number.isFinite(maxDomain) && Number.isFinite(minDomain) ? maxDomain! - minDomain! : 0;
-  const clampPercent = (value: number) => Math.min(100, Math.max(0, value));
-  const maxTickPosition = domainRange > 0 ? clampPercent(100 - ((maxLabel - minDomain!) / domainRange) * 100) : 0;
-  const minTickPosition = domainRange > 0 ? clampPercent(100 - ((minLabel - minDomain!) / domainRange) * 100) : 100;
-  const midTickPosition = domainRange > 0 ? clampPercent(100 - ((midLabel - minDomain!) / domainRange) * 100) : 50;
-  const maxDataCount = normalizedDatasets.reduce((currentMax, dataset) => Math.max(currentMax, dataset.data.length), 0);
+  const series = normalizedDatasets.map((dataset, index) => {
+    const scale = dataset.yAxis === 'right' ? rightScale : leftScale;
+    return createSeriesHtml(normalizedLabels, dataset, index, scale, chartType);
+  });
+
+  const leftYAxisHtml = leftDomain ? makeYAxisHtml(leftDomain, 'y-axis') : '';
+  const rightYAxisHtml = rightDomain ? makeYAxisHtml(rightDomain, 'y-axis y-axis-right') : '';
+
+  const maxDataCount = normalizedDatasets.reduce((max, d) => Math.max(max, d.data.length), 0);
   const count = Math.max(normalizedLabels.length, maxDataCount, 1);
   const shouldAngleLabels = count > 14;
   const labelsHtml = createLabelsHtml(normalizedLabels, count, { maxVisibleLabels: xLabelMaxVisible });
   const legendHtml = createLegendHtml(normalizedDatasets);
   const style = `--count:${count}; --x-padding:${(xPaddingPercent * 100).toFixed(2)}%;`;
   const seriesHtml = series.map((item) => item.html);
-  const yAxisHtml = html`
-    <ol class="y-axis" aria-hidden="true">
-      <li class="y-axis-max" style="top:${maxTickPosition.toFixed(2)}%;">${formatAxisValue(maxLabel)}</li>
-      <li class="y-axis-mid" style="top:${midTickPosition.toFixed(2)}%;">${formatAxisValue(midLabel)}</li>
-      <li class="y-axis-min" style="top:${minTickPosition.toFixed(2)}%;">${formatAxisValue(minLabel)}</li>
-    </ol>
-  `;
 
   return html`
-    <section id="${targetId}" class="chart" aria-label="Pet count line chart" style="${style}">
+    <section id="${targetId}" class="chart" aria-label="Chart" style="${style}">
       <div class="plot">
-        ${yAxisHtml}
+        ${leftYAxisHtml}
+        ${rightYAxisHtml}
         ${seriesHtml}
       </div>
       ${legendHtml}

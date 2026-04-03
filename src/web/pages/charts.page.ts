@@ -3,11 +3,11 @@ import { RouteGetHandler, RoutePage } from "@jon49/sw/routes.middleware.js";
 import { createChartHtml } from "./charts/_chart.js";
 
 let {
-  charts: { getGoalWeight, getWeeklyData },
+  charts: { getGoalWeight, getStartDate, getWeeklyData },
   db: { get, getMany },
   html,
   layout,
-  utils: { avg, dateAdd, dateFill, formatNumber, getPreviousDay, isNil, round, setDefaults, stdev, cssRes },
+  utils: { avg, dateAdd, dateFill, formatNumber, getPreviousDay, isNil, reduceSlice, round, setDefaults, stdev, cssRes },
 } = self.sw;
 
 async function getChartSettings() {
@@ -61,8 +61,8 @@ const render = ({
     <a id=history-chart-btn role=button target=htmz href="?handler=historyChart">History</a>
     <a id=avg-chart-btn role=button target=htmz href="?handler=averageChart">Average</a>
     <a id=histogram-chart-btn role=button target=htmz href="?handler=histogramChart">Histogram</a>
-    <button _click=chartButton data-chart=chart-bedtime>Bedtime</button>
-    <button _click=chartButton data-chart=chart-sleep>Sleep</button>
+    <a id=bedtime-chart-btn role=button target=htmz href="?handler=bedtimeChart">Bedtime</a>
+    <a id=sleep-chart-btn role=button target=htmz href="?handler=sleepChart">Sleep</a>
     <a id=rate-chart-btn role=button target=htmz href="?handler=rateChart">Rate</a>
 </div>
 
@@ -162,7 +162,7 @@ const getHanders: RouteGetHandler = {
     let data = await setupStats();
     return layout({
       main: render(data),
-      scripts: ["/web/js/chart.min.js", "/web/js/charts-page.bundle.js"],
+      scripts: ["/web/js/charts-page.bundle.js"],
       title: "Charts",
       cssLinks: [`?handler=css`],
     });
@@ -257,6 +257,118 @@ const getHanders: RouteGetHandler = {
     `;
   },
 
+  async bedtimeChart() {
+    const [chartSettings, userSettings] = await Promise.all([
+      getChartSettings(),
+      get("user-settings"),
+    ]);
+    const bedtimeGoal = userSettings?.bedtime;
+    const startDate = getStartDate(chartSettings.duration, chartSettings.durationUnit);
+    const dates = dateFill(startDate, new Date());
+    const rawValues = await getMany<WeightData>(dates);
+
+    const timeToNum = (t: string) => {
+      const b = t.split(":");
+      return round(+b[0] + +b[1] / 60, 3);
+    };
+    const hoursAfterGoal = (time: number, goalTime: number) => {
+      let hours = time - goalTime;
+      if (hours < 0) hours += 24;
+      return hours > 12 ? 0 : hours;
+    };
+    const goalTime = timeToNum(bedtimeGoal ?? "22:00");
+
+    const values = reduceSlice(
+      dates,
+      7,
+      (acc: { date: string | null; std: number | null; success: number | null }, val: string, index: number) => {
+        if (acc.date) return acc;
+        acc.date = val;
+        const bedtimesForWeek = rawValues
+          .slice(index, index + 7)
+          .filter((x: WeightData | undefined) => x?.bedtime)
+          .map((x: WeightData) => timeToNum(x.bedtime as string));
+        acc.std = round(stdev(bedtimesForWeek) || 0, 3) || null;
+        const successValues = bedtimesForWeek.map(
+          (x: number) => round(1 - hoursAfterGoal(x, goalTime) / 12, 3),
+        );
+        acc.success = round(avg(successValues) || 0, 3) || null;
+        return acc;
+      },
+      () => ({ date: null, std: null, success: null }) as { date: string | null; std: number | null; success: number | null },
+    );
+
+    const chartLabels = values.map((x: { date: string | null }) => x.date as string);
+
+    if (chartLabels.length === 0) {
+      return html`<template id="bedtime-chart-btn"></template>`;
+    }
+
+    const chartHtml = createChartHtml("bedtime-chart", chartLabels, {
+      labels: chartLabels,
+      datasets: [
+        { label: "Bedtime Success", data: values.map((x: { success: number | null }) => x.success), lineColor: "#ff6384", yAxis: "left" },
+        { label: "Standard Deviation", data: values.map((x: { std: number | null }) => x.std), lineColor: "rgba(0, 200, 0, 0.5)", yAxis: "right" },
+      ],
+      chartType: "bar",
+      xPaddingPercent: 5,
+      yAxes: {
+        left: { min: 0, exactMax: 1 },
+        right: { min: 0 },
+      },
+    });
+
+    return html`
+      <template id="bedtime-chart-btn"></template>
+      <template hz-target="#charts-location" hz-swap="prepend">${chartHtml}</template>
+    `;
+  },
+
+  async sleepChart() {
+    const chartSettings = await getChartSettings();
+    const startDate = getStartDate(chartSettings.duration, chartSettings.durationUnit);
+    const dates = dateFill(startDate, new Date());
+    const rawValues = await getMany<WeightData>(dates);
+
+    const values = reduceSlice(
+      dates,
+      7,
+      (acc: { date: string | null; avg: number | null; std: number | null }, val: string, index: number) => {
+        if (acc.date) return acc;
+        acc.date = val;
+        const v = rawValues.slice(index, index + 7).map((x: WeightData | undefined) => x?.sleep);
+        acc.avg = avg(v) || null;
+        acc.std = round(stdev(v) || 0, 2) || null;
+        return acc;
+      },
+      () => ({ date: null, avg: null, std: null }) as { date: string | null; avg: number | null; std: number | null },
+    );
+
+    const chartLabels = values.map((x: { date: string | null }) => x.date as string);
+
+    if (chartLabels.length === 0) {
+      return html`<template id="sleep-chart-btn"></template>`;
+    }
+
+    const chartHtml = createChartHtml("sleep-chart", chartLabels, {
+      labels: chartLabels,
+      datasets: [
+        { label: "Average Sleep for Week", data: values.map((x: { avg: number | null }) => x.avg), lineColor: "#ff6384", yAxis: "left" },
+        { label: "Standard Deviation", data: values.map((x: { std: number | null }) => x.std), lineColor: "#63ff83", yAxis: "right" },
+      ],
+      xPaddingPercent: 5,
+      yAxes: {
+        left: { min: 0 },
+        right: { min: 0 },
+      },
+    });
+
+    return html`
+      <template id="sleep-chart-btn"></template>
+      <template hz-target="#charts-location" hz-swap="prepend">${chartHtml}</template>
+    `;
+  },
+
   async histogramChart() {
     const userSettings = await get("user-settings");
     const startDate = userSettings?.earliestDate;
@@ -296,6 +408,7 @@ const getHanders: RouteGetHandler = {
       ],
       chartType: "bar",
       xPaddingPercent: 3,
+      yAxes: { left: { min: 0 } },
     });
 
     return html`
@@ -388,6 +501,17 @@ body {
   line-height: 1;
   text-shadow: 0 1px 0 color-mix(in oklab, canvas 92%, transparent);
   white-space: nowrap;
+}
+
+.y-axis-right {
+  inset: 0 0 0 auto;
+  text-align: right;
+  background: linear-gradient(to left, color-mix(in oklab, canvas 94%, transparent), transparent);
+}
+
+.y-axis-right li {
+  left: auto;
+  right: 0.35rem;
 }
 
 .series {
