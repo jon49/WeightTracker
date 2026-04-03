@@ -57,7 +57,7 @@ const render = ({
 </div>
 </div>
 
-<div id=create-chart class="flex">
+<div id=create-chart class="flex m-1">
     <a id=history-chart-btn role=button target=htmz href="?handler=historyChart">History</a>
     <a id=avg-chart-btn role=button target=htmz href="?handler=averageChart">Average</a>
     <a id=histogram-chart-btn role=button target=htmz href="?handler=histogramChart">Histogram</a>

@@ -20,6 +20,10 @@ body {
   margin: 0;
 }
 
+.m-1 {
+  margin: 0.25em;
+}
+
 .w-auto {
   width: auto;
 }
