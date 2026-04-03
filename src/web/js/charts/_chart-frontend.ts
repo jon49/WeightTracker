@@ -28,7 +28,7 @@ if (chartsLocation) {
   };
 
   const getPointBtn = (e: Event) =>
-    (e.target as HTMLElement).closest('.point-btn') as HTMLElement | null;
+    (e.target as HTMLElement).closest('.point-btn, .bar-segment') as HTMLElement | null;
 
   chartsLocation.addEventListener('mouseover', (e) => {
     const button = getPointBtn(e);

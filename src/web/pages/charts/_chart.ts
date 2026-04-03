@@ -206,6 +206,7 @@ function createChartModel(labels: string[], values: (number | null)[], options: 
   return {
     count: normalized.length,
     validPointCount: validPoints.length,
+    validPoints,
     lineShape,
     linePoints,
     linePointSegments,
@@ -234,7 +235,7 @@ const normalizeDatasets = ({ datasets, data, showLines }: ChartOptions): Normali
   ];
 };
 
-const createSeriesHtml = (labels: string[], dataset: NormalizedDataset, index: number, scale: { minValue?: number; maxValue?: number; xPaddingPercent?: number } = {}) => {
+const createSeriesHtml = (labels: string[], dataset: NormalizedDataset, index: number, scale: { minValue?: number; maxValue?: number; xPaddingPercent?: number } = {}, chartType: 'line' | 'bar' = 'line') => {
   const chart = createChartModel(labels, dataset.data, {
     showLines: dataset.showLines,
     minValue: scale.minValue,
@@ -242,27 +243,49 @@ const createSeriesHtml = (labels: string[], dataset: NormalizedDataset, index: n
     xPaddingPercent: scale.xPaddingPercent,
   });
   const seriesColor = dataset.lineColor ? String(dataset.lineColor) : 'rgb(29 78 216)';
-  const strokeWidth = getAdaptiveStrokeWidth(chart.validPointCount!);
   const pointSize = getAdaptivePointSize(chart.validPointCount!);
   const pointBorderWidth = getAdaptivePointBorderWidth(chart.validPointCount!);
   const colorStyle = html`--line-color:${seriesColor}; --point-size:${pointSize}rem; --point-border-width:${pointBorderWidth}px;`;
-  const linePolylines =
-    chart.showLines && Array.isArray(chart.linePointSegments)
-      ? chart.linePointSegments
-        .map(
-          (points: string) =>
-            html`<polyline class="series-line-shape" points="${points}" stroke="${seriesColor}" fill="none" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round"></polyline>`
-        )
-      : null
+
+  let svgContent;
+  if (chartType === 'bar') {
+    const minValue = scale.minValue ?? 0;
+    const maxValue = scale.maxValue ?? 0;
+    const range = maxValue - minValue;
+    const baselineY = range > 0 ? Math.min(100, Math.max(0, 100 - ((0 - minValue) / range) * 100)) : 100;
+    const count = chart.count;
+    const xPad = scale.xPaddingPercent ?? 0;
+    const usableWidth = 100 - 2 * xPad * 100;
+    const barWidth = count > 1 ? (usableWidth / (count - 1)) * 0.85 : Math.min(10, usableWidth * 0.8);
+
+    svgContent = (chart.validPoints as NormalizedPoint[]).map(
+      (point) => {
+        const barHeight = Math.max(0, baselineY - point.y);
+        return html`<rect class="bar-segment" x="${(point.x - barWidth / 2).toFixed(2)}" y="${point.y.toFixed(2)}" width="${barWidth.toFixed(2)}" height="${barHeight.toFixed(2)}" fill="${seriesColor}" opacity="0.8" pointer-events="auto" cursor="pointer" data-label="${point.label}" data-value="${point.value}"/>`;
+      }
+    );
+  } else {
+    const strokeWidth = getAdaptiveStrokeWidth(chart.validPointCount!);
+    svgContent =
+      chart.showLines && Array.isArray(chart.linePointSegments)
+        ? chart.linePointSegments
+          .map(
+            (points: string) =>
+              html`<polyline class="series-line-shape" points="${points}" stroke="${seriesColor}" fill="none" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round"></polyline>`
+          )
+        : null;
+  }
+
+  const pointsHtml = chartType !== 'bar' ? html`<ol class="points" aria-hidden="true">$${chart.pointsHtml}</ol>` : '';
 
   return {
     model: chart,
     html: html`
       <div class="series" data-series-index="${index}" data-series-label="${dataset.label}" style="${colorStyle}">
         <svg class="series-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-          $${linePolylines}
+          $${svgContent}
         </svg>
-        <ol class="points" aria-hidden="true">$${chart.pointsHtml}</ol>
+        $${pointsHtml}
       </div>
     `
   };
@@ -308,6 +331,7 @@ type ChartOptions = {
   }[];
   data?: (number | null)[];
   showLines?: boolean;
+  chartType?: 'line' | 'bar';
   xPaddingPercent: number | string;
   yPaddingPercent?: number | string;
   xLabelMaxVisible?: number | string;
@@ -356,9 +380,9 @@ export const createChartHtml = (targetId: string, labels: string[], options: Cha
   const minLabel = Number.isFinite(minDomain) ? minDomain! : 0;
   const maxLabel = Number.isFinite(maxDomain) ? maxDomain! : 0;
   const midLabel = (minLabel + maxLabel) / 2;
-  // Extend domain by 1 past the snapped values so labels aren't clipped at edges
+  // Extend domain past the snapped values so labels aren't clipped at edges
   if (Number.isFinite(minDomain)) minDomain = minDomain! - 1;
-  if (Number.isFinite(maxDomain)) maxDomain = maxDomain! + 1;
+  if (Number.isFinite(maxDomain)) maxDomain = maxDomain! + 3;
   const scale =
     Number.isFinite(minDomain) && Number.isFinite(maxDomain)
       ? {
@@ -367,7 +391,8 @@ export const createChartHtml = (targetId: string, labels: string[], options: Cha
         xPaddingPercent
       }
       : {};
-  const series = normalizedDatasets.map((dataset, index) => createSeriesHtml(normalizedLabels, dataset, index, scale));
+  const chartType = options.chartType ?? 'line';
+  const series = normalizedDatasets.map((dataset, index) => createSeriesHtml(normalizedLabels, dataset, index, scale, chartType));
   const domainRange = Number.isFinite(maxDomain) && Number.isFinite(minDomain) ? maxDomain! - minDomain! : 0;
   const clampPercent = (value: number) => Math.min(100, Math.max(0, value));
   const maxTickPosition = domainRange > 0 ? clampPercent(100 - ((maxLabel - minDomain!) / domainRange) * 100) : 0;
