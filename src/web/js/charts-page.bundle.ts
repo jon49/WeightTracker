@@ -5,6 +5,8 @@ import "./charts/_chart-button.js";
 import { bedtimeSuccess, timeToNumber } from "./charts/_utils.js";
 import "./charts/_chart-frontend.js";
 
+console.log("hello");
+
 const red = "#ff6384",
   blue = "#6391ff",
   green = "#63ff83";
