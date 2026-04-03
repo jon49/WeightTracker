@@ -60,7 +60,7 @@ const render = ({
 <div id=create-chart class="flex">
     <a id=history-chart-btn role=button target=htmz href="?handler=historyChart">History</a>
     <a id=avg-chart-btn role=button target=htmz href="?handler=averageChart">Average</a>
-    <button _click=chartButton data-chart=chart-histogram>Histogram</button>
+    <a id=histogram-chart-btn role=button target=htmz href="?handler=histogramChart">Histogram</a>
     <button _click=chartButton data-chart=chart-bedtime>Bedtime</button>
     <button _click=chartButton data-chart=chart-sleep>Sleep</button>
     <a id=rate-chart-btn role=button target=htmz href="?handler=rateChart">Rate</a>
@@ -257,6 +257,53 @@ const getHanders: RouteGetHandler = {
     `;
   },
 
+  async histogramChart() {
+    const userSettings = await get("user-settings");
+    const startDate = userSettings?.earliestDate;
+    if (!startDate) {
+      return html`<template id="histogram-chart-btn"></template>`;
+    }
+    const split = startDate.split("-");
+    const labels = dateFill(new Date(+split[0], +split[1] - 1, +split[2]), new Date());
+    const rawValues = await getMany<WeightData>(labels);
+
+    const counts: Record<number, number> = {};
+    for (const val of rawValues) {
+      const weight = (val?.weight || 0) | 0;
+      if (weight) {
+        counts[weight] = (counts[weight] || 0) + 1;
+      }
+    }
+
+    const keys = Object.keys(counts).map(Number).sort((a, b) => a - b);
+    if (keys.length === 0) {
+      return html`<template id="histogram-chart-btn"></template>`;
+    }
+
+    const minKey = keys[0];
+    const maxKey = keys[keys.length - 1];
+    const histLabels: string[] = [];
+    const histData: number[] = [];
+    for (let i = minKey; i <= maxKey; i++) {
+      histLabels.push(String(i));
+      histData.push(counts[i] ?? 0);
+    }
+
+    const chartHtml = createChartHtml("histogram-chart", histLabels, {
+      labels: histLabels,
+      datasets: [
+        { label: "Weight (Count)", data: histData, lineColor: "#ff6384" },
+      ],
+      chartType: "bar",
+      xPaddingPercent: 3,
+    });
+
+    return html`
+      <template id="histogram-chart-btn"></template>
+      <template hz-target="#charts-location" hz-swap="prepend">${chartHtml}</template>
+    `;
+  },
+
   async historyChart() {
     const userSettings = await get("user-settings");
     const startDate = userSettings?.earliestDate;
@@ -360,6 +407,10 @@ body {
 
 .series-line-shape {
   opacity: 1;
+}
+
+.bar-segment {
+  cursor: pointer;
 }
 
 .points {

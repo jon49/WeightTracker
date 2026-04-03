@@ -11,20 +11,6 @@ const red = "#ff6384",
   blue = "#6391ff",
   green = "#63ff83";
 
-class HistogramChart extends HTMLElement {
-  chart: any | undefined | null;
-  constructor() {
-    super();
-    createChart(this, histogram());
-  }
-
-  disconnectedCallback() {
-    cleanUp(this);
-  }
-}
-
-customElements.define("chart-histogram", HistogramChart);
-
 class BedtimeChart extends HTMLElement {
   chart: any | undefined | null;
   constructor() {
@@ -68,49 +54,6 @@ function createChart(ctx: HTMLElement & { chart?: any }, config: Promise<any>) {
 function cleanUp(ctx: { chart?: any }) {
   ctx.chart?.destroy();
   ctx.chart = null;
-}
-
-async function histogram() {
-  const startDate = (await api<UserSettings>("user-settings"))?.earliestDate;
-  if (!startDate) return;
-  const rawValues = await getWeightData(startDate);
-  if (!rawValues) return;
-  const values: any = {};
-  for (let val of rawValues) {
-    let weight;
-    if ((weight = (val?.weight || 0) | 0)) {
-      values[weight] = (values[weight] | 0) + 1;
-    }
-  }
-
-  // Fill in missing values
-  const keys = Object.keys(values);
-  const length = +keys[keys.length - 1] - +keys[0] + 1;
-  const start = +keys[0];
-  for (var i = 0; i < length; i++) {
-    values[i + start] = values[i + start] ?? 0;
-  }
-
-  const data = {
-    normalized: true,
-    parsing: false,
-    spanGaps: false,
-    datasets: [
-      {
-        label: "Weight (Count)",
-        backgroundColor: red,
-        borderColor: red,
-        data: values,
-        borderWidth: 1,
-      },
-    ],
-  };
-  const config = {
-    type: "bar",
-    data,
-    options: {},
-  };
-  return config;
 }
 
 async function bedtime() {
