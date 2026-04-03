@@ -435,9 +435,6 @@ export const createChartHtml = (targetId: string, labels: string[], options: Cha
   const leftDomain = computeAxisDomain(collectValues(leftDatasets), options.yAxes?.left);
   const rightDomain = hasRightAxis ? computeAxisDomain(collectValues(rightDatasets), options.yAxes?.right) : null;
 
-  // If no left datasets, fall back to right domain for the single-axis case
-  const primaryDomain = leftDomain ?? rightDomain;
-
   const makeScale = (domain: AxisDomain | null) =>
     domain ? { minValue: domain.minDomain, maxValue: domain.maxDomain, xPaddingPercent } : {};
 
