@@ -81,7 +81,7 @@ type CreateChartOptions = {
 type NormalizedPoint = {
   index: number;
   label: string;
-  value: number;
+  value: number | null;
   valid: boolean;
   x: number;
   y: number;
@@ -89,12 +89,12 @@ type NormalizedPoint = {
 
 type NormalizedDataset = {
   label: string;
-  data: number[];
+  data: (number | null)[];
   lineColor?: string;
   showLines?: boolean;
 };
 
-function createChartModel(labels: string[], values: number[], options: CreateChartOptions) {
+function createChartModel(labels: string[], values: (number | null)[], options: CreateChartOptions) {
   const showLines = options.showLines ?? true;
   const rawXPaddingInput = options.xPaddingPercent;
   const normalizedXPaddingPercent = Number.isFinite(rawXPaddingInput)
@@ -104,7 +104,7 @@ function createChartModel(labels: string[], values: number[], options: CreateCha
     : 0;
   const xPaddingPercent = Math.max(0, Math.min(0.45, normalizedXPaddingPercent));
   const count = Math.max(labels.length, values.length);
-  const parsedPoints: { index: number; label: string; value: number; valid: boolean }[] = [];
+  const parsedPoints: { index: number; label: string; value: number | null; valid: boolean }[] = [];
 
   for (let index = 0; index < count; index += 1) {
     const label = labels[index] ?? `item ${index + 1}`;
@@ -117,7 +117,7 @@ function createChartModel(labels: string[], values: number[], options: CreateCha
     });
   }
 
-  const validValues = parsedPoints.filter((point) => point.valid).map((point) => point.value);
+  const validValues = parsedPoints.filter((point) => point.valid).map((point) => point.value) as number[];
 
   const providedMin = options.minValue;
   const providedMax = options.maxValue;
@@ -131,7 +131,7 @@ function createChartModel(labels: string[], values: number[], options: CreateCha
       : xPaddingPercent * 100 + (index / (parsedPoints.length - 1)) * (100 - xPaddingPercent * 200);
     let y = NaN;
     if (point.valid) {
-      y = range === 0 ? 50 : 100 - ((point.value - min) / range) * 100;
+      y = range === 0 ? 50 : 100 - ((point.value! - min) / range) * 100;
     }
     return {
       ...point,
@@ -159,13 +159,13 @@ function createChartModel(labels: string[], values: number[], options: CreateCha
   if (showLines && validPoints.length >= 2) {
     const clampPercent = (value: number) => Math.min(100, Math.max(0, value));
     const upper = validPoints.map(
-      (point: NormalizedPoint) => `${point.x.toFixed(2)}% ${clampPercent(point.y - stroke).toFixed(2)}%`
+      (point: NormalizedPoint) => `${point.x.toFixed(2)}% ${clampPercent(point.y! - stroke).toFixed(2)}%`
     );
     const lower = [...validPoints]
       .reverse()
-      .map((point: NormalizedPoint) => `${point.x.toFixed(2)}% ${clampPercent(point.y + stroke).toFixed(2)}%`);
+      .map((point: NormalizedPoint) => `${point.x.toFixed(2)}% ${clampPercent(point.y! + stroke).toFixed(2)}%`);
     lineShape = `polygon(${[...upper, ...lower].join(', ')})`;
-    linePoints = validPoints.map((point) => `${point.x.toFixed(2)},${point.y.toFixed(2)}`).join(' ');
+    linePoints = validPoints.map((point) => `${point.x.toFixed(2)},${point.y?.toFixed(2)}`).join(' ');
 
 
     const currentSegment: string[] = [];
@@ -178,7 +178,7 @@ function createChartModel(labels: string[], values: number[], options: CreateCha
         continue;
       }
 
-      currentSegment.push(`${point.x.toFixed(2)},${point.y.toFixed(2)}`);
+      currentSegment.push(`${point.x.toFixed(2)},${point.y?.toFixed(2)}`);
     }
 
     if (currentSegment.length >= 2) {
@@ -302,11 +302,11 @@ type ChartOptions = {
   labels: string[];
   datasets?: {
     label?: string;
-    data?: number[];
+    data?: (number | null)[];
     lineColor?: string;
     showLines?: boolean;
   }[];
-  data?: number[];
+  data?: (number | null)[];
   showLines?: boolean;
   xPaddingPercent: number | string;
   yPaddingPercent?: number | string;
