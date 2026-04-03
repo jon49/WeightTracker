@@ -58,7 +58,7 @@ const render = ({
 </div>
 
 <div id=create-chart class="flex">
-    <button _click=chartButton data-chart=chart-history>History</button>
+    <a id=history-chart-btn role=button target=htmz href="?handler=historyChart">History</a>
     <a id=avg-chart-btn role=button target=htmz href="?handler=averageChart">Average</a>
     <button _click=chartButton data-chart=chart-histogram>Histogram</button>
     <button _click=chartButton data-chart=chart-bedtime>Bedtime</button>
@@ -196,6 +196,32 @@ const getHanders: RouteGetHandler = {
       <template hz-target="#charts-location" hz-swap="prepend">${chartHtml}</template>
     `;
   },
+  async historyChart() {
+    const userSettings = await get("user-settings");
+    const startDate = userSettings?.earliestDate;
+    if (!startDate) {
+      return html`<template id="history-chart-btn"></template>`;
+    }
+    const split = startDate.split("-");
+    const labels = dateFill(new Date(+split[0], +split[1] - 1, +split[2]), new Date());
+    const rawValues = await getMany<WeightData>(labels);
+    const values = rawValues.map((x: WeightData | undefined) => x?.weight || null);
+    const showLines = labels.length < 500;
+
+    const chartHtml = createChartHtml("history-chart", labels, {
+      labels,
+      datasets: [
+        { label: "Weight", data: values, lineColor: "#ff6384", showLines },
+      ],
+      xPaddingPercent: 2,
+    });
+
+    return html`
+      <template id="history-chart-btn"></template>
+      <template hz-target="#charts-location" hz-swap="prepend">${chartHtml}</template>
+    `;
+  },
+
   css() {
     return cssRes(`
 :root {

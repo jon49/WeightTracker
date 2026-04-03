@@ -11,20 +11,6 @@ const red = "#ff6384",
   blue = "#6391ff",
   green = "#63ff83";
 
-class HistoryChart extends HTMLElement {
-  chart: any | undefined | null;
-  constructor() {
-    super();
-    createChart(this, weightData());
-  }
-
-  disconnectedCallback() {
-    cleanUp(this);
-  }
-}
-
-customElements.define("chart-history", HistoryChart);
-
 class HistogramChart extends HTMLElement {
   chart: any | undefined | null;
   constructor() {
@@ -96,39 +82,6 @@ function createChart(ctx: HTMLElement & { chart?: any }, config: Promise<any>) {
 function cleanUp(ctx: { chart?: any }) {
   ctx.chart?.destroy();
   ctx.chart = null;
-}
-
-async function weightData() {
-  const startDate = (await api<UserSettings>("user-settings"))?.earliestDate;
-  if (!startDate) return;
-  const labels = dateFill(new Date(startDate), new Date());
-  const rawValues = await getWeightData(startDate);
-  if (!rawValues) return;
-  const values = rawValues.map((x) => x?.weight || null);
-  const pointRadius = labels.length < 500 ? 2 : 1;
-  const data = {
-    labels: labels,
-    normalized: true,
-    parsing: false,
-    spanGaps: false,
-    datasets: [
-      {
-        label: "Weight",
-        backgroundColor: red,
-        borderColor: red,
-        data: values,
-        pointRadius,
-        borderWidth: 1,
-        showLine: labels.length < 500,
-      },
-    ],
-  };
-  const config = {
-    type: "line",
-    data,
-    options: {},
-  };
-  return config;
 }
 
 async function histogram() {
