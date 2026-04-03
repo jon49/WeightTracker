@@ -350,9 +350,15 @@ export const createChartHtml = (targetId: string, labels: string[], options: Cha
     const fallbackRange = Math.max(Math.abs(rawMax), Math.abs(rawMin), 1);
     const rangeForPadding = rawRange === 0 ? fallbackRange : rawRange;
     const padding = rangeForPadding * yPaddingPercent;
-    minDomain = rawMin - padding;
-    maxDomain = rawMax + padding;
+    minDomain = Math.floor(rawMin / 5) * 5;
+    maxDomain = Math.ceil(rawMax / 5) * 5;
   }
+  const minLabel = Number.isFinite(minDomain) ? minDomain! : 0;
+  const maxLabel = Number.isFinite(maxDomain) ? maxDomain! : 0;
+  const midLabel = (minLabel + maxLabel) / 2;
+  // Extend domain by 1 past the snapped values so labels aren't clipped at edges
+  if (Number.isFinite(minDomain)) minDomain = minDomain! - 1;
+  if (Number.isFinite(maxDomain)) maxDomain = maxDomain! + 1;
   const scale =
     Number.isFinite(minDomain) && Number.isFinite(maxDomain)
       ? {
@@ -362,23 +368,11 @@ export const createChartHtml = (targetId: string, labels: string[], options: Cha
       }
       : {};
   const series = normalizedDatasets.map((dataset, index) => createSeriesHtml(normalizedLabels, dataset, index, scale));
-  const minLabel = Number.isFinite(rawMinValue) ? rawMinValue! : 0;
-  const maxLabel = Number.isFinite(rawMaxValue) ? rawMaxValue! : 0;
-  const midLabel = (minLabel + maxLabel) / 2;
   const domainRange = Number.isFinite(maxDomain) && Number.isFinite(minDomain) ? maxDomain! - minDomain! : 0;
   const clampPercent = (value: number) => Math.min(100, Math.max(0, value));
-  const maxTickPosition =
-    Number.isFinite(rawMaxValue) && domainRange > 0
-      ? clampPercent(100 - ((rawMaxValue! - minDomain!) / domainRange) * 100)
-      : 0;
-  const minTickPosition =
-    Number.isFinite(rawMinValue) && domainRange > 0
-      ? clampPercent(100 - ((rawMinValue! - minDomain!) / domainRange) * 100)
-      : 100;
-  const midTickPosition =
-    Number.isFinite(midLabel) && domainRange > 0
-      ? clampPercent(100 - ((midLabel - minDomain!) / domainRange) * 100)
-      : 50;
+  const maxTickPosition = domainRange > 0 ? clampPercent(100 - ((maxLabel - minDomain!) / domainRange) * 100) : 0;
+  const minTickPosition = domainRange > 0 ? clampPercent(100 - ((minLabel - minDomain!) / domainRange) * 100) : 100;
+  const midTickPosition = domainRange > 0 ? clampPercent(100 - ((midLabel - minDomain!) / domainRange) * 100) : 50;
   const maxDataCount = normalizedDatasets.reduce((currentMax, dataset) => Math.max(currentMax, dataset.data.length), 0);
   const count = Math.max(normalizedLabels.length, maxDataCount, 1);
   const shouldAngleLabels = count > 14;
