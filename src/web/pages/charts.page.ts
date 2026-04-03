@@ -215,7 +215,7 @@ body {
 .chart {
   --line-color: rgb(29 78 216);
   --fill-color: color-mix(in oklab, var(--line-color) 26%, transparent);
-  width: min(92vw, 720px);
+  width: 100%;
   padding: 1rem;
   border: 1px solid color-mix(in oklab, canvastext 14%, transparent);
   border-radius: 12px;
