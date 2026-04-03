@@ -53,20 +53,6 @@ class SleepChart extends HTMLElement {
 
 customElements.define("chart-sleep", SleepChart);
 
-class RateChart extends HTMLElement {
-  chart: any | undefined | null;
-  constructor() {
-    super();
-    createChart(this, rate());
-  }
-
-  disconnectedCallback() {
-    cleanUp(this);
-  }
-}
-
-customElements.define("chart-rate", RateChart);
-
 function createChart(ctx: HTMLElement & { chart?: any }, config: Promise<any>) {
   config.then((config) => {
     if (!config) return;
@@ -125,99 +111,6 @@ async function histogram() {
     options: {},
   };
   return config;
-}
-
-async function rate() {
-  const chartSettings = await getChartSettings();
-  const startDate = getStartDate(chartSettings.duration, chartSettings.durationUnit);
-  const dates = dateFill(startDate, new Date());
-  const rawValues = await getWeightData(startDate);
-  if (!rawValues) return;
-  const averages = reduceSlice(
-    dates,
-    7,
-    (acc, val, index) => {
-      if (acc.date) return acc;
-      acc.date = val;
-      const v = <number[]>rawValues
-        .slice(index, index + 7)
-        .filter((x) => x?.weight)
-        .map((x) => x?.weight);
-      acc.avg = avg(v) || null;
-      return acc;
-    },
-    () => <{ date: string; avg: number | null }>{},
-  );
-  const length = averages.length;
-  const values: {
-    x?: string;
-    pos?: number | null;
-    neg?: number | null;
-    avgAll?: number;
-    avgNeg?: number;
-  }[] = new Array(length - 1);
-  let allTotal = 0;
-  let negTotal = 0;
-  let count = 0;
-  for (let index = 1; index < length; index++) {
-    const first = averages[index - 1];
-    const last = averages[index];
-    let pos = null,
-      neg = null;
-    if (first.avg && last.avg) {
-      count++;
-      const diff = last.avg - first.avg;
-      diff > 0
-        ? ((pos = diff), (allTotal += diff))
-        : ((neg = diff), (allTotal += diff), (negTotal += diff));
-    }
-    values[index - 1] = { pos, neg, x: last.date };
-  }
-
-  const pointRadius = 0;
-  const data = {
-    labels: values.map((x) => x.x),
-    normalized: true,
-    parsing: false,
-    spanGaps: false,
-    datasets: [
-      {
-        label: "Weight Gained",
-        backgroundColor: blue,
-        borderColor: blue,
-        data: values.map((x) => x.pos),
-        borderWidth: 1,
-      },
-      {
-        label: "Weight Lost",
-        backgroundColor: red,
-        borderColor: red,
-        data: values.map((x) => x.neg),
-        borderWidth: 1,
-      },
-      {
-        label: "Overall Weight Change",
-        backgroundColor: green,
-        borderColor: green,
-        data: new Array(length - 1).fill(allTotal / (count || 1)),
-        borderWidth: 1,
-        pointRadius,
-      },
-      {
-        label: "Overall Weight Loss",
-        backgroundColor: red,
-        borderColor: red,
-        data: new Array(length - 1).fill(negTotal / (count || 1)),
-        borderWidth: 1,
-        pointRadius,
-      },
-    ],
-  };
-  return {
-    type: "line",
-    data,
-    options: {},
-  };
 }
 
 async function bedtime() {

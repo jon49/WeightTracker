@@ -63,7 +63,7 @@ const render = ({
     <button _click=chartButton data-chart=chart-histogram>Histogram</button>
     <button _click=chartButton data-chart=chart-bedtime>Bedtime</button>
     <button _click=chartButton data-chart=chart-sleep>Sleep</button>
-    <button _click=chartButton data-chart=chart-rate>Rate</button>
+    <a id=rate-chart-btn role=button target=htmz href="?handler=rateChart">Rate</a>
 </div>
 
 <div id=charts-location></div>
@@ -196,6 +196,67 @@ const getHanders: RouteGetHandler = {
       <template hz-target="#charts-location" hz-swap="prepend">${chartHtml}</template>
     `;
   },
+  async rateChart() {
+    const chartSettings = await getChartSettings();
+    const weeklyData = await getWeeklyData(chartSettings, (startDate: Date) =>
+      getMany(dateFill(startDate, new Date())),
+    );
+
+    if (!weeklyData) {
+      return html`<template id="rate-chart-btn"></template>`;
+    }
+
+    const { labels: weekLabels, avgValues } = weeklyData;
+    const length = avgValues.length;
+    const rateLabels: string[] = [];
+    const posValues: (number | null)[] = [];
+    const negValues: (number | null)[] = [];
+    let allTotal = 0;
+    let negTotal = 0;
+    let count = 0;
+
+    for (let index = 1; index < length; index++) {
+      const first = avgValues[index - 1];
+      const last = avgValues[index];
+      rateLabels.push(weekLabels[index]);
+      let pos: number | null = null;
+      let neg: number | null = null;
+      if (first && last) {
+        count++;
+        const diff = last - first;
+        if (diff > 0) {
+          pos = round(diff, 2);
+          allTotal += diff;
+        } else {
+          neg = round(diff, 2);
+          allTotal += diff;
+          negTotal += diff;
+        }
+      }
+      posValues.push(pos);
+      negValues.push(neg);
+    }
+
+    const overallChange = count > 0 ? round(allTotal / count, 2) : null;
+    const overallLoss = count > 0 ? round(negTotal / count, 2) : null;
+
+    const chartHtml = createChartHtml("rate-chart", rateLabels, {
+      labels: rateLabels,
+      datasets: [
+        { label: "Weight Gained", data: posValues, lineColor: "#6391ff" },
+        { label: "Weight Lost", data: negValues, lineColor: "#ff6384" },
+        { label: "Overall Weight Change", data: rateLabels.map(() => overallChange), lineColor: "#63ff83" },
+        { label: "Overall Weight Loss", data: rateLabels.map(() => overallLoss), lineColor: "#ff6384" },
+      ],
+      xPaddingPercent: 5,
+    });
+
+    return html`
+      <template id="rate-chart-btn"></template>
+      <template hz-target="#charts-location" hz-swap="prepend">${chartHtml}</template>
+    `;
+  },
+
   async historyChart() {
     const userSettings = await get("user-settings");
     const startDate = userSettings?.earliestDate;
