@@ -445,20 +445,6 @@ const getHanders: RouteGetHandler = {
 
   css() {
     return cssRes(`
-:root {
-  color-scheme: light dark;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  font-family: system-ui, sans-serif;
-  background: canvas;
-  color: canvastext;
-}
-
 .chart {
   --line-color: rgb(29 78 216);
   --fill-color: color-mix(in oklab, var(--line-color) 26%, transparent);
