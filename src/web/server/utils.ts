@@ -34,7 +34,8 @@ export function tail<T>(xs: T[]): T {
 
 export function cssRes(css: string) {
   return {
-    body: css,
-    type: "text/css",
-  }
+    response: new Response(css, {
+      headers: { "Content-Type": "text/css; charset=utf-8" },
+    }),
+  } as any
 }
