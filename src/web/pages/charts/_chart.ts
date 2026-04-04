@@ -3,10 +3,6 @@ const {
   html
 } = self.sw
 
-const escChars: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
-const escRe = /[&<>"']/g;
-const esc = (s: string) => s.replace(escRe, (m) => escChars[m]);
-
 function formatAxisValue(value: number) {
   if (!Number.isFinite(value)) {
     return '0';
@@ -152,8 +148,7 @@ function createChartModel(labels: string[], values: (number | null)[], options: 
       count: 1,
       lineShape: 'none',
       linePoints: '',
-      labelsStr: '<li>No valid data points</li>',
-      pointsStr: ''
+      pointsHtml: '',
     };
   }
 
@@ -191,19 +186,10 @@ function createChartModel(labels: string[], values: (number | null)[], options: 
     }
   }
 
-  let labelsStr = '';
-  for (const point of normalized) {
-    const cls = point.valid ? '' : ' class="is-missing"';
-    const text = esc(point.label) + ' (' + (point.valid ? String(point.value) : '—') + ')';
-    labelsStr += '<li' + cls + '>' + text + '</li>';
-  }
-
-  let pointsStr = '';
-  for (const point of normalized) {
-    if (!point.valid) continue;
-    const label = esc(point.label);
-    const value = String(point.value);
-    pointsStr += '<li style="--x:' + point.x.toFixed(2) + '%; --y:' + point.y.toFixed(2) + '%"><button class="point-btn" type="button" data-label="' + label + '" data-value="' + value + '" aria-label="' + label + ': ' + value + '"></button></li>';
+  const points = new Array<string>(validPoints.length);
+  for (let i = 0; i < validPoints.length; i++) {
+    const point = validPoints[i];
+    points[i] = '<li style="--x:' + point.x.toFixed(2) + '%; --y:' + point.y.toFixed(2) + '%"><button class="point-btn" type="button" data-label="' + point.label + '" data-value="' + point.value + '" aria-label="' + point.label + ': ' + point.value + '"></button></li>';
   }
 
   return {
@@ -214,8 +200,7 @@ function createChartModel(labels: string[], values: (number | null)[], options: 
     linePoints,
     linePointSegments,
     showLines,
-    labelsStr,
-    pointsStr
+    pointsHtml: points.join(''),
   };
 }
 
@@ -249,7 +234,7 @@ const createSeriesHtml = (labels: string[], dataset: NormalizedDataset, index: n
   const seriesColor = dataset.lineColor ? String(dataset.lineColor) : 'rgb(29 78 216)';
   const pointSize = getAdaptivePointSize(chart.validPointCount!);
   const pointBorderWidth = getAdaptivePointBorderWidth(chart.validPointCount!);
-  const colorStyle = '--line-color:' + esc(seriesColor) + '; --point-size:' + pointSize + 'rem; --point-border-width:' + pointBorderWidth + 'px;';
+  const colorStyle = '--line-color:' + seriesColor + '; --point-size:' + pointSize + 'rem; --point-border-width:' + pointBorderWidth + 'px;';
 
   let svgContent;
   if (chartType === 'bar') {
@@ -262,25 +247,27 @@ const createSeriesHtml = (labels: string[], dataset: NormalizedDataset, index: n
     const usableWidth = 100 - 2 * xPad * 100;
     const barWidth = count > 1 ? (usableWidth / (count - 1)) * 0.85 : Math.min(10, usableWidth * 0.8);
 
-    let barSvg = '';
-    for (const point of (chart.validPoints as NormalizedPoint[])) {
+    const bars = chart.validPoints as NormalizedPoint[];
+    const barSvg = new Array<string>(bars.length);
+    for (let i = 0; i < bars.length; i++) {
+      const point = bars[i];
       const barHeight = Math.max(0, baselineY - point.y);
       const barX = point.x - barWidth / 2;
-      barSvg += '<rect class="bar-segment" x="' + barX.toFixed(2) + '" y="' + point.y.toFixed(2) + '" width="' + barWidth.toFixed(2) + '" height="' + barHeight.toFixed(2) + '" fill="' + esc(seriesColor) + '" opacity="0.8" pointer-events="auto" cursor="pointer" data-label="' + esc(point.label) + '" data-value="' + point.value + '"/>';
+      barSvg[i] = '<rect class="bar-segment" x="' + barX.toFixed(2) + '" y="' + point.y.toFixed(2) + '" width="' + barWidth.toFixed(2) + '" height="' + barHeight.toFixed(2) + '" fill="' + seriesColor + '" opacity="0.8" pointer-events="auto" cursor="pointer" data-label="' + point.label + '" data-value="' + point.value + '"/>';
     }
-    svgContent = barSvg;
+    svgContent = barSvg.join('');
   } else {
     const strokeWidth = getAdaptiveStrokeWidth(chart.validPointCount!);
     let lineSvg = '';
     if (chart.showLines && Array.isArray(chart.linePointSegments)) {
       for (const points of chart.linePointSegments) {
-        lineSvg += '<polyline class="series-line-shape" points="' + points + '" stroke="' + esc(seriesColor) + '" fill="none" stroke-width="' + strokeWidth + '" stroke-linecap="round" stroke-linejoin="round"></polyline>';
+        lineSvg += '<polyline class="series-line-shape" points="' + points + '" stroke="' + seriesColor + '" fill="none" stroke-width="' + strokeWidth + '" stroke-linecap="round" stroke-linejoin="round"></polyline>';
       }
     }
     svgContent = lineSvg;
   }
 
-  const pointsHtml = chartType !== 'bar' ? '<ol class="points" aria-hidden="true">' + chart.pointsStr + '</ol>' : '';
+  const pointsHtml = chartType !== 'bar' && chart.pointsHtml ? '<ol class="points" aria-hidden="true">' + chart.pointsHtml + '</ol>' : '';
 
   return {
     model: chart,
@@ -299,19 +286,15 @@ const createLabelsHtml = (labels: string[], count: number, options: { maxVisible
   const rawMaxVisible = Number.parseInt(options.maxVisibleLabels as string, 10);
   const maxVisibleLabels = Number.isFinite(rawMaxVisible) ? Math.max(2, rawMaxVisible) : 14;
   const step = count > maxVisibleLabels ? Math.ceil((count - 1) / (maxVisibleLabels - 1)) : 1;
-  let result = '';
+  const result = new Array<string>(count);
 
   for (let index = 0; index < count; index += 1) {
     const label = labels[index] ?? `item ${index + 1}`;
     const showLabel = step === 1 || index === 0 || index === count - 1 || index % step === 0;
-    if (showLabel) {
-      result += '<li>' + esc(label) + '</li>';
-    } else {
-      result += '<li class="is-sparse"></li>';
-    }
+    result[index] = showLabel ? '<li>' + label + '</li>' : '<li class="is-sparse"></li>';
   }
 
-  return result;
+  return result.join('');
 };
 
 const createLegendHtml = (datasets: NormalizedDataset[]) => {
@@ -319,15 +302,15 @@ const createLegendHtml = (datasets: NormalizedDataset[]) => {
     return '';
   }
 
-  let items = '';
+  const items = new Array<string>(datasets.length);
   for (let index = 0; index < datasets.length; index++) {
     const dataset = datasets[index];
     const label = dataset?.label ? String(dataset.label) : `Series ${index + 1}`;
     const color = dataset?.lineColor ? String(dataset.lineColor) : 'rgb(29 78 216)';
-    items += '<li><span class="legend-swatch" style="--legend-color:' + esc(color) + ';"></span><span class="legend-label">' + esc(label) + '</span></li>';
+    items[index] = '<li><span class="legend-swatch" style="--legend-color:' + color + ';"></span><span class="legend-label">' + label + '</span></li>';
   }
 
-  return '<ol class="legend" aria-label="Chart series">' + items + '</ol>';
+  return '<ol class="legend" aria-label="Chart series">' + items.join('') + '</ol>';
 };
 
 type ChartOptions = {
@@ -402,7 +385,7 @@ function makeYAxisHtml(domain: AxisDomain, cssClass: string) {
   const clamp = (v: number) => Math.min(100, Math.max(0, v));
   const tickPos = (value: number) => domainRange > 0 ? clamp(100 - ((value - domain.minDomain) / domainRange) * 100) : 50;
 
-  return '<ol class="' + esc(cssClass) + '" aria-hidden="true">'
+  return '<ol class="' + cssClass + '" aria-hidden="true">'
     + '<li style="top:' + tickPos(domain.maxLabel).toFixed(2) + '%;">' + formatAxisValue(domain.maxLabel) + '</li>'
     + '<li style="top:' + tickPos(domain.midLabel).toFixed(2) + '%;">' + formatAxisValue(domain.midLabel) + '</li>'
     + '<li style="top:' + tickPos(domain.minLabel).toFixed(2) + '%;">' + formatAxisValue(domain.minLabel) + '</li>'
