@@ -3,13 +3,14 @@ import db from "../server/global-model.js";
 import { when } from "@jon49/sw/utils.js";
 import { Theme } from "../api/settings.page.js";
 
-const defaultTheme = "⛅",
-  lightTheme = "&#127774;",
-  darkTheme = "&#127762;";
+const sunIcon = "&#127774;",
+  moonIcon = "&#127762;";
 
 export function themeView(theme: Theme | undefined) {
-  return html`<button id=themeView form=post formaction="/web/api/settings?handler=theme" class="bg">$${theme === "light" ? lightTheme : theme === "dark" ? darkTheme : defaultTheme
-    }</button>`;
+  const isNeither = !theme || theme === "neither";
+  return html`<button id=themeView form=post formaction="/web/api/settings?handler=theme" class="bg" $${isNeither ? '_load=initTheme' : ''}>$${
+    theme === "dark" ? sunIcon : moonIcon
+  }</button>`;
 }
 
 export function syncCountView(count: number) {
@@ -106,6 +107,18 @@ const render = async ({ main, head, scripts, nav, title, cssLinks }: LayoutTempl
     <form id=post method=post target=htmz hidden></form>
 
     <script src="/web/js/app.bundle.js" type=module></script>
+
+    $${when(!theme || theme === "neither", `<script>
+window.app.initTheme = (_, el) => {
+    setTimeout(() => {
+        let button = el
+        if (!window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
+            button.setAttribute('formaction', '/web/api/settings?handler=initTheme&theme=light')
+        }
+        button.click()
+    })
+}
+</script>`)}
 
     ${(scripts ?? []).map((x) => html`<script src="${x}" ${when(!x.includes(".min."), "type=module")}></script>`)}
 </body>
