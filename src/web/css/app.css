@@ -59,6 +59,7 @@ body {
   top: auto;
   bottom: 10px;
   background-color: var(--pico-primary-background);
+  color: var(--pico-primary-inverse);
   opacity: 0.95;
 }
 
