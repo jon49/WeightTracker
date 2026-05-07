@@ -12,6 +12,12 @@ const settingDefaults: Settings = {
   theme: "neither",
 };
 
+export interface AuthTokens {
+  auth_token: string;
+  refresh_token: string;
+  csrf_token?: string;
+}
+
 class GlobalDB {
   async updated(): Promise<(string | number)[]> {
     return Array.from((await get("updated")) ?? new Set()).map(parseKey);
@@ -19,10 +25,41 @@ class GlobalDB {
 
   async setLoggedIn(loggedIn: boolean): Promise<void> {
     await set("loggedIn", loggedIn, false);
+    if (!loggedIn) {
+      await this.clearAuthTokens();
+    }
   }
 
   async isLoggedIn(): Promise<boolean> {
-    return (await get("loggedIn")) ?? false;
+    if (await get("loggedIn")) return true;
+    return !!(await get("auth_token"));
+  }
+
+  async authTokens(): Promise<AuthTokens | undefined> {
+    let auth_token = await get<string>("auth_token");
+    if (!auth_token) return;
+    let refresh_token = (await get<string>("refresh_token")) ?? "";
+    let csrf_token = await get<string>("csrf_token");
+    return { auth_token, refresh_token, csrf_token };
+  }
+
+  async setAuthTokens(tokens: AuthTokens): Promise<void> {
+    await Promise.all([
+      set("auth_token", tokens.auth_token, false),
+      set("refresh_token", tokens.refresh_token, false),
+      tokens.csrf_token != null
+        ? set("csrf_token", tokens.csrf_token, false)
+        : Promise.resolve(),
+      set("loggedIn", true, false),
+    ]);
+  }
+
+  async clearAuthTokens(): Promise<void> {
+    await Promise.all([
+      set("auth_token", null, false),
+      set("refresh_token", null, false),
+      set("csrf_token", null, false),
+    ]);
   }
 
   async settings(): Promise<Settings> {

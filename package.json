@@ -6,15 +6,16 @@
   "type": "module",
   "scripts": {
     "test": "npx playwright test",
-    "start": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=dev -p 8008",
+    "start": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=dev -p 8008 --proxy=/api=http://localhost:4000",
     "server": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=server --target=./server/public",
+    "start:full": "concurrently -k -n start,server,trail -c blue,green,yellow \"npm:start\" \"npm:server\" \"make -C ../ImageBase dev\"",
     "build": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=prod --target=deploy",
     "check": "tsc --noEmit",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check"
   },
   "dependencies": {
-    "@jon49/sw": "^0.15.7",
+    "@jon49/sw": "^0.16.5",
     "@jon49/web": "^0.11.1",
     "html-template-tag-stream": "^4.0.1",
     "idb-keyval": "^6.2.2",
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@playwright/test": "^1.58.2",
     "@types/node": "^24.0.10",
+    "concurrently": "^9.2.1",
     "oxfmt": "^0.35.0",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"

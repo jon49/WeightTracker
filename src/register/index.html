@@ -12,7 +12,7 @@
 
     <script>
       document.querySelector("main").innerHTML = `
-    <form id=register-form action="/api/authentication/register" method=post>
+    <form id=register-form action="/api/auth/v1/register" method=post>
         <div>
             <label for="email">Email</label>
             <input type="email" name="email" id="email" required>
@@ -22,8 +22,8 @@
             <input type="password" name="password" id="password" required>
         </div>
         <div>
-            <label for="passwordConfirm">Confirm Password</label>
-            <input type="password" name="passwordConfirm" id="passwordConfirm" required>
+            <label for="password_repeat">Confirm Password</label>
+            <input type="password" name="password_repeat" id="password_repeat" required>
         </div>
         <button>Register</button>
     </form>
@@ -37,7 +37,7 @@
         }
         let form = e.target.form;
         let password = form.password;
-        let confirm = form.passwordConfirm;
+        let confirm = form.password_repeat;
         if (password.value === confirm.value) {
           confirm.setCustomValidity("");
         } else {

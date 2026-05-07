@@ -14,18 +14,23 @@
 
     <script>
       (() => {
-        let token = new URL(location.href).searchParams.get("token");
+        let url = new URL(location.href);
+        // TrailBase emails use `password_reset_code`; accept legacy `?token=`
+        // for backward compat with old reset emails still in inboxes.
+        let token =
+          url.searchParams.get("password_reset_code") ||
+          url.searchParams.get("token");
         if (!token) return;
         document.querySelector("main").innerHTML = `
-<form method="post" action="/api/authentication/reset-password">
-    <input type=hidden name=token value="${token}">
+<form method="post" action="/api/auth/v1/reset_password/update">
+    <input type=hidden name=password_reset_code value="${token}">
     <div>
         <label for="password">New Password</label>
         <input type="password" name="password" id="password" required>
     </div>
     <div>
-        <label for="passwordConfirm">Confirm New Password</label>
-        <input type="password" name="passwordConfirm" id="passwordConfirm" required>
+        <label for="password_repeat">Confirm New Password</label>
+        <input type="password" name="password_repeat" id="password_repeat" required>
     </div>
     <button type="submit">Reset Password</button>
 </form>`;

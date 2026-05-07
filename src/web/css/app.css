@@ -1,4 +1,11 @@
-@import url("/web/css/pico.min.css") layer;
+/* The unhashed pico.min.css path here requires server-side resolution to the
+ * built hashed file (e.g. /web/css/pico.min.4e713321.css):
+ *   - dev: handled by @jon49/sw's dev proxy via the file-map.
+ *   - prod: NGINX must serve a hashed equivalent for /web/css/pico.min.css
+ *     (e.g. `try_files $uri $uri.* =404;` or an explicit alias).
+ *   - service worker: also rewrites unhashed → hashed once active.
+ */
+@import url("/web/css/pico.min.css");
 
 body {
   padding: 1em 0.5em 50vh 0.5em;

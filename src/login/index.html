@@ -14,7 +14,7 @@
 
   <script>
     document.querySelector("main").innerHTML = `
-<form action="/api/authentication/login" method="post">
+<form action="/api/auth/v1/login" method="post">
   <div>
     <label for="email">Email</label>
     <input type="email" name="email" id="email" required>
@@ -33,15 +33,57 @@
   <script>
     (() => {
       let url = document.location.href;
-      if (url.includes("logout")) {
-        fetch("/api/authentication/logout", { method: "POST" })
-          .then((res) => {
-            if (res.ok) {
-              document.location.href = "/web/?loggedOut=true";
-            }
-          })
-          .catch((err) => console.error(err));
+      if (!url.includes("logout")) return;
+
+      function openDb() {
+        return new Promise((resolve, reject) => {
+          let req = indexedDB.open("keyval-store", 1);
+          req.onupgradeneeded = () => req.result.createObjectStore("keyval");
+          req.onerror = () => reject(req.error);
+          req.onsuccess = () => resolve(req.result);
+        });
       }
+      async function idbGet(key) {
+        let db = await openDb();
+        return new Promise((resolve, reject) => {
+          let tx = db.transaction("keyval", "readonly");
+          let g = tx.objectStore("keyval").get(key);
+          g.onsuccess = () => (db.close(), resolve(g.result));
+          g.onerror = () => reject(g.error);
+        });
+      }
+      async function idbSet(key, value) {
+        let db = await openDb();
+        return new Promise((resolve, reject) => {
+          let tx = db.transaction("keyval", "readwrite");
+          tx.objectStore("keyval").put(value, key);
+          tx.oncomplete = () => (db.close(), resolve());
+          tx.onerror = tx.onabort = () => reject(tx.error);
+        });
+      }
+
+      (async () => {
+        let refresh_token;
+        try { refresh_token = await idbGet("refresh_token"); } catch {}
+        try {
+          if (refresh_token) {
+            await fetch("/api/auth/v1/logout", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ refresh_token }),
+            });
+          }
+        } catch (err) { console.error(err); }
+
+        await Promise.all([
+          idbSet("auth_token", null),
+          idbSet("refresh_token", null),
+          idbSet("csrf_token", null),
+          idbSet("loggedIn", false),
+        ]).catch(() => {});
+
+        document.location.href = "/web/?loggedOut=true";
+      })();
     })();
   </script>
 
