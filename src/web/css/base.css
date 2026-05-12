@@ -1,0 +1,1302 @@
+/* ===== ./css/000-variables.css ===== */
+/* Theme variables. All colors cascade from --hue and --chroma.
+   Swap light/dark via radio input: <input name="theme" value="light|dark|auto"> */
+:root {
+  color-scheme: light dark;
+
+  /* Base */
+  --hue: 278;
+  --chroma: 0.197;
+
+  /* Typography */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-size: 100%;
+  --line-height: 1.6;
+
+  /* Rhythm */
+  --spacing: 1rem;
+  --radius: 0.375rem;
+  --border-width: 1px;
+  --transition: 150ms ease;
+
+  /* Layout */
+  --measure: 70ch;
+
+  /* Colors cascade from --hue / --chroma.
+     light-dark() auto-resolves from color-scheme. */
+  --bg: light-dark(oklch(99% 0.005 var(--hue)), oklch(16% 0.015 var(--hue)));
+  --bg-raised: light-dark(oklch(97% 0.010 var(--hue)), oklch(20% 0.020 var(--hue)));
+  --bg-sunken: light-dark(oklch(95% 0.015 var(--hue)), oklch(13% 0.015 var(--hue)));
+
+  --text: light-dark(oklch(22% 0.025 var(--hue)), oklch(94% 0.010 var(--hue)));
+  --text-muted: light-dark(oklch(45% 0.025 var(--hue)), oklch(70% 0.015 var(--hue)));
+
+  --border: light-dark(oklch(88% 0.015 var(--hue)), oklch(30% 0.020 var(--hue)));
+  --border-strong: light-dark(oklch(75% 0.020 var(--hue)), oklch(45% 0.025 var(--hue)));
+
+  --primary: light-dark(oklch(55% var(--chroma) var(--hue)), oklch(70% var(--chroma) var(--hue)));
+  --primary-hover: light-dark(oklch(48% var(--chroma) var(--hue)), oklch(78% var(--chroma) var(--hue)));
+  --on-primary: light-dark(oklch(99% 0 0), oklch(15% 0 0));
+
+  --accent: oklch(65% 0.18 calc(var(--hue) + 180));
+  --danger: oklch(58% 0.18 27);
+  --success: oklch(60% 0.15 150);
+  --warning: oklch(75% 0.15 85);
+
+  --focus-ring: 0 0 0 3px oklch(from var(--primary) l c h / 0.35);
+  --shadow: 0 1px 2px oklch(0% 0 0 / 0.06), 0 4px 12px oklch(0% 0 0 / 0.08);
+}
+
+/* Theme override — takes effect when a radio input controls mode.
+   Place <input type="radio" name="theme" value="light|dark|auto"> anywhere
+   inside <html>. `auto` (or none checked) falls back to system preference. */
+:root:has([name="theme"][value="light"]:checked) {
+  color-scheme: light;
+}
+
+:root:has([name="theme"][value="dark"]:checked) {
+  color-scheme: dark;
+}
+
+
+/* ===== ./css/010-reset.css ===== */
+/* Minimal reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html {
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--body-color, var(--text));
+  background-color: var(--body-bg, var(--bg));
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  tab-size: 4;
+}
+
+body {
+  min-height: 100dvh;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-shadow, var(--focus-ring));
+}
+
+::selection {
+  background: var(--selection-bg, var(--primary));
+  color: var(--selection-color, var(--on-primary));
+}
+
+hr {
+  border: 0;
+  border-top: var(--border-width) solid var(--hr-color, var(--border));
+  margin: calc(var(--spacing) * 2) 0;
+}
+
+
+/* ===== ./css/020-document.css ===== */
+/* Page shell */
+body>header,
+body>main,
+body>footer {
+  max-width: var(--measure);
+  margin-inline: auto;
+  padding-inline: var(--spacing);
+}
+
+body>header {
+  padding-block: calc(var(--spacing) * 2) var(--spacing);
+}
+
+body>main {
+  padding-block: var(--spacing) calc(var(--spacing) * 4);
+}
+
+body>footer {
+  padding-block: var(--spacing) calc(var(--spacing) * 2);
+  color: var(--footer-color, var(--text-muted));
+  border-top: var(--border-width) solid var(--footer-border, var(--border));
+  margin-top: calc(var(--spacing) * 3);
+}
+
+section {
+  margin-block: calc(var(--spacing) * 2);
+}
+
+
+/* ===== ./css/030-typography.css ===== */
+/* Headings & prose */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  line-height: 1.2;
+  font-weight: 600;
+  margin-top: calc(var(--spacing) * 2);
+  margin-bottom: var(--spacing);
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: 2.25rem;
+}
+
+h2 {
+  font-size: 1.75rem;
+}
+
+h3 {
+  font-size: 1.375rem;
+}
+
+h4 {
+  font-size: 1.125rem;
+}
+
+h5 {
+  font-size: 1rem;
+}
+
+h6 {
+  font-size: 0.875rem;
+  color: var(--h6-color, var(--text-muted));
+}
+
+p,
+ul,
+ol,
+dl,
+blockquote,
+figure {
+  margin-bottom: var(--spacing);
+  text-wrap: pretty;
+}
+
+small {
+  color: var(--small-color, var(--text-muted));
+  font-size: 0.875em;
+}
+
+strong,
+b {
+  font-weight: 600;
+}
+
+abbr[title] {
+  text-decoration: underline dotted;
+  cursor: help;
+}
+
+mark {
+  background: var(--mark-bg, oklch(from var(--warning) l c h / 0.4));
+  color: var(--mark-color, inherit);
+  padding: 0 0.2em;
+  border-radius: 2px;
+}
+
+blockquote {
+  border-left: 3px solid var(--quote-border, var(--border-strong));
+  padding-inline-start: var(--spacing);
+  color: var(--quote-color, var(--text-muted));
+  font-style: italic;
+}
+
+figcaption {
+  font-size: 0.875em;
+  color: var(--figcaption-color, var(--text-muted));
+  margin-top: 0.5rem;
+}
+
+
+/* ===== ./css/040-link.css ===== */
+/* Links. Excludes a[role="button"] so link-as-button inherits button styles. */
+a:not([role="button"]) {
+  color: var(--link-color, var(--primary));
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  transition: color var(--transition);
+}
+
+a:not([role="button"]):hover {
+  color: var(--link-color-hover, var(--primary-hover));
+  text-decoration-thickness: 2px;
+}
+
+a:not([role="button"]):visited {
+  color: var(--link-color-visited, oklch(from var(--primary) calc(l - 0.05) c calc(h - 20)));
+}
+
+
+/* ===== ./css/050-list.css ===== */
+/* Lists */
+ul,
+ol {
+  padding-inline-start: calc(var(--spacing) * 1.5);
+}
+
+li {
+  margin-bottom: 0.25rem;
+}
+
+li>ul,
+li>ol {
+  margin-top: 0.25rem;
+  margin-bottom: 0;
+}
+
+dt {
+  font-weight: 600;
+}
+
+dd {
+  margin-inline-start: var(--spacing);
+  margin-bottom: 0.5rem;
+}
+
+dl dl {
+  margin-inline-start: var(--spacing);
+  padding-inline-start: var(--spacing);
+  border-inline-start: 2px solid var(--dl-border, var(--border));
+}
+
+/* Unstyled list via role */
+ul[role="list"],
+ol[role="list"] {
+  list-style: none;
+  padding: 0;
+}
+
+
+/* ===== ./css/060-button.css ===== */
+/* Buttons — includes [role="button"] and submit/reset inputs.
+   Per-element overrides via --btn-*; variants have their own namespaces. */
+button,
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+[role="button"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  padding: 0.5em 1em;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.2;
+  text-decoration: none;
+  color: var(--btn-color, var(--on-primary));
+  background: var(--btn-bg, var(--primary));
+  border: var(--border-width) solid var(--btn-border, transparent);
+  border-radius: var(--radius);
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--transition), border-color var(--transition), color var(--transition), transform var(--transition);
+}
+
+button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover,
+input[type="reset"]:hover,
+[role="button"]:hover {
+  background: var(--btn-bg-hover, var(--primary-hover));
+}
+
+button:active,
+input[type="submit"]:active,
+input[type="button"]:active,
+input[type="reset"]:active,
+[role="button"]:active {
+  transform: translateY(1px);
+}
+
+button:disabled,
+input[type="submit"]:disabled,
+input[type="button"]:disabled,
+input[type="reset"]:disabled,
+[role="button"][aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Secondary — subdued surface */
+.secondary,
+[data-variant="secondary"] {
+  color: var(--btn-secondary-color, var(--text));
+  background: var(--btn-secondary-bg, var(--bg-raised));
+  border-color: var(--btn-secondary-border, var(--border-strong));
+}
+
+.secondary:hover,
+[data-variant="secondary"]:hover {
+  background: var(--btn-secondary-bg-hover, var(--bg-sunken));
+}
+
+/* Outline */
+.outline,
+[data-variant="outline"] {
+  color: var(--btn-outline-color, var(--primary));
+  background: var(--btn-outline-bg, transparent);
+  border-color: var(--btn-outline-border, var(--primary));
+}
+
+.outline:hover,
+[data-variant="outline"]:hover {
+  background: var(--btn-outline-bg-hover, oklch(from var(--primary) l c h / 0.1));
+}
+
+/* Ghost */
+.ghost,
+[data-variant="ghost"] {
+  color: var(--btn-ghost-color, var(--text));
+  background: var(--btn-ghost-bg, transparent);
+  border-color: transparent;
+}
+
+.ghost:hover,
+[data-variant="ghost"]:hover {
+  background: var(--btn-ghost-bg-hover, var(--bg-raised));
+}
+
+/* Danger */
+[data-variant="danger"] {
+  color: var(--btn-danger-color, var(--on-primary));
+  background: var(--btn-danger-bg, var(--danger));
+}
+
+[data-variant="danger"]:hover {
+  background: var(--btn-danger-bg-hover, oklch(from var(--danger) calc(l - 0.05) c h));
+}
+
+/* Link-as-button: strip underline; UA default would re-add it */
+a[role="button"] {
+  text-decoration: none;
+}
+
+/* Button group */
+.button-group {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.button-group>* {
+  border-radius: 0;
+}
+
+.button-group> :first-child {
+  border-start-start-radius: var(--radius);
+  border-end-start-radius: var(--radius);
+}
+
+.button-group> :last-child {
+  border-start-end-radius: var(--radius);
+  border-end-end-radius: var(--radius);
+}
+
+
+/* ===== ./css/070-form.css ===== */
+/* Forms */
+label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+label>input,
+label>textarea,
+label>select {
+  margin-top: 0.25rem;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="image"]),
+textarea,
+select {
+  display: block;
+  width: 100%;
+  padding: 0.5em 0.75em;
+  color: var(--input-color, var(--text));
+  background: var(--input-bg, var(--bg));
+  border: var(--border-width) solid var(--input-border, var(--border-strong));
+  border-radius: var(--radius);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+textarea {
+  min-height: 6em;
+  resize: vertical;
+  font-family: inherit;
+}
+
+select {
+  appearance: none;
+  padding-inline-end: 2.25em;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 1.1em) 50%, calc(100% - 0.7em) 50%;
+  background-size: 0.4em 0.4em, 0.4em 0.4em;
+  background-repeat: no-repeat;
+}
+
+input:hover,
+textarea:hover,
+select:hover {
+  border-color: var(--input-border-hover, var(--text-muted));
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--input-border-focus, var(--primary));
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+input:invalid:not(:placeholder-shown),
+textarea:invalid:not(:placeholder-shown) {
+  border-color: var(--input-border-invalid, var(--danger));
+}
+
+::placeholder {
+  color: var(--placeholder-color, var(--text-muted));
+  opacity: 1;
+}
+
+/* Checkbox and radio */
+input[type="checkbox"],
+input[type="radio"] {
+  width: 1.1em;
+  height: 1.1em;
+  margin: 0 0.4em 0 0;
+  accent-color: var(--control-accent, var(--primary));
+  vertical-align: -0.15em;
+  cursor: pointer;
+}
+
+/* Switch variant */
+input[type="checkbox"][role="switch"] {
+  appearance: none;
+  width: 2.25em;
+  height: 1.25em;
+  border-radius: 1em;
+  background: var(--switch-bg, var(--border-strong));
+  position: relative;
+  transition: background var(--transition);
+}
+
+input[type="checkbox"][role="switch"]::before {
+  content: "";
+  position: absolute;
+  inset: 2px auto 2px 2px;
+  width: calc(1.25em - 4px);
+  background: var(--switch-knob, var(--bg));
+  border-radius: 50%;
+  transition: inset var(--transition);
+}
+
+input[type="checkbox"][role="switch"]:checked {
+  background: var(--switch-bg-checked, var(--primary));
+}
+
+input[type="checkbox"][role="switch"]:checked::before {
+  inset: 2px 2px 2px auto;
+}
+
+/* Range */
+input[type="range"] {
+  accent-color: var(--control-accent, var(--primary));
+  width: 100%;
+}
+
+/* Fieldset */
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-inline-size: 0;
+}
+
+fieldset:has(> legend) {
+  border: var(--border-width) solid var(--fieldset-border, var(--border));
+  border-radius: var(--radius);
+  padding: var(--spacing);
+  margin-bottom: var(--spacing);
+}
+
+legend {
+  padding-inline: 0.5em;
+  font-weight: 600;
+}
+
+/* Helper text */
+.helper {
+  display: block;
+  font-size: 0.875em;
+  color: var(--helper-color, var(--text-muted));
+  margin-top: 0.25rem;
+}
+
+/* Form row */
+form>*+* {
+  margin-top: var(--spacing);
+}
+
+
+/* ===== ./css/080-table.css ===== */
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--spacing);
+}
+
+caption {
+  padding: 0.5em;
+  color: var(--caption-color, var(--text-muted));
+  text-align: start;
+  font-size: 0.9em;
+}
+
+th,
+td {
+  padding: 0.6em 0.75em;
+  text-align: start;
+  border-bottom: var(--border-width) solid var(--table-border, var(--border));
+  vertical-align: baseline;
+}
+
+th {
+  font-weight: 600;
+  color: var(--th-color, var(--text));
+  background: var(--th-bg, var(--bg-raised));
+}
+
+tbody tr:hover {
+  background: var(--tr-hover-bg, var(--bg-raised));
+}
+
+/* Striped via role */
+table[role="grid"] tbody tr:nth-child(even) {
+  background: var(--tr-stripe-bg, var(--bg-sunken));
+}
+
+/* Responsive wrapper: wrap <table> in <div class="scroll"> */
+.scroll {
+  overflow-x: auto;
+  margin-bottom: var(--spacing);
+}
+
+.scroll>table {
+  margin-bottom: 0;
+}
+
+
+/* ===== ./css/090-code.css ===== */
+/* Code */
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+code {
+  color: var(--code-color, inherit);
+  background: var(--code-bg, var(--bg-sunken));
+  border: var(--border-width) solid var(--code-border, var(--border));
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+pre {
+  color: var(--pre-color, inherit);
+  background: var(--pre-bg, var(--bg-sunken));
+  border: var(--border-width) solid var(--pre-border, var(--border));
+  padding: var(--spacing);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  margin-bottom: var(--spacing);
+  line-height: 1.5;
+}
+
+pre>code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+kbd {
+  color: var(--kbd-color, inherit);
+  background: var(--kbd-bg, var(--bg-raised));
+  border: var(--border-width) solid var(--kbd-border, var(--border-strong));
+  border-bottom-width: 2px;
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+
+/* ===== ./css/100-nav.css ===== */
+/* Nav */
+nav {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing);
+  flex-wrap: wrap;
+}
+
+nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: var(--spacing);
+  flex-wrap: wrap;
+}
+
+[role="navigation"] {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing);
+  flex-wrap: wrap;
+}
+
+[role="navigation"]:has(ul) {
+  justify-content: space-between;
+}
+
+nav a {
+  text-decoration: none;
+  color: var(--nav-link-color, var(--text));
+  padding: 0.3em 0.5em;
+  border-radius: var(--radius);
+}
+
+nav a:hover {
+  color: var(--nav-link-color-hover, var(--primary));
+  background: var(--nav-link-bg-hover, var(--bg-raised));
+}
+
+nav a[aria-current="page"] {
+  color: var(--nav-link-color-current, var(--primary));
+  font-weight: 600;
+}
+
+
+/* ===== ./css/110-details.css ===== */
+/* Details / Summary */
+details {
+  border: var(--border-width) solid var(--details-border, var(--border));
+  border-radius: var(--radius);
+  padding: 0.5em var(--spacing);
+  margin-bottom: var(--spacing);
+  color: var(--details-color, inherit);
+  background: var(--details-bg, var(--bg-raised));
+}
+
+summary {
+  cursor: pointer;
+  font-weight: 500;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+summary::before {
+  content: "";
+  display: inline-block;
+  width: 0.5em;
+  height: 0.5em;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--transition);
+}
+
+details[open]>summary::before {
+  transform: rotate(45deg);
+}
+
+details[open]>summary {
+  margin-bottom: 0.5em;
+  padding-bottom: 0.5em;
+  border-bottom: var(--border-width) solid var(--details-divider, var(--border));
+}
+
+
+/* ===== ./css/120-card.css ===== */
+/* Cards — <article> or .card */
+article,
+.card {
+  color: var(--card-color, inherit);
+  background: var(--card-bg, var(--bg-raised));
+  border: var(--border-width) solid var(--card-border, var(--border));
+  border-radius: var(--radius);
+  padding: calc(var(--spacing) * 1.25);
+  margin-bottom: var(--spacing);
+  box-shadow: var(--card-shadow, var(--shadow));
+}
+
+article>header,
+.card>header {
+  margin: calc(var(--spacing) * -1.25) calc(var(--spacing) * -1.25) var(--spacing);
+  padding: var(--spacing) calc(var(--spacing) * 1.25);
+  color: var(--card-header-color, inherit);
+  background: var(--card-header-bg, var(--bg-sunken));
+  border-bottom: var(--border-width) solid var(--card-header-border, var(--border));
+  border-start-start-radius: var(--radius);
+  border-start-end-radius: var(--radius);
+}
+
+article>footer,
+.card>footer {
+  margin: var(--spacing) calc(var(--spacing) * -1.25) calc(var(--spacing) * -1.25);
+  padding: var(--spacing) calc(var(--spacing) * 1.25);
+  color: var(--card-footer-color, inherit);
+  background: var(--card-footer-bg, var(--bg-sunken));
+  border-top: var(--border-width) solid var(--card-footer-border, var(--border));
+  border-end-start-radius: var(--radius);
+  border-end-end-radius: var(--radius);
+}
+
+
+/* ===== ./css/130-container.css ===== */
+/* Layout helpers — opt-in via class. */
+.container {
+  width: 100%;
+  max-width: var(--container-max, var(--measure));
+  margin-inline: auto;
+  padding-inline: var(--spacing);
+}
+
+.container-fluid {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: var(--spacing);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols, auto-fit), minmax(var(--grid-min, 220px), 1fr));
+  gap: var(--grid-gap, var(--spacing));
+}
+
+.grid>* {
+  margin: 0;
+}
+
+
+/* ===== ./css/140-group.css ===== */
+/* Input groups — [role="group"] / [role="search"]. Inline form fragments. */
+[role="group"],
+[role="search"] {
+  display: inline-flex;
+  width: 100%;
+  align-items: stretch;
+  border-radius: var(--radius);
+  box-shadow: var(--group-shadow, none);
+  margin-bottom: var(--spacing);
+}
+
+[role="group"]>*,
+[role="search"]>* {
+  flex: 1 1 auto;
+  margin: 0;
+  border-radius: 0;
+  position: relative;
+}
+
+[role="group"]> :not(:first-child),
+[role="search"]> :not(:first-child) {
+  margin-inline-start: calc(var(--border-width) * -1);
+}
+
+[role="group"]> :first-child,
+[role="search"]> :first-child {
+  border-start-start-radius: var(--radius);
+  border-end-start-radius: var(--radius);
+}
+
+[role="group"]> :last-child,
+[role="search"]> :last-child {
+  border-start-end-radius: var(--radius);
+  border-end-end-radius: var(--radius);
+}
+
+[role="group"]> :is(button, [role="button"], input[type="submit"], input[type="button"]),
+[role="search"]> :is(button, [role="button"], input[type="submit"], input[type="button"]) {
+  flex: 0 0 auto;
+}
+
+[role="group"]> :focus,
+[role="search"]> :focus {
+  z-index: 1;
+}
+
+[role="search"]>input[type="search"]::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+
+/* ===== ./css/150-dropdown.css ===== */
+/* Dropdown — <details class="dropdown"> with a single <summary> and a sibling list. */
+details.dropdown {
+  position: relative;
+  display: inline-block;
+  border: none;
+  background: none;
+  padding: 0;
+  margin-bottom: var(--spacing);
+}
+
+details.dropdown>summary {
+  padding: 0.5em 2.25em 0.5em 0.75em;
+  border: var(--border-width) solid var(--dropdown-border, var(--border-strong));
+  border-radius: var(--radius);
+  background: var(--dropdown-bg, var(--bg));
+  color: var(--dropdown-color, var(--text));
+  cursor: pointer;
+  position: relative;
+}
+
+details.dropdown>summary::before {
+  content: none;
+}
+
+details.dropdown>summary::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: 0.75em;
+  top: 50%;
+  width: 0.4em;
+  height: 0.4em;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-75%) rotate(45deg);
+  transition: transform var(--transition);
+}
+
+details.dropdown[open]>summary::after {
+  transform: translateY(-25%) rotate(-135deg);
+}
+
+details.dropdown>summary+* {
+  position: absolute;
+  inset-block-start: calc(100% + 4px);
+  inset-inline-start: 0;
+  min-width: 100%;
+  z-index: 50;
+  margin: 0;
+  padding: 0.25em 0;
+  list-style: none;
+  background: var(--dropdown-menu-bg, var(--bg-raised));
+  border: var(--border-width) solid var(--dropdown-menu-border, var(--border));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  white-space: nowrap;
+}
+
+details.dropdown>summary+*>li,
+details.dropdown>summary+*>a,
+details.dropdown>summary+*>label,
+details.dropdown>summary+*>button {
+  display: block;
+  padding: 0.4em 0.75em;
+  margin: 0;
+  color: inherit;
+  text-decoration: none;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: start;
+  cursor: pointer;
+}
+
+details.dropdown>summary+* :is(a, button, label):hover {
+  background: var(--dropdown-item-bg-hover, var(--bg-sunken));
+  color: var(--dropdown-item-color-hover, var(--primary));
+}
+
+/* Inside <nav>, drop the border so it reads as a menu trigger */
+nav details.dropdown>summary {
+  border-color: transparent;
+  background: transparent;
+}
+
+
+/* ===== ./css/160-progress.css ===== */
+/* Progress */
+progress {
+  display: block;
+  width: 100%;
+  height: 0.5rem;
+  appearance: none;
+  border: none;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--progress-bg, var(--bg-sunken));
+  color: var(--progress-color, var(--primary));
+  margin-bottom: var(--spacing);
+}
+
+progress::-webkit-progress-bar {
+  background: var(--progress-bg, var(--bg-sunken));
+}
+
+progress::-webkit-progress-value {
+  background: var(--progress-color, var(--primary));
+  transition: inline-size var(--transition);
+}
+
+progress::-moz-progress-bar {
+  background: var(--progress-color, var(--primary));
+}
+
+/* Indeterminate — animated stripe */
+progress:indeterminate {
+  background:
+    linear-gradient(90deg,
+      var(--progress-bg, var(--bg-sunken)) 0%,
+      var(--progress-color, var(--primary)) 50%,
+      var(--progress-bg, var(--bg-sunken)) 100%) no-repeat;
+  background-size: 200% 100%;
+  animation: progress-slide 1.4s linear infinite;
+}
+
+progress:indeterminate::-webkit-progress-bar {
+  background: transparent;
+}
+
+progress:indeterminate::-moz-progress-bar {
+  background: transparent;
+}
+
+@keyframes progress-slide {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+
+/* ===== ./css/170-loading.css ===== */
+/* Loading state — [aria-busy="true"] appends a spinning indicator. */
+[aria-busy="true"]:not(input, select, textarea) {
+  cursor: progress;
+}
+
+[aria-busy="true"]:not(input, select, textarea, progress)::before {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-inline-end: 0.5em;
+  vertical-align: -0.15em;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  opacity: 0.7;
+}
+
+/* When applied to a button-like element, swap label out */
+button[aria-busy="true"],
+[role="button"][aria-busy="true"],
+input[type="submit"][aria-busy="true"] {
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [aria-busy="true"]::before {
+    animation: none;
+  }
+}
+
+
+/* ===== ./css/180-dialog.css ===== */
+/* Native <dialog>. Use dialog.showModal() to open; the ::backdrop styles the scrim. */
+dialog {
+  margin: auto;
+  padding: calc(var(--spacing) * 1.25);
+  color: var(--dialog-color, inherit);
+  background: var(--dialog-bg, var(--bg-raised));
+  border: var(--border-width) solid var(--dialog-border, var(--border));
+  border-radius: var(--radius);
+  box-shadow: var(--dialog-shadow, var(--shadow));
+  max-width: min(90vw, 480px);
+  max-height: 90dvh;
+  overflow: auto;
+}
+
+dialog::backdrop {
+  background: oklch(0% 0 0 / 0.4);
+  backdrop-filter: blur(2px);
+}
+
+dialog[open] {
+  animation: dialog-in 150ms ease-out;
+}
+
+dialog[open]::backdrop {
+  animation: dialog-fade 150ms ease-out;
+}
+
+dialog>header,
+dialog>footer {
+  margin: calc(var(--spacing) * -1.25) calc(var(--spacing) * -1.25) var(--spacing);
+  padding: var(--spacing) calc(var(--spacing) * 1.25);
+  background: var(--dialog-header-bg, var(--bg-sunken));
+  border-bottom: var(--border-width) solid var(--border);
+  border-start-start-radius: var(--radius);
+  border-start-end-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing);
+}
+
+dialog>footer {
+  margin: var(--spacing) calc(var(--spacing) * -1.25) calc(var(--spacing) * -1.25);
+  border-bottom: none;
+  border-top: var(--border-width) solid var(--border);
+  border-radius: 0 0 var(--radius) var(--radius);
+  justify-content: flex-end;
+}
+
+/* Close button — <button class="close" aria-label="Close"> or <form method="dialog"><button>×</button></form> */
+dialog .close,
+dialog button[aria-label="Close"] {
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  padding: 0.25em;
+  font-size: 1.5em;
+  line-height: 1;
+  cursor: pointer;
+}
+
+dialog .close:hover {
+  color: var(--text);
+  background: transparent;
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dialog-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  dialog[open],
+  dialog[open]::backdrop {
+    animation: none;
+  }
+}
+
+
+/* ===== ./css/190-tooltip.css ===== */
+/* Tooltip — [data-tooltip="text"]. Placement via data-placement="top|bottom|left|right". */
+[data-tooltip] {
+  position: relative;
+  cursor: help;
+}
+
+[data-tooltip]::before,
+[data-tooltip]::after {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+[data-tooltip]::before {
+  content: attr(data-tooltip);
+  inset-inline-start: 50%;
+  inset-block-end: calc(100% + 8px);
+  transform: translateX(-50%) translateY(4px);
+  padding: 0.3em 0.6em;
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--tooltip-color, var(--on-primary));
+  background: var(--tooltip-bg, oklch(from var(--text) l c h));
+  border-radius: 4px;
+  z-index: 100;
+}
+
+[data-tooltip]::after {
+  content: "";
+  inset-inline-start: 50%;
+  inset-block-end: calc(100% + 2px);
+  transform: translateX(-50%) translateY(4px);
+  border: 4px solid transparent;
+  border-top-color: var(--tooltip-bg, oklch(from var(--text) l c h));
+}
+
+[data-tooltip]:is(:hover, :focus-visible)::before,
+[data-tooltip]:is(:hover, :focus-visible)::after {
+  opacity: 1;
+  transform: translateX(-50%);
+}
+
+/* Placement: bottom */
+[data-tooltip][data-placement="bottom"]::before {
+  inset-block-end: auto;
+  inset-block-start: calc(100% + 8px);
+  transform: translateX(-50%) translateY(-4px);
+}
+
+[data-tooltip][data-placement="bottom"]::after {
+  inset-block-end: auto;
+  inset-block-start: calc(100% + 2px);
+  transform: translateX(-50%) translateY(-4px);
+  border-top-color: transparent;
+  border-bottom-color: var(--tooltip-bg, oklch(from var(--text) l c h));
+}
+
+[data-tooltip][data-placement="bottom"]:is(:hover, :focus-visible)::before,
+[data-tooltip][data-placement="bottom"]:is(:hover, :focus-visible)::after {
+  transform: translateX(-50%);
+}
+
+/* Placement: left / right */
+[data-tooltip][data-placement="left"]::before,
+[data-tooltip][data-placement="right"]::before {
+  inset-block: 50% auto;
+  inset-inline-start: auto;
+  transform: translateY(-50%);
+}
+
+[data-tooltip][data-placement="left"]::before {
+  inset-inline-end: calc(100% + 8px);
+}
+
+[data-tooltip][data-placement="right"]::before {
+  inset-inline-start: calc(100% + 8px);
+}
+
+[data-tooltip][data-placement="left"]::after,
+[data-tooltip][data-placement="right"]::after {
+  display: none;
+}
+
+
+/* ===== ./css/200-utilities.css ===== */
+/* Utilities & accessibility */
+
+[aria-hidden="true"] {
+  display: none !important;
+}
+
+[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+[aria-controls] {
+  cursor: pointer;
+}
+
+.sr-only,
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+[dir="rtl"] {
+  direction: rtl;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

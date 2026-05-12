@@ -17,8 +17,8 @@
 #
 # NGINX note (production)
 # -----------------------
-# src/web/css/app.css contains `@import url("/web/css/pico.min.css");` — the
-# unhashed path. The build emits hashed files like `pico.min.4e713321.css`,
+# src/web/css/app.css contains `@import url("/web/css/base.css");` — the
+# unhashed path. The build emits hashed files like `base.4e713321.css`,
 # never the unhashed name. Three places resolve the rewrite:
 #
 #   - Service worker (sw.ts dev middleware + production fetch handler) for

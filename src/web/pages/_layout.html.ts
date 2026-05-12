@@ -7,10 +7,21 @@ const sunIcon = "&#127774;",
   moonIcon = "&#127762;";
 
 export function themeView(theme: Theme | undefined) {
-  const isNeither = !theme || theme === "neither";
-  return html`<button id=themeView form=post formaction="/web/api/settings?handler=theme" class="bg" $${isNeither ? '_load=initTheme' : ''}>$${
-    theme === "dark" ? sunIcon : moonIcon
-  }</button>`;
+  const isSet = theme === "light" || theme === "dark";
+  const current: "light" | "dark" = theme === "dark" ? "dark" : "light";
+  const next: "light" | "dark" = current === "dark" ? "light" : "dark";
+  const icon = current === "dark" ? sunIcon : moonIcon;
+  return html`<span id=themeView>
+<button form=post formaction="/web/api/settings?handler=theme" name=theme value="${next}" class=bg>$${icon}</button>
+${when(isSet, () => html`<input type=radio name=theme value="${current}" checked hidden>`)}
+${when(!isSet, () => html`<script>
+(function(){
+  var btn = document.currentScript.parentNode.querySelector('button');
+  btn.value = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  btn.click();
+})();
+</script>`)}
+</span>`;
 }
 
 export function syncCountView(count: number) {
@@ -44,7 +55,7 @@ const render = async ({ main, head, scripts, nav, title, cssLinks }: LayoutTempl
 
   return html`
 <!DOCTYPE html>
-<html $${when(theme, (x) => (x === "neither" ? null : `data-theme=${x}`))}>
+<html>
  <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -107,18 +118,6 @@ const render = async ({ main, head, scripts, nav, title, cssLinks }: LayoutTempl
     <form id=post method=post target=htmz hidden></form>
 
     <script src="/web/js/app.bundle.js" type=module></script>
-
-    $${when(!theme || theme === "neither", `<script>
-window.app.initTheme = (_, el) => {
-    setTimeout(() => {
-        let button = el
-        if (!window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
-            button.setAttribute('formaction', '/web/api/settings?handler=initTheme&theme=light')
-        }
-        button.click()
-    })
-}
-</script>`)}
 
     ${(scripts ?? []).map((x) => html`<script src="${x}" ${when(!x.includes(".min."), "type=module")}></script>`)}
 </body>

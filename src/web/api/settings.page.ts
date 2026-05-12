@@ -9,27 +9,15 @@ const {
 export type Theme = "dark" | "light" | "neither";
 
 const postHandlers: RoutePostHandler = {
-  async theme() {
-    let { theme } = await db.settings();
-    theme = theme === "dark" ? "light" : "dark";
+  async theme({ data }) {
+    const submitted = (data as { theme?: string } | undefined)?.theme;
+    const theme: Theme = submitted === "dark" ? "dark" : "light";
 
     await db.setTheme(theme);
 
     return {
       status: 200,
-      body: html`${themeView(theme)}
-            <i _load=theme hz-target="#temp" hz-swap="append" data-theme="${theme}"></i>`,
-    };
-  },
-  async initTheme({ query }) {
-    const theme: Theme = query.theme === "dark" ? "dark" : "light";
-
-    await db.setTheme(theme);
-
-    return {
-      status: 200,
-      body: html`${themeView(theme)}
-            <i _load=theme hz-target="#temp" hz-swap="append" data-theme="${theme}"></i>`,
+      body: html`${themeView(theme)}`,
     };
   },
 };

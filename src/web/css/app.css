@@ -1,11 +1,11 @@
-/* The unhashed pico.min.css path here requires server-side resolution to the
- * built hashed file (e.g. /web/css/pico.min.4e713321.css):
+/* The unhashed base.css path here requires server-side resolution to the
+ * built hashed file (e.g. /web/css/base.4e713321.css):
  *   - dev: handled by @jon49/sw's dev proxy via the file-map.
- *   - prod: NGINX must serve a hashed equivalent for /web/css/pico.min.css
+ *   - prod: NGINX must serve a hashed equivalent for /web/css/base.css
  *     (e.g. `try_files $uri $uri.* =404;` or an explicit alias).
  *   - service worker: also rewrites unhashed → hashed once active.
  */
-@import url("/web/css/pico.min.css");
+@import url("/web/css/base.css");
 
 body {
   padding: 1em 0.5em 50vh 0.5em;
@@ -65,11 +65,11 @@ body {
   min-height: auto;
   top: auto;
   bottom: 10px;
-  background-color: var(--pico-primary-background);
+  background-color: var(--primary);
   opacity: 0.95;
 }
 
 .toast p {
-  margin-top: var(--pico-typography-spacing-vertical);
-  color: var(--pico-primary-inverse);
+  margin-top: var(--spacing);
+  color: var(--on-primary);
 }
