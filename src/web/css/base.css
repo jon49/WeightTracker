@@ -1,1302 +1,2257 @@
-/* ===== ./css/000-variables.css ===== */
-/* Theme variables. All colors cascade from --hue and --chroma.
-   Swap light/dark via radio input: <input name="theme" value="light|dark|auto"> */
-:root {
-  color-scheme: light dark;
+@charset "UTF-8";
 
-  /* Base */
-  --hue: 278;
-  --chroma: 0.197;
+/* pico-builder v1 | h=278.00 c=0.1970 l=0.5500 | sections=00-header,01-styles,02-color-schemes,03-document,04-landmarks,05-section,06-container,09-typography,11-button,12-table,16-misc,17-basics-form-elements,18-checkboxes-radios-switches,20-input-type-datetime,25-card,26-dropdown,27-group,30-nav,33-accessibility,34-reduce-motion */
+/* Generated 2026-05-20 — paste the line above into the Restore field to rebuild this selection. */
 
-  /* Typography */
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --font-size: 100%;
-  --line-height: 1.6;
+/* ===== css/00-header.css ===== */
+/*!
+ * Pico CSS ✨ v2.1.1 (https://picocss.com)
+ * Copyright 2019-2025 - Licensed under MIT
+ */
 
-  /* Rhythm */
-  --spacing: 1rem;
-  --radius: 0.375rem;
-  --border-width: 1px;
-  --transition: 150ms ease;
-
-  /* Layout */
-  --measure: 70ch;
-
-  /* Colors cascade from --hue / --chroma.
-     light-dark() auto-resolves from color-scheme. */
-  --bg: light-dark(oklch(99% 0.005 var(--hue)), oklch(16% 0.015 var(--hue)));
-  --bg-raised: light-dark(oklch(97% 0.010 var(--hue)), oklch(20% 0.020 var(--hue)));
-  --bg-sunken: light-dark(oklch(95% 0.015 var(--hue)), oklch(13% 0.015 var(--hue)));
-
-  --text: light-dark(oklch(22% 0.025 var(--hue)), oklch(94% 0.010 var(--hue)));
-  --text-muted: light-dark(oklch(45% 0.025 var(--hue)), oklch(70% 0.015 var(--hue)));
-
-  --border: light-dark(oklch(88% 0.015 var(--hue)), oklch(30% 0.020 var(--hue)));
-  --border-strong: light-dark(oklch(75% 0.020 var(--hue)), oklch(45% 0.025 var(--hue)));
-
-  --primary: light-dark(oklch(55% var(--chroma) var(--hue)), oklch(70% var(--chroma) var(--hue)));
-  --primary-hover: light-dark(oklch(48% var(--chroma) var(--hue)), oklch(78% var(--chroma) var(--hue)));
-  --on-primary: light-dark(oklch(99% 0 0), oklch(15% 0 0));
-
-  --accent: oklch(65% 0.18 calc(var(--hue) + 180));
-  --danger: oklch(58% 0.18 27);
-  --success: oklch(60% 0.15 150);
-  --warning: oklch(75% 0.15 85);
-
-  --focus-ring: 0 0 0 3px oklch(from var(--primary) l c h / 0.35);
-  --shadow: 0 1px 2px oklch(0% 0 0 / 0.06), 0 4px 12px oklch(0% 0 0 / 0.08);
+/* ===== css/01-styles.css ===== */
+/**
+ * Styles
+ */
+:root,
+:host {
+  --pico-font-family-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --pico-font-family-sans-serif: system-ui, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, Helvetica, Arial, "Helvetica Neue", sans-serif, var(--pico-font-family-emoji);
+  --pico-font-family-monospace: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace, var(--pico-font-family-emoji);
+  --pico-font-family: var(--pico-font-family-sans-serif);
+  --pico-line-height: 1.5;
+  --pico-font-weight: 400;
+  --pico-font-size: 100%;
+  --pico-text-underline-offset: 0.1rem;
+  --pico-border-radius: 0.25rem;
+  --pico-border-width: 0.0625rem;
+  --pico-outline-width: 0.125rem;
+  --pico-transition: 0.2s ease-in-out;
+  --pico-spacing: 1rem;
+  --pico-typography-spacing-vertical: 1rem;
+  --pico-block-spacing-vertical: var(--pico-spacing);
+  --pico-block-spacing-horizontal: var(--pico-spacing);
+  --pico-grid-column-gap: var(--pico-spacing);
+  --pico-grid-row-gap: var(--pico-spacing);
+  --pico-form-element-spacing-vertical: 0.75rem;
+  --pico-form-element-spacing-horizontal: 1rem;
+  --pico-group-box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  --pico-group-box-shadow-focus-with-button: 0 0 0 var(--pico-outline-width) var(--pico-primary-focus);
+  --pico-group-box-shadow-focus-with-input: 0 0 0 0.0625rem var(--pico-form-element-border-color);
+  --pico-modal-overlay-backdrop-filter: blur(0.375rem);
+  --pico-nav-element-spacing-vertical: 1rem;
+  --pico-nav-element-spacing-horizontal: 0.5rem;
+  --pico-nav-link-spacing-vertical: 0.5rem;
+  --pico-nav-link-spacing-horizontal: 0.5rem;
+  --pico-nav-breadcrumb-divider: ">";
+  --pico-icon-checkbox: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(255, 255, 255)' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  --pico-icon-minus: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(255, 255, 255)' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='5' y1='12' x2='19' y2='12'%3E%3C/line%3E%3C/svg%3E");
+  --pico-icon-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(136, 145, 164)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  --pico-icon-date: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(136, 145, 164)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E");
+  --pico-icon-time: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(136, 145, 164)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cpolyline points='12 6 12 12 16 14'%3E%3C/polyline%3E%3C/svg%3E");
+  --pico-icon-search: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(136, 145, 164)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
+  --pico-icon-close: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(136, 145, 164)' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'%3E%3C/line%3E%3Cline x1='6' y1='6' x2='18' y2='18'%3E%3C/line%3E%3C/svg%3E");
+  --pico-icon-loading: url("data:image/svg+xml,%3Csvg fill='none' height='24' width='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg' %3E%3Cstyle%3E g %7B animation: rotate 2s linear infinite; transform-origin: center center; %7D circle %7B stroke-dasharray: 75,100; stroke-dashoffset: -5; animation: dash 1.5s ease-in-out infinite; stroke-linecap: round; %7D @keyframes rotate %7B 0%25 %7B transform: rotate(0deg); %7D 100%25 %7B transform: rotate(360deg); %7D %7D @keyframes dash %7B 0%25 %7B stroke-dasharray: 1,100; stroke-dashoffset: 0; %7D 50%25 %7B stroke-dasharray: 44.5,100; stroke-dashoffset: -17.5; %7D 100%25 %7B stroke-dasharray: 44.5,100; stroke-dashoffset: -62; %7D %7D %3C/style%3E%3Cg%3E%3Ccircle cx='12' cy='12' r='10' fill='none' stroke='rgb(136, 145, 164)' stroke-width='4' /%3E%3C/g%3E%3C/svg%3E");
 }
 
-/* Theme override — takes effect when a radio input controls mode.
-   Place <input type="radio" name="theme" value="light|dark|auto"> anywhere
-   inside <html>. `auto` (or none checked) falls back to system preference. */
-:root:has([name="theme"][value="light"]:checked) {
-  color-scheme: light;
+@media (min-width: 576px) {
+
+  :root,
+  :host {
+    --pico-font-size: 106.25%;
+  }
 }
 
-:root:has([name="theme"][value="dark"]:checked) {
-  color-scheme: dark;
+@media (min-width: 768px) {
+
+  :root,
+  :host {
+    --pico-font-size: 112.5%;
+  }
 }
 
+@media (min-width: 1024px) {
 
-/* ===== ./css/010-reset.css ===== */
-/* Minimal reset */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+  :root,
+  :host {
+    --pico-font-size: 118.75%;
+  }
 }
 
-* {
-  margin: 0;
+@media (min-width: 1280px) {
+
+  :root,
+  :host {
+    --pico-font-size: 125%;
+  }
 }
 
-[hidden] {
-  display: none !important;
+@media (min-width: 1536px) {
+
+  :root,
+  :host {
+    --pico-font-size: 131.25%;
+  }
 }
 
-html {
-  font-family: var(--font-sans);
-  font-size: var(--font-size);
-  line-height: var(--line-height);
-  color: var(--body-color, var(--text));
-  background-color: var(--body-bg, var(--bg));
-  -webkit-text-size-adjust: 100%;
-  text-rendering: optimizeLegibility;
-  tab-size: 4;
+a {
+  --pico-text-decoration: underline;
 }
 
-body {
-  min-height: 100dvh;
+a.secondary,
+a.contrast {
+  --pico-text-decoration: underline;
 }
 
-img,
-picture,
-video,
-canvas,
-svg {
-  display: block;
-  max-width: 100%;
-  height: auto;
+small {
+  --pico-font-size: 0.875em;
 }
 
-input,
-button,
-textarea,
-select {
-  font: inherit;
-  color: inherit;
-}
-
-:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-shadow, var(--focus-ring));
-}
-
-::selection {
-  background: var(--selection-bg, var(--primary));
-  color: var(--selection-color, var(--on-primary));
-}
-
-hr {
-  border: 0;
-  border-top: var(--border-width) solid var(--hr-color, var(--border));
-  margin: calc(var(--spacing) * 2) 0;
-}
-
-
-/* ===== ./css/020-document.css ===== */
-/* Page shell */
-body>header,
-body>main,
-body>footer {
-  max-width: var(--measure);
-  margin-inline: auto;
-  padding-inline: var(--spacing);
-}
-
-body>header {
-  padding-block: calc(var(--spacing) * 2) var(--spacing);
-}
-
-body>main {
-  padding-block: var(--spacing) calc(var(--spacing) * 4);
-}
-
-body>footer {
-  padding-block: var(--spacing) calc(var(--spacing) * 2);
-  color: var(--footer-color, var(--text-muted));
-  border-top: var(--border-width) solid var(--footer-border, var(--border));
-  margin-top: calc(var(--spacing) * 3);
-}
-
-section {
-  margin-block: calc(var(--spacing) * 2);
-}
-
-
-/* ===== ./css/030-typography.css ===== */
-/* Headings & prose */
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  line-height: 1.2;
-  font-weight: 600;
-  margin-top: calc(var(--spacing) * 2);
-  margin-bottom: var(--spacing);
-  text-wrap: balance;
+  --pico-font-weight: 700;
 }
 
 h1 {
-  font-size: 2.25rem;
+  --pico-font-size: 2rem;
+  --pico-line-height: 1.125;
+  --pico-typography-spacing-top: 3rem;
 }
 
 h2 {
-  font-size: 1.75rem;
+  --pico-font-size: 1.75rem;
+  --pico-line-height: 1.15;
+  --pico-typography-spacing-top: 2.625rem;
 }
 
 h3 {
-  font-size: 1.375rem;
+  --pico-font-size: 1.5rem;
+  --pico-line-height: 1.175;
+  --pico-typography-spacing-top: 2.25rem;
 }
 
 h4 {
-  font-size: 1.125rem;
+  --pico-font-size: 1.25rem;
+  --pico-line-height: 1.2;
+  --pico-typography-spacing-top: 1.874rem;
 }
 
 h5 {
-  font-size: 1rem;
+  --pico-font-size: 1.125rem;
+  --pico-line-height: 1.225;
+  --pico-typography-spacing-top: 1.6875rem;
 }
 
 h6 {
-  font-size: 0.875rem;
-  color: var(--h6-color, var(--text-muted));
+  --pico-font-size: 1rem;
+  --pico-line-height: 1.25;
+  --pico-typography-spacing-top: 1.5rem;
 }
 
-p,
-ul,
-ol,
-dl,
-blockquote,
-figure {
-  margin-bottom: var(--spacing);
-  text-wrap: pretty;
+thead th,
+thead td,
+tfoot th,
+tfoot td {
+  --pico-font-weight: 600;
+  --pico-border-width: 0.1875rem;
 }
 
-small {
-  color: var(--small-color, var(--text-muted));
-  font-size: 0.875em;
+pre,
+code,
+kbd,
+samp {
+  --pico-font-family: var(--pico-font-family-monospace);
 }
 
-strong,
-b {
-  font-weight: 600;
+kbd {
+  --pico-font-weight: bolder;
 }
 
-abbr[title] {
-  text-decoration: underline dotted;
-  cursor: help;
+input:not([type=submit],
+  [type=button],
+  [type=reset],
+  [type=checkbox],
+  [type=radio],
+  [type=file]),
+:where(select, textarea) {
+  --pico-outline-width: 0.0625rem;
 }
 
-mark {
-  background: var(--mark-bg, oklch(from var(--warning) l c h / 0.4));
-  color: var(--mark-color, inherit);
-  padding: 0 0.2em;
-  border-radius: 2px;
+[type=search] {
+  --pico-border-radius: 5rem;
 }
 
-blockquote {
-  border-left: 3px solid var(--quote-border, var(--border-strong));
-  padding-inline-start: var(--spacing);
-  color: var(--quote-color, var(--text-muted));
-  font-style: italic;
+[type=checkbox],
+[type=radio] {
+  --pico-border-width: 0.125rem;
 }
 
-figcaption {
-  font-size: 0.875em;
-  color: var(--figcaption-color, var(--text-muted));
-  margin-top: 0.5rem;
+[type=checkbox][role=switch] {
+  --pico-border-width: 0.1875rem;
 }
 
-
-/* ===== ./css/040-link.css ===== */
-/* Links. Excludes a[role="button"] so link-as-button inherits button styles. */
-a:not([role="button"]) {
-  color: var(--link-color, var(--primary));
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
-  transition: color var(--transition);
+details.dropdown summary:not([role=button]) {
+  --pico-outline-width: 0.0625rem;
 }
 
-a:not([role="button"]):hover {
-  color: var(--link-color-hover, var(--primary-hover));
-  text-decoration-thickness: 2px;
+nav details.dropdown summary:focus-visible {
+  --pico-outline-width: 0.125rem;
 }
 
-a:not([role="button"]):visited {
-  color: var(--link-color-visited, oklch(from var(--primary) calc(l - 0.05) c calc(h - 20)));
+[role=search] {
+  --pico-border-radius: 5rem;
 }
 
-
-/* ===== ./css/050-list.css ===== */
-/* Lists */
-ul,
-ol {
-  padding-inline-start: calc(var(--spacing) * 1.5);
+[role=search]:has(button.secondary:focus,
+  [type=submit].secondary:focus,
+  [type=button].secondary:focus,
+  [role=button].secondary:focus),
+[role=group]:has(button.secondary:focus,
+  [type=submit].secondary:focus,
+  [type=button].secondary:focus,
+  [role=button].secondary:focus) {
+  --pico-group-box-shadow-focus-with-button: 0 0 0 var(--pico-outline-width) var(--pico-secondary-focus);
 }
 
-li {
-  margin-bottom: 0.25rem;
+[role=search]:has(button.contrast:focus,
+  [type=submit].contrast:focus,
+  [type=button].contrast:focus,
+  [role=button].contrast:focus),
+[role=group]:has(button.contrast:focus,
+  [type=submit].contrast:focus,
+  [type=button].contrast:focus,
+  [role=button].contrast:focus) {
+  --pico-group-box-shadow-focus-with-button: 0 0 0 var(--pico-outline-width) var(--pico-contrast-focus);
 }
 
-li>ul,
-li>ol {
-  margin-top: 0.25rem;
-  margin-bottom: 0;
+[role=search] button,
+[role=search] [type=submit],
+[role=search] [type=button],
+[role=search] [role=button],
+[role=group] button,
+[role=group] [type=submit],
+[role=group] [type=button],
+[role=group] [role=button] {
+  --pico-form-element-spacing-horizontal: 2rem;
 }
 
-dt {
-  font-weight: 600;
+details summary[role=button]:not(.outline)::after {
+  filter: brightness(0) invert(1);
 }
 
-dd {
-  margin-inline-start: var(--spacing);
-  margin-bottom: 0.5rem;
+[aria-busy=true]:not(input, select, textarea):is(button, [type=submit], [type=button], [type=reset], [role=button]):not(.outline)::before {
+  filter: brightness(0) invert(0);
 }
 
-dl dl {
-  margin-inline-start: var(--spacing);
-  padding-inline-start: var(--spacing);
-  border-inline-start: 2px solid var(--dl-border, var(--border));
+/* ===== css/02-color-schemes.css ===== */
+/**
+ * Color schemes
+ */
+/* Accent color the whole primary palette is derived from. Override
+   --accent-h / --accent-c / --accent-l (the builder's theme block does
+   exactly this) to recolor every --pico-primary* role at once. */
+:root,
+:host {
+  --accent-h: 84;
+  --accent-c: 0.18;
+  --accent-l: 0.83;
 }
 
-/* Unstyled list via role */
-ul[role="list"],
-ol[role="list"] {
-  list-style: none;
-  padding: 0;
+/* Light vars apply when:
+   - data-theme=light is set, OR
+   - a #theme input with value=light is checked, OR
+   - nothing forces dark (default path) */
+[data-theme=light],
+:root:has(#theme input[value=light]:checked),
+:root:not([data-theme=dark]):not(:has(#theme input[value=dark]:checked)),
+:host(:not([data-theme=dark])) {
+  color-scheme: light;
+  --pico-background-color: #fff;
+  --pico-color: #373c44;
+  --pico-text-selection-color: rgba(183, 136, 0, 0.25);
+  --pico-muted-color: #646b79;
+  --pico-muted-border-color: rgb(231, 234, 239.5);
+  --pico-primary: oklch(calc(var(--accent-l) - 0.33) calc(var(--accent-c) * 0.72) var(--accent-h));
+  --pico-primary-background: oklch(var(--accent-l) var(--accent-c) var(--accent-h));
+  --pico-primary-border: var(--pico-primary-background);
+  --pico-primary-underline: oklch(calc(var(--accent-l) - 0.33) calc(var(--accent-c) * 0.72) var(--accent-h) / 0.5);
+  --pico-primary-hover: oklch(calc(var(--accent-l) - 0.42) calc(var(--accent-c) * 0.55) var(--accent-h));
+  --pico-primary-hover-background: oklch(calc(var(--accent-l) - 0.06) var(--accent-c) var(--accent-h));
+  --pico-primary-hover-border: var(--pico-primary-hover-background);
+  --pico-primary-hover-underline: var(--pico-primary-hover);
+  --pico-primary-focus: oklch(calc(var(--accent-l) - 0.23) var(--accent-c) var(--accent-h) / 0.5);
+  --pico-primary-inverse: #000;
+  --pico-secondary: #5d6b89;
+  --pico-secondary-background: #525f7a;
+  --pico-secondary-border: var(--pico-secondary-background);
+  --pico-secondary-underline: rgba(93, 107, 137, 0.5);
+  --pico-secondary-hover: #48536b;
+  --pico-secondary-hover-background: #48536b;
+  --pico-secondary-hover-border: var(--pico-secondary-hover-background);
+  --pico-secondary-hover-underline: var(--pico-secondary-hover);
+  --pico-secondary-focus: rgba(93, 107, 137, 0.25);
+  --pico-secondary-inverse: #fff;
+  --pico-contrast: #181c25;
+  --pico-contrast-background: #181c25;
+  --pico-contrast-border: var(--pico-contrast-background);
+  --pico-contrast-underline: rgba(24, 28, 37, 0.5);
+  --pico-contrast-hover: #000;
+  --pico-contrast-hover-background: #000;
+  --pico-contrast-hover-border: var(--pico-contrast-hover-background);
+  --pico-contrast-hover-underline: var(--pico-secondary-hover);
+  --pico-contrast-focus: rgba(93, 107, 137, 0.25);
+  --pico-contrast-inverse: #fff;
+  --pico-box-shadow: 0.0145rem 0.029rem 0.174rem rgba(129, 145, 181, 0.01698), 0.0335rem 0.067rem 0.402rem rgba(129, 145, 181, 0.024), 0.0625rem 0.125rem 0.75rem rgba(129, 145, 181, 0.03), 0.1125rem 0.225rem 1.35rem rgba(129, 145, 181, 0.036), 0.2085rem 0.417rem 2.502rem rgba(129, 145, 181, 0.04302), 0.5rem 1rem 6rem rgba(129, 145, 181, 0.06), 0 0 0 0.0625rem rgba(129, 145, 181, 0.015);
+  --pico-h1-color: #2d3138;
+  --pico-h2-color: #373c44;
+  --pico-h3-color: #424751;
+  --pico-h4-color: #4d535e;
+  --pico-h5-color: #5c6370;
+  --pico-h6-color: #646b79;
+  --pico-mark-background-color: rgb(252.5, 230.5, 191.5);
+  --pico-mark-color: #0f1114;
+  --pico-ins-color: rgb(28.5, 105.5, 84);
+  --pico-del-color: rgb(136, 56.5, 53);
+  --pico-blockquote-border-color: var(--pico-muted-border-color);
+  --pico-blockquote-footer-color: var(--pico-muted-color);
+  --pico-button-box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  --pico-button-hover-box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  --pico-table-border-color: var(--pico-muted-border-color);
+  --pico-table-row-stripped-background-color: rgba(111, 120, 135, 0.0375);
+  --pico-code-background-color: rgb(243, 244.5, 246.75);
+  --pico-code-color: #646b79;
+  --pico-code-kbd-background-color: var(--pico-color);
+  --pico-code-kbd-color: var(--pico-background-color);
+  --pico-form-element-background-color: rgb(251, 251.5, 252.25);
+  --pico-form-element-selected-background-color: #dfe3eb;
+  --pico-form-element-border-color: #cfd5e2;
+  --pico-form-element-color: #23262c;
+  --pico-form-element-placeholder-color: var(--pico-muted-color);
+  --pico-form-element-active-background-color: #fff;
+  --pico-form-element-active-border-color: var(--pico-primary-border);
+  --pico-form-element-focus-color: var(--pico-primary-border);
+  --pico-form-element-disabled-opacity: 0.5;
+  --pico-form-element-invalid-border-color: rgb(183.5, 105.5, 106.5);
+  --pico-form-element-invalid-active-border-color: rgb(200.25, 79.25, 72.25);
+  --pico-form-element-invalid-focus-color: var(--pico-form-element-invalid-active-border-color);
+  --pico-form-element-valid-border-color: rgb(76, 154.5, 137.5);
+  --pico-form-element-valid-active-border-color: rgb(39, 152.75, 118.75);
+  --pico-form-element-valid-focus-color: var(--pico-form-element-valid-active-border-color);
+  --pico-switch-background-color: #bfc7d9;
+  --pico-switch-checked-background-color: var(--pico-primary-background);
+  --pico-switch-color: #fff;
+  --pico-switch-thumb-box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.25);
+  --pico-range-border-color: #dfe3eb;
+  --pico-range-active-border-color: #bfc7d9;
+  --pico-range-thumb-border-color: var(--pico-background-color);
+  --pico-range-thumb-color: var(--pico-secondary-background);
+  --pico-range-thumb-active-color: var(--pico-primary-background);
+  --pico-accordion-border-color: var(--pico-muted-border-color);
+  --pico-accordion-active-summary-color: var(--pico-primary-hover);
+  --pico-accordion-close-summary-color: var(--pico-color);
+  --pico-accordion-open-summary-color: var(--pico-muted-color);
+  --pico-card-background-color: var(--pico-background-color);
+  --pico-card-border-color: var(--pico-muted-border-color);
+  --pico-card-box-shadow: var(--pico-box-shadow);
+  --pico-card-sectioning-background-color: rgb(251, 251.5, 252.25);
+  --pico-dropdown-background-color: #fff;
+  --pico-dropdown-border-color: #eff1f4;
+  --pico-dropdown-box-shadow: var(--pico-box-shadow);
+  --pico-dropdown-color: var(--pico-color);
+  --pico-dropdown-hover-background-color: #eff1f4;
+  --pico-loading-spinner-opacity: 0.5;
+  --pico-modal-overlay-background-color: rgba(232, 234, 237, 0.75);
+  --pico-progress-background-color: #dfe3eb;
+  --pico-progress-color: var(--pico-primary-background);
+  --pico-tooltip-background-color: var(--pico-contrast-background);
+  --pico-tooltip-color: var(--pico-contrast-inverse);
+  --pico-icon-valid: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(76, 154.5, 137.5)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  --pico-icon-invalid: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(200.25, 79.25, 72.25)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='12' y1='8' x2='12' y2='12'%3E%3C/line%3E%3Cline x1='12' y1='16' x2='12.01' y2='16'%3E%3C/line%3E%3C/svg%3E");
 }
 
-
-/* ===== ./css/060-button.css ===== */
-/* Buttons — includes [role="button"] and submit/reset inputs.
-   Per-element overrides via --btn-*; variants have their own namespaces. */
-button,
-input[type="submit"],
-input[type="button"],
-input[type="reset"],
-[role="button"] {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5em;
-  padding: 0.5em 1em;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.2;
-  text-decoration: none;
-  color: var(--btn-color, var(--on-primary));
-  background: var(--btn-bg, var(--primary));
-  border: var(--border-width) solid var(--btn-border, transparent);
-  border-radius: var(--radius);
-  cursor: pointer;
-  user-select: none;
-  transition: background var(--transition), border-color var(--transition), color var(--transition), transform var(--transition);
+[data-theme=light] input:is([type=submit],
+  [type=button],
+  [type=reset],
+  [type=checkbox],
+  [type=radio],
+  [type=file]),
+:root:has(#theme input[value=light]:checked) input:is([type=submit],
+  [type=button],
+  [type=reset],
+  [type=checkbox],
+  [type=radio],
+  [type=file]),
+:root:not([data-theme=dark]):not(:has(#theme input[value=dark]:checked)) input:is([type=submit],
+  [type=button],
+  [type=reset],
+  [type=checkbox],
+  [type=radio],
+  [type=file]),
+:host(:not([data-theme=dark])) input:is([type=submit],
+  [type=button],
+  [type=reset],
+  [type=checkbox],
+  [type=radio],
+  [type=file]) {
+  --pico-form-element-focus-color: var(--pico-primary-focus);
 }
 
-button:hover,
-input[type="submit"]:hover,
-input[type="button"]:hover,
-input[type="reset"]:hover,
-[role="button"]:hover {
-  background: var(--btn-bg-hover, var(--primary-hover));
+/* Auto-dark via system preference. Skipped when a #theme input forces light. */
+@media only screen and (prefers-color-scheme: dark) {
+
+  :root:not([data-theme]):not(:has(#theme input[value=light]:checked)):not(:has(#theme input[value=dark]:checked)),
+  :host(:not([data-theme])) {
+    color-scheme: dark;
+    --pico-background-color: rgb(19, 22.5, 30.5);
+    --pico-color: #c2c7d0;
+    --pico-text-selection-color: rgba(199, 148, 0, 0.1875);
+    --pico-muted-color: #7b8495;
+    --pico-muted-border-color: #202632;
+    --pico-primary: oklch(calc(var(--accent-l) - 0.17) calc(var(--accent-c) * 0.85) var(--accent-h));
+    --pico-primary-background: oklch(var(--accent-l) var(--accent-c) var(--accent-h));
+    --pico-primary-border: var(--pico-primary-background);
+    --pico-primary-underline: oklch(calc(var(--accent-l) - 0.17) calc(var(--accent-c) * 0.85) var(--accent-h) / 0.5);
+    --pico-primary-hover: oklch(calc(var(--accent-l) - 0.06) var(--accent-c) var(--accent-h));
+    --pico-primary-hover-background: oklch(calc(var(--accent-l) + 0.03) calc(var(--accent-c) * 0.85) var(--accent-h));
+    --pico-primary-hover-border: var(--pico-primary-hover-background);
+    --pico-primary-hover-underline: var(--pico-primary-hover);
+    --pico-primary-focus: oklch(calc(var(--accent-l) - 0.17) var(--accent-c) var(--accent-h) / 0.375);
+    --pico-primary-inverse: #000;
+    --pico-secondary: #969eaf;
+    --pico-secondary-background: #525f7a;
+    --pico-secondary-border: var(--pico-secondary-background);
+    --pico-secondary-underline: rgba(150, 158, 175, 0.5);
+    --pico-secondary-hover: #b3b9c5;
+    --pico-secondary-hover-background: #5d6b89;
+    --pico-secondary-hover-border: var(--pico-secondary-hover-background);
+    --pico-secondary-hover-underline: var(--pico-secondary-hover);
+    --pico-secondary-focus: rgba(144, 158, 190, 0.25);
+    --pico-secondary-inverse: #fff;
+    --pico-contrast: #dfe3eb;
+    --pico-contrast-background: #eff1f4;
+    --pico-contrast-border: var(--pico-contrast-background);
+    --pico-contrast-underline: rgba(223, 227, 235, 0.5);
+    --pico-contrast-hover: #fff;
+    --pico-contrast-hover-background: #fff;
+    --pico-contrast-hover-border: var(--pico-contrast-hover-background);
+    --pico-contrast-hover-underline: var(--pico-contrast-hover);
+    --pico-contrast-focus: rgba(207, 213, 226, 0.25);
+    --pico-contrast-inverse: #000;
+    --pico-box-shadow: 0.0145rem 0.029rem 0.174rem rgba(7, 8.5, 12, 0.01698), 0.0335rem 0.067rem 0.402rem rgba(7, 8.5, 12, 0.024), 0.0625rem 0.125rem 0.75rem rgba(7, 8.5, 12, 0.03), 0.1125rem 0.225rem 1.35rem rgba(7, 8.5, 12, 0.036), 0.2085rem 0.417rem 2.502rem rgba(7, 8.5, 12, 0.04302), 0.5rem 1rem 6rem rgba(7, 8.5, 12, 0.06), 0 0 0 0.0625rem rgba(7, 8.5, 12, 0.015);
+    --pico-h1-color: #f0f1f3;
+    --pico-h2-color: #e0e3e7;
+    --pico-h3-color: #c2c7d0;
+    --pico-h4-color: #b3b9c5;
+    --pico-h5-color: #a4acba;
+    --pico-h6-color: #8891a4;
+    --pico-mark-background-color: #014063;
+    --pico-mark-color: #fff;
+    --pico-ins-color: #62af9a;
+    --pico-del-color: rgb(205.5, 126, 123);
+    --pico-blockquote-border-color: var(--pico-muted-border-color);
+    --pico-blockquote-footer-color: var(--pico-muted-color);
+    --pico-button-box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    --pico-button-hover-box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    --pico-table-border-color: var(--pico-muted-border-color);
+    --pico-table-row-stripped-background-color: rgba(111, 120, 135, 0.0375);
+    --pico-code-background-color: rgb(26, 30.5, 40.25);
+    --pico-code-color: #8891a4;
+    --pico-code-kbd-background-color: var(--pico-color);
+    --pico-code-kbd-color: var(--pico-background-color);
+    --pico-form-element-background-color: rgb(28, 33, 43.5);
+    --pico-form-element-selected-background-color: #2a3140;
+    --pico-form-element-border-color: #2a3140;
+    --pico-form-element-color: #e0e3e7;
+    --pico-form-element-placeholder-color: #8891a4;
+    --pico-form-element-active-background-color: rgb(26, 30.5, 40.25);
+    --pico-form-element-active-border-color: var(--pico-primary-border);
+    --pico-form-element-focus-color: var(--pico-primary-border);
+    --pico-form-element-disabled-opacity: 0.5;
+    --pico-form-element-invalid-border-color: rgb(149.5, 74, 80);
+    --pico-form-element-invalid-active-border-color: rgb(183.25, 63.5, 59);
+    --pico-form-element-invalid-focus-color: var(--pico-form-element-invalid-active-border-color);
+    --pico-form-element-valid-border-color: #2a7b6f;
+    --pico-form-element-valid-active-border-color: rgb(22, 137, 105.5);
+    --pico-form-element-valid-focus-color: var(--pico-form-element-valid-active-border-color);
+    --pico-switch-background-color: #333c4e;
+    --pico-switch-checked-background-color: var(--pico-primary-background);
+    --pico-switch-color: #fff;
+    --pico-switch-thumb-box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.25);
+    --pico-range-border-color: #202632;
+    --pico-range-active-border-color: #2a3140;
+    --pico-range-thumb-border-color: var(--pico-background-color);
+    --pico-range-thumb-color: var(--pico-secondary-background);
+    --pico-range-thumb-active-color: var(--pico-primary-background);
+    --pico-accordion-border-color: var(--pico-muted-border-color);
+    --pico-accordion-active-summary-color: var(--pico-primary-hover);
+    --pico-accordion-close-summary-color: var(--pico-color);
+    --pico-accordion-open-summary-color: var(--pico-muted-color);
+    --pico-card-background-color: #181c25;
+    --pico-card-border-color: var(--pico-card-background-color);
+    --pico-card-box-shadow: var(--pico-box-shadow);
+    --pico-card-sectioning-background-color: rgb(26, 30.5, 40.25);
+    --pico-dropdown-background-color: #181c25;
+    --pico-dropdown-border-color: #202632;
+    --pico-dropdown-box-shadow: var(--pico-box-shadow);
+    --pico-dropdown-color: var(--pico-color);
+    --pico-dropdown-hover-background-color: #202632;
+    --pico-loading-spinner-opacity: 0.5;
+    --pico-modal-overlay-background-color: rgba(7.5, 8.5, 10, 0.75);
+    --pico-progress-background-color: #202632;
+    --pico-progress-color: var(--pico-primary-background);
+    --pico-tooltip-background-color: var(--pico-contrast-background);
+    --pico-tooltip-color: var(--pico-contrast-inverse);
+    --pico-icon-valid: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(42, 123, 111)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+    --pico-icon-invalid: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(149.5, 74, 80)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='12' y1='8' x2='12' y2='12'%3E%3C/line%3E%3Cline x1='12' y1='16' x2='12.01' y2='16'%3E%3C/line%3E%3C/svg%3E");
+  }
+
+  :root:not([data-theme]):not(:has(#theme input[value=light]:checked)) input:is([type=submit],
+    [type=button],
+    [type=reset],
+    [type=checkbox],
+    [type=radio],
+    [type=file]),
+  :host(:not([data-theme])) input:is([type=submit],
+    [type=button],
+    [type=reset],
+    [type=checkbox],
+    [type=radio],
+    [type=file]) {
+    --pico-form-element-focus-color: var(--pico-primary-focus);
+  }
+
+  :root:not([data-theme]):not(:has(#theme input[value=light]:checked)) details summary[role=button].contrast:not(.outline)::after,
+  :host(:not([data-theme])) details summary[role=button].contrast:not(.outline)::after {
+    filter: brightness(0);
+  }
+
+  :root:not([data-theme]):not(:has(#theme input[value=light]:checked)) [aria-busy=true]:not(input, select, textarea).contrast:is(button,
+    [type=submit],
+    [type=button],
+    [type=reset],
+    [role=button]):not(.outline)::before,
+  :host(:not([data-theme])) [aria-busy=true]:not(input, select, textarea).contrast:is(button,
+    [type=submit],
+    [type=button],
+    [type=reset],
+    [role=button]):not(.outline)::before {
+    filter: brightness(0);
+  }
 }
 
-button:active,
-input[type="submit"]:active,
-input[type="button"]:active,
-input[type="reset"]:active,
-[role="button"]:active {
-  transform: translateY(1px);
+/* Dark vars apply when:
+   - data-theme=dark is set, OR
+   - a #theme input with value=dark is checked */
+[data-theme=dark],
+:root:has(#theme input[value=dark]:checked) {
+  color-scheme: dark;
+  --pico-background-color: rgb(19, 22.5, 30.5);
+  --pico-color: #c2c7d0;
+  --pico-text-selection-color: rgba(199, 148, 0, 0.1875);
+  --pico-muted-color: #7b8495;
+  --pico-muted-border-color: #202632;
+  --pico-primary: oklch(calc(var(--accent-l) - 0.17) calc(var(--accent-c) * 0.85) var(--accent-h));
+  --pico-primary-background: oklch(var(--accent-l) var(--accent-c) var(--accent-h));
+  --pico-primary-border: var(--pico-primary-background);
+  --pico-primary-underline: oklch(calc(var(--accent-l) - 0.17) calc(var(--accent-c) * 0.85) var(--accent-h) / 0.5);
+  --pico-primary-hover: oklch(calc(var(--accent-l) - 0.06) var(--accent-c) var(--accent-h));
+  --pico-primary-hover-background: oklch(calc(var(--accent-l) + 0.03) calc(var(--accent-c) * 0.85) var(--accent-h));
+  --pico-primary-hover-border: var(--pico-primary-hover-background);
+  --pico-primary-hover-underline: var(--pico-primary-hover);
+  --pico-primary-focus: oklch(calc(var(--accent-l) - 0.17) var(--accent-c) var(--accent-h) / 0.375);
+  --pico-primary-inverse: #000;
+  --pico-secondary: #969eaf;
+  --pico-secondary-background: #525f7a;
+  --pico-secondary-border: var(--pico-secondary-background);
+  --pico-secondary-underline: rgba(150, 158, 175, 0.5);
+  --pico-secondary-hover: #b3b9c5;
+  --pico-secondary-hover-background: #5d6b89;
+  --pico-secondary-hover-border: var(--pico-secondary-hover-background);
+  --pico-secondary-hover-underline: var(--pico-secondary-hover);
+  --pico-secondary-focus: rgba(144, 158, 190, 0.25);
+  --pico-secondary-inverse: #fff;
+  --pico-contrast: #dfe3eb;
+  --pico-contrast-background: #eff1f4;
+  --pico-contrast-border: var(--pico-contrast-background);
+  --pico-contrast-underline: rgba(223, 227, 235, 0.5);
+  --pico-contrast-hover: #fff;
+  --pico-contrast-hover-background: #fff;
+  --pico-contrast-hover-border: var(--pico-contrast-hover-background);
+  --pico-contrast-hover-underline: var(--pico-contrast-hover);
+  --pico-contrast-focus: rgba(207, 213, 226, 0.25);
+  --pico-contrast-inverse: #000;
+  --pico-box-shadow: 0.0145rem 0.029rem 0.174rem rgba(7, 8.5, 12, 0.01698), 0.0335rem 0.067rem 0.402rem rgba(7, 8.5, 12, 0.024), 0.0625rem 0.125rem 0.75rem rgba(7, 8.5, 12, 0.03), 0.1125rem 0.225rem 1.35rem rgba(7, 8.5, 12, 0.036), 0.2085rem 0.417rem 2.502rem rgba(7, 8.5, 12, 0.04302), 0.5rem 1rem 6rem rgba(7, 8.5, 12, 0.06), 0 0 0 0.0625rem rgba(7, 8.5, 12, 0.015);
+  --pico-h1-color: #f0f1f3;
+  --pico-h2-color: #e0e3e7;
+  --pico-h3-color: #c2c7d0;
+  --pico-h4-color: #b3b9c5;
+  --pico-h5-color: #a4acba;
+  --pico-h6-color: #8891a4;
+  --pico-mark-background-color: #014063;
+  --pico-mark-color: #fff;
+  --pico-ins-color: #62af9a;
+  --pico-del-color: rgb(205.5, 126, 123);
+  --pico-blockquote-border-color: var(--pico-muted-border-color);
+  --pico-blockquote-footer-color: var(--pico-muted-color);
+  --pico-button-box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  --pico-button-hover-box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  --pico-table-border-color: var(--pico-muted-border-color);
+  --pico-table-row-stripped-background-color: rgba(111, 120, 135, 0.0375);
+  --pico-code-background-color: rgb(26, 30.5, 40.25);
+  --pico-code-color: #8891a4;
+  --pico-code-kbd-background-color: var(--pico-color);
+  --pico-code-kbd-color: var(--pico-background-color);
+  --pico-form-element-background-color: rgb(28, 33, 43.5);
+  --pico-form-element-selected-background-color: #2a3140;
+  --pico-form-element-border-color: #2a3140;
+  --pico-form-element-color: #e0e3e7;
+  --pico-form-element-placeholder-color: #8891a4;
+  --pico-form-element-active-background-color: rgb(26, 30.5, 40.25);
+  --pico-form-element-active-border-color: var(--pico-primary-border);
+  --pico-form-element-focus-color: var(--pico-primary-border);
+  --pico-form-element-disabled-opacity: 0.5;
+  --pico-form-element-invalid-border-color: rgb(149.5, 74, 80);
+  --pico-form-element-invalid-active-border-color: rgb(183.25, 63.5, 59);
+  --pico-form-element-invalid-focus-color: var(--pico-form-element-invalid-active-border-color);
+  --pico-form-element-valid-border-color: #2a7b6f;
+  --pico-form-element-valid-active-border-color: rgb(22, 137, 105.5);
+  --pico-form-element-valid-focus-color: var(--pico-form-element-valid-active-border-color);
+  --pico-switch-background-color: #333c4e;
+  --pico-switch-checked-background-color: var(--pico-primary-background);
+  --pico-switch-color: #fff;
+  --pico-switch-thumb-box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.25);
+  --pico-range-border-color: #202632;
+  --pico-range-active-border-color: #2a3140;
+  --pico-range-thumb-border-color: var(--pico-background-color);
+  --pico-range-thumb-color: var(--pico-secondary-background);
+  --pico-range-thumb-active-color: var(--pico-primary-background);
+  --pico-accordion-border-color: var(--pico-muted-border-color);
+  --pico-accordion-active-summary-color: var(--pico-primary-hover);
+  --pico-accordion-close-summary-color: var(--pico-color);
+  --pico-accordion-open-summary-color: var(--pico-muted-color);
+  --pico-card-background-color: #181c25;
+  --pico-card-border-color: var(--pico-card-background-color);
+  --pico-card-box-shadow: var(--pico-box-shadow);
+  --pico-card-sectioning-background-color: rgb(26, 30.5, 40.25);
+  --pico-dropdown-background-color: #181c25;
+  --pico-dropdown-border-color: #202632;
+  --pico-dropdown-box-shadow: var(--pico-box-shadow);
+  --pico-dropdown-color: var(--pico-color);
+  --pico-dropdown-hover-background-color: #202632;
+  --pico-loading-spinner-opacity: 0.5;
+  --pico-modal-overlay-background-color: rgba(7.5, 8.5, 10, 0.75);
+  --pico-progress-background-color: #202632;
+  --pico-progress-color: var(--pico-primary-background);
+  --pico-tooltip-background-color: var(--pico-contrast-background);
+  --pico-tooltip-color: var(--pico-contrast-inverse);
+  --pico-icon-valid: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(42, 123, 111)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  --pico-icon-invalid: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(149.5, 74, 80)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='12' y1='8' x2='12' y2='12'%3E%3C/line%3E%3Cline x1='12' y1='16' x2='12.01' y2='16'%3E%3C/line%3E%3C/svg%3E");
 }
 
-button:disabled,
-input[type="submit"]:disabled,
-input[type="button"]:disabled,
-input[type="reset"]:disabled,
-[role="button"][aria-disabled="true"] {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
+[data-theme=dark] input:is([type=submit],
+  [type=button],
+  [type=reset],
+  [type=checkbox],
+  [type=radio],
+  [type=file]),
+:root:has(#theme input[value=dark]:checked) input:is([type=submit],
+  [type=button],
+  [type=reset],
+  [type=checkbox],
+  [type=radio],
+  [type=file]) {
+  --pico-form-element-focus-color: var(--pico-primary-focus);
 }
 
-/* Secondary — subdued surface */
-.secondary,
-[data-variant="secondary"] {
-  color: var(--btn-secondary-color, var(--text));
-  background: var(--btn-secondary-bg, var(--bg-raised));
-  border-color: var(--btn-secondary-border, var(--border-strong));
+[data-theme=dark] details summary[role=button].contrast:not(.outline)::after,
+:root:has(#theme input[value=dark]:checked) details summary[role=button].contrast:not(.outline)::after {
+  filter: brightness(0);
 }
 
-.secondary:hover,
-[data-variant="secondary"]:hover {
-  background: var(--btn-secondary-bg-hover, var(--bg-sunken));
+[data-theme=dark] [aria-busy=true]:not(input, select, textarea).contrast:is(button,
+  [type=submit],
+  [type=button],
+  [type=reset],
+  [role=button]):not(.outline)::before,
+:root:has(#theme input[value=dark]:checked) [aria-busy=true]:not(input, select, textarea).contrast:is(button,
+  [type=submit],
+  [type=button],
+  [type=reset],
+  [role=button]):not(.outline)::before {
+  filter: brightness(0);
 }
 
-/* Outline */
-.outline,
-[data-variant="outline"] {
-  color: var(--btn-outline-color, var(--primary));
-  background: var(--btn-outline-bg, transparent);
-  border-color: var(--btn-outline-border, var(--primary));
+progress,
+[type=checkbox],
+[type=radio],
+[type=range] {
+  accent-color: var(--pico-primary);
 }
 
-.outline:hover,
-[data-variant="outline"]:hover {
-  background: var(--btn-outline-bg-hover, oklch(from var(--primary) l c h / 0.1));
-}
-
-/* Ghost */
-.ghost,
-[data-variant="ghost"] {
-  color: var(--btn-ghost-color, var(--text));
-  background: var(--btn-ghost-bg, transparent);
-  border-color: transparent;
-}
-
-.ghost:hover,
-[data-variant="ghost"]:hover {
-  background: var(--btn-ghost-bg-hover, var(--bg-raised));
-}
-
-/* Danger */
-[data-variant="danger"] {
-  color: var(--btn-danger-color, var(--on-primary));
-  background: var(--btn-danger-bg, var(--danger));
-}
-
-[data-variant="danger"]:hover {
-  background: var(--btn-danger-bg-hover, oklch(from var(--danger) calc(l - 0.05) c h));
-}
-
-/* Link-as-button: strip underline; UA default would re-add it */
-a[role="button"] {
-  text-decoration: none;
-}
-
-/* Button group */
-.button-group {
-  display: inline-flex;
-  gap: 0.25rem;
-}
-
-.button-group>* {
-  border-radius: 0;
-}
-
-.button-group> :first-child {
-  border-start-start-radius: var(--radius);
-  border-end-start-radius: var(--radius);
-}
-
-.button-group> :last-child {
-  border-start-end-radius: var(--radius);
-  border-end-end-radius: var(--radius);
-}
-
-
-/* ===== ./css/070-form.css ===== */
-/* Forms */
-label {
-  display: block;
-  margin-bottom: 0.25rem;
-  font-weight: 500;
-}
-
-label>input,
-label>textarea,
-label>select {
-  margin-top: 0.25rem;
-}
-
-input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="image"]),
-textarea,
-select {
-  display: block;
-  width: 100%;
-  padding: 0.5em 0.75em;
-  color: var(--input-color, var(--text));
-  background: var(--input-bg, var(--bg));
-  border: var(--border-width) solid var(--input-border, var(--border-strong));
-  border-radius: var(--radius);
-  transition: border-color var(--transition), box-shadow var(--transition);
-}
-
-textarea {
-  min-height: 6em;
-  resize: vertical;
-  font-family: inherit;
-}
-
-select {
-  appearance: none;
-  padding-inline-end: 2.25em;
-  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
-    linear-gradient(135deg, currentColor 50%, transparent 50%);
-  background-position: calc(100% - 1.1em) 50%, calc(100% - 0.7em) 50%;
-  background-size: 0.4em 0.4em, 0.4em 0.4em;
+/* ===== css/03-document.css ===== */
+/**
+ * Document
+ * Content-box & Responsive typography
+ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
   background-repeat: no-repeat;
 }
 
-input:hover,
-textarea:hover,
-select:hover {
-  border-color: var(--input-border-hover, var(--text-muted));
+::before,
+::after {
+  text-decoration: inherit;
+  vertical-align: inherit;
 }
 
-input:focus,
-textarea:focus,
-select:focus {
-  border-color: var(--input-border-focus, var(--primary));
+:where(:root),
+:where(:host) {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background-color: var(--pico-background-color);
+  color: var(--pico-color);
+  font-weight: var(--pico-font-weight);
+  font-size: var(--pico-font-size);
+  line-height: var(--pico-line-height);
+  font-family: var(--pico-font-family);
+  text-underline-offset: var(--pico-text-underline-offset);
+  text-rendering: optimizeLegibility;
+  overflow-wrap: break-word;
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
 }
 
-input:disabled,
-textarea:disabled,
-select:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+/* ===== css/04-landmarks.css ===== */
+/**
+ * Landmarks
+ */
+body {
+  width: 100%;
+  margin: 0;
 }
 
-input:invalid:not(:placeholder-shown),
-textarea:invalid:not(:placeholder-shown) {
-  border-color: var(--input-border-invalid, var(--danger));
+main {
+  display: block;
 }
 
-::placeholder {
-  color: var(--placeholder-color, var(--text-muted));
-  opacity: 1;
+body>header,
+body>main,
+body>footer {
+  padding-block: var(--pico-block-spacing-vertical);
 }
 
-/* Checkbox and radio */
-input[type="checkbox"],
-input[type="radio"] {
-  width: 1.1em;
-  height: 1.1em;
-  margin: 0 0.4em 0 0;
-  accent-color: var(--control-accent, var(--primary));
-  vertical-align: -0.15em;
+/* ===== css/05-section.css ===== */
+/**
+ * Section
+ */
+section {
+  margin-bottom: var(--pico-block-spacing-vertical);
+}
+
+/* ===== css/06-container.css ===== */
+/**
+ * Container
+ */
+.container,
+.container-fluid {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: var(--pico-spacing);
+  padding-left: var(--pico-spacing);
+}
+
+@media (min-width: 576px) {
+  .container {
+    max-width: 510px;
+    padding-right: 0;
+    padding-left: 0;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 700px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 950px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1200px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1450px;
+  }
+}
+
+/* ===== css/09-typography.css ===== */
+/**
+ * Typography
+ */
+b,
+strong {
+  font-weight: bolder;
+}
+
+sub,
+sup {
+  position: relative;
+  font-size: 0.75em;
+  line-height: 0;
+  vertical-align: baseline;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+address,
+blockquote,
+dl,
+ol,
+p,
+pre,
+table,
+ul {
+  margin-top: 0;
+  margin-bottom: var(--pico-typography-spacing-vertical);
+  color: var(--pico-color);
+  font-style: normal;
+  font-weight: var(--pico-font-weight);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+  margin-bottom: var(--pico-typography-spacing-vertical);
+  color: var(--pico-color);
+  font-weight: var(--pico-font-weight);
+  font-size: var(--pico-font-size);
+  line-height: var(--pico-line-height);
+  font-family: var(--pico-font-family);
+}
+
+h1 {
+  --pico-color: var(--pico-h1-color);
+}
+
+h2 {
+  --pico-color: var(--pico-h2-color);
+}
+
+h3 {
+  --pico-color: var(--pico-h3-color);
+}
+
+h4 {
+  --pico-color: var(--pico-h4-color);
+}
+
+h5 {
+  --pico-color: var(--pico-h5-color);
+}
+
+h6 {
+  --pico-color: var(--pico-h6-color);
+}
+
+:where(article, address, blockquote, dl, figure, form, ol, p, pre, table, ul)~ :is(h1, h2, h3, h4, h5, h6) {
+  margin-top: var(--pico-typography-spacing-top);
+}
+
+p {
+  margin-bottom: var(--pico-typography-spacing-vertical);
+}
+
+hgroup {
+  margin-bottom: var(--pico-typography-spacing-vertical);
+}
+
+hgroup>* {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+hgroup>*:not(:first-child):last-child {
+  --pico-color: var(--pico-muted-color);
+  --pico-font-weight: unset;
+  font-size: 1rem;
+}
+
+:where(ol, ul) li {
+  margin-bottom: calc(var(--pico-typography-spacing-vertical) * 0.25);
+}
+
+:where(dl, ol, ul) :where(dl, ol, ul) {
+  margin: 0;
+  margin-top: calc(var(--pico-typography-spacing-vertical) * 0.25);
+}
+
+ul li {
+  list-style: square;
+}
+
+mark {
+  padding: 0.125rem 0.25rem;
+  background-color: var(--pico-mark-background-color);
+  color: var(--pico-mark-color);
+  vertical-align: baseline;
+}
+
+blockquote {
+  display: block;
+  margin: var(--pico-typography-spacing-vertical) 0;
+  padding: var(--pico-spacing);
+  border-right: none;
+  border-left: 0.25rem solid var(--pico-blockquote-border-color);
+  border-inline-start: 0.25rem solid var(--pico-blockquote-border-color);
+  border-inline-end: none;
+}
+
+blockquote footer {
+  margin-top: calc(var(--pico-typography-spacing-vertical) * 0.5);
+  color: var(--pico-blockquote-footer-color);
+}
+
+abbr[title] {
+  border-bottom: 1px dotted;
+  text-decoration: none;
+  cursor: help;
+}
+
+ins {
+  color: var(--pico-ins-color);
+  text-decoration: none;
+}
+
+del {
+  color: var(--pico-del-color);
+}
+
+::-moz-selection {
+  background-color: var(--pico-text-selection-color);
+}
+
+::selection {
+  background-color: var(--pico-text-selection-color);
+}
+
+/* ===== css/11-button.css ===== */
+/**
+ * Button
+ */
+button {
+  margin: 0;
+  overflow: visible;
+  font-family: inherit;
+  text-transform: none;
+}
+
+button,
+[type=submit],
+[type=reset],
+[type=button] {
+  -webkit-appearance: button;
+}
+
+button,
+[type=submit],
+[type=reset],
+[type=button],
+[type=file]::file-selector-button,
+[role=button] {
+  --pico-background-color: var(--pico-primary-background);
+  --pico-border-color: var(--pico-primary-border);
+  --pico-color: var(--pico-primary-inverse);
+  --pico-box-shadow: var(--pico-button-box-shadow, 0 0 0 rgba(0, 0, 0, 0));
+  padding: var(--pico-form-element-spacing-vertical) var(--pico-form-element-spacing-horizontal);
+  border: var(--pico-border-width) solid var(--pico-border-color);
+  border-radius: var(--pico-border-radius);
+  outline: none;
+  background-color: var(--pico-background-color);
+  box-shadow: var(--pico-box-shadow);
+  color: var(--pico-color);
+  font-weight: var(--pico-font-weight);
+  font-size: 1rem;
+  line-height: var(--pico-line-height);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  transition: background-color var(--pico-transition), border-color var(--pico-transition), color var(--pico-transition), box-shadow var(--pico-transition);
+}
+
+button:is([aria-current]:not([aria-current=false])),
+button:is(:hover, :active, :focus),
+[type=submit]:is([aria-current]:not([aria-current=false])),
+[type=submit]:is(:hover, :active, :focus),
+[type=reset]:is([aria-current]:not([aria-current=false])),
+[type=reset]:is(:hover, :active, :focus),
+[type=button]:is([aria-current]:not([aria-current=false])),
+[type=button]:is(:hover, :active, :focus),
+[type=file]::file-selector-button:is([aria-current]:not([aria-current=false])),
+[type=file]::file-selector-button:is(:hover, :active, :focus),
+[role=button]:is([aria-current]:not([aria-current=false])),
+[role=button]:is(:hover, :active, :focus) {
+  --pico-background-color: var(--pico-primary-hover-background);
+  --pico-border-color: var(--pico-primary-hover-border);
+  --pico-box-shadow: var(--pico-button-hover-box-shadow, 0 0 0 rgba(0, 0, 0, 0));
+  --pico-color: var(--pico-primary-inverse);
+}
+
+button:focus,
+button:is([aria-current]:not([aria-current=false])):focus,
+[type=submit]:focus,
+[type=submit]:is([aria-current]:not([aria-current=false])):focus,
+[type=reset]:focus,
+[type=reset]:is([aria-current]:not([aria-current=false])):focus,
+[type=button]:focus,
+[type=button]:is([aria-current]:not([aria-current=false])):focus,
+[type=file]::file-selector-button:focus,
+[type=file]::file-selector-button:is([aria-current]:not([aria-current=false])):focus,
+[role=button]:focus,
+[role=button]:is([aria-current]:not([aria-current=false])):focus {
+  --pico-box-shadow: var(--pico-button-hover-box-shadow, 0 0 0 rgba(0, 0, 0, 0)), 0 0 0 var(--pico-outline-width) var(--pico-primary-focus);
+}
+
+[type=submit],
+[type=reset],
+[type=button] {
+  margin-bottom: var(--pico-spacing);
+}
+
+:is(button, [type=submit], [type=button], [role=button]).secondary,
+[type=reset],
+[type=file]::file-selector-button {
+  --pico-background-color: var(--pico-secondary-background);
+  --pico-border-color: var(--pico-secondary-border);
+  --pico-color: var(--pico-secondary-inverse);
   cursor: pointer;
 }
 
-/* Switch variant */
-input[type="checkbox"][role="switch"] {
-  appearance: none;
-  width: 2.25em;
-  height: 1.25em;
-  border-radius: 1em;
-  background: var(--switch-bg, var(--border-strong));
-  position: relative;
-  transition: background var(--transition);
+:is(button, [type=submit], [type=button], [role=button]).secondary:is([aria-current]:not([aria-current=false]), :hover, :active, :focus),
+[type=reset]:is([aria-current]:not([aria-current=false]), :hover, :active, :focus),
+[type=file]::file-selector-button:is([aria-current]:not([aria-current=false]), :hover, :active, :focus) {
+  --pico-background-color: var(--pico-secondary-hover-background);
+  --pico-border-color: var(--pico-secondary-hover-border);
+  --pico-color: var(--pico-secondary-inverse);
 }
 
-input[type="checkbox"][role="switch"]::before {
-  content: "";
-  position: absolute;
-  inset: 2px auto 2px 2px;
-  width: calc(1.25em - 4px);
-  background: var(--switch-knob, var(--bg));
-  border-radius: 50%;
-  transition: inset var(--transition);
+:is(button, [type=submit], [type=button], [role=button]).secondary:focus,
+:is(button, [type=submit], [type=button], [role=button]).secondary:is([aria-current]:not([aria-current=false])):focus,
+[type=reset]:focus,
+[type=reset]:is([aria-current]:not([aria-current=false])):focus,
+[type=file]::file-selector-button:focus,
+[type=file]::file-selector-button:is([aria-current]:not([aria-current=false])):focus {
+  --pico-box-shadow: var(--pico-button-hover-box-shadow, 0 0 0 rgba(0, 0, 0, 0)), 0 0 0 var(--pico-outline-width) var(--pico-secondary-focus);
 }
 
-input[type="checkbox"][role="switch"]:checked {
-  background: var(--switch-bg-checked, var(--primary));
+:is(button, [type=submit], [type=button], [role=button]).contrast {
+  --pico-background-color: var(--pico-contrast-background);
+  --pico-border-color: var(--pico-contrast-border);
+  --pico-color: var(--pico-contrast-inverse);
 }
 
-input[type="checkbox"][role="switch"]:checked::before {
-  inset: 2px 2px 2px auto;
+:is(button, [type=submit], [type=button], [role=button]).contrast:is([aria-current]:not([aria-current=false]), :hover, :active, :focus) {
+  --pico-background-color: var(--pico-contrast-hover-background);
+  --pico-border-color: var(--pico-contrast-hover-border);
+  --pico-color: var(--pico-contrast-inverse);
 }
 
-/* Range */
-input[type="range"] {
-  accent-color: var(--control-accent, var(--primary));
-  width: 100%;
+:is(button, [type=submit], [type=button], [role=button]).contrast:focus,
+:is(button, [type=submit], [type=button], [role=button]).contrast:is([aria-current]:not([aria-current=false])):focus {
+  --pico-box-shadow: var(--pico-button-hover-box-shadow, 0 0 0 rgba(0, 0, 0, 0)), 0 0 0 var(--pico-outline-width) var(--pico-contrast-focus);
 }
 
-/* Fieldset */
-fieldset {
-  border: 0;
-  padding: 0;
-  margin: 0;
-  min-inline-size: 0;
+:is(button, [type=submit], [type=button], [role=button]).outline,
+[type=reset].outline {
+  --pico-background-color: transparent;
+  --pico-color: var(--pico-primary);
+  --pico-border-color: var(--pico-primary);
 }
 
-fieldset:has(> legend) {
-  border: var(--border-width) solid var(--fieldset-border, var(--border));
-  border-radius: var(--radius);
-  padding: var(--spacing);
-  margin-bottom: var(--spacing);
+:is(button, [type=submit], [type=button], [role=button]).outline:is([aria-current]:not([aria-current=false]), :hover, :active, :focus),
+[type=reset].outline:is([aria-current]:not([aria-current=false]), :hover, :active, :focus) {
+  --pico-background-color: transparent;
+  --pico-color: var(--pico-primary-hover);
+  --pico-border-color: var(--pico-primary-hover);
 }
 
-legend {
-  padding-inline: 0.5em;
-  font-weight: 600;
+:is(button, [type=submit], [type=button], [role=button]).outline.secondary,
+[type=reset].outline {
+  --pico-color: var(--pico-secondary);
+  --pico-border-color: var(--pico-secondary);
 }
 
-/* Helper text */
-.helper {
-  display: block;
-  font-size: 0.875em;
-  color: var(--helper-color, var(--text-muted));
-  margin-top: 0.25rem;
+:is(button, [type=submit], [type=button], [role=button]).outline.secondary:is([aria-current]:not([aria-current=false]), :hover, :active, :focus),
+[type=reset].outline:is([aria-current]:not([aria-current=false]), :hover, :active, :focus) {
+  --pico-color: var(--pico-secondary-hover);
+  --pico-border-color: var(--pico-secondary-hover);
 }
 
-/* Form row */
-form>*+* {
-  margin-top: var(--spacing);
+:is(button, [type=submit], [type=button], [role=button]).outline.contrast {
+  --pico-color: var(--pico-contrast);
+  --pico-border-color: var(--pico-contrast);
 }
 
+:is(button, [type=submit], [type=button], [role=button]).outline.contrast:is([aria-current]:not([aria-current=false]), :hover, :active, :focus) {
+  --pico-color: var(--pico-contrast-hover);
+  --pico-border-color: var(--pico-contrast-hover);
+}
 
-/* ===== ./css/080-table.css ===== */
-/* Tables */
-table {
+:where(button, [type=submit], [type=reset], [type=button], [role=button])[disabled],
+:where(fieldset[disabled]) :is(button, [type=submit], [type=button], [type=reset], [role=button]) {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ===== css/12-table.css ===== */
+/**
+ * Table
+ */
+:where(table) {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: var(--spacing);
-}
-
-caption {
-  padding: 0.5em;
-  color: var(--caption-color, var(--text-muted));
-  text-align: start;
-  font-size: 0.9em;
+  border-spacing: 0;
+  text-indent: 0;
 }
 
 th,
 td {
-  padding: 0.6em 0.75em;
+  padding: calc(var(--pico-spacing) / 2) var(--pico-spacing);
+  border-bottom: var(--pico-border-width) solid var(--pico-table-border-color);
+  background-color: var(--pico-background-color);
+  color: var(--pico-color);
+  font-weight: var(--pico-font-weight);
+  text-align: left;
   text-align: start;
-  border-bottom: var(--border-width) solid var(--table-border, var(--border));
-  vertical-align: baseline;
 }
 
-th {
-  font-weight: 600;
-  color: var(--th-color, var(--text));
-  background: var(--th-bg, var(--bg-raised));
+tfoot th,
+tfoot td {
+  border-top: var(--pico-border-width) solid var(--pico-table-border-color);
+  border-bottom: 0;
 }
 
-tbody tr:hover {
-  background: var(--tr-hover-bg, var(--bg-raised));
+table.striped tbody tr:nth-child(odd) th,
+table.striped tbody tr:nth-child(odd) td {
+  background-color: var(--pico-table-row-stripped-background-color);
 }
 
-/* Striped via role */
-table[role="grid"] tbody tr:nth-child(even) {
-  background: var(--tr-stripe-bg, var(--bg-sunken));
-}
-
-/* Responsive wrapper: wrap <table> in <div class="scroll"> */
-.scroll {
-  overflow-x: auto;
-  margin-bottom: var(--spacing);
-}
-
-.scroll>table {
-  margin-bottom: 0;
-}
-
-
-/* ===== ./css/090-code.css ===== */
-/* Code */
-code,
-kbd,
-samp,
-pre {
-  font-family: var(--font-mono);
-  font-size: 0.9em;
-}
-
-code {
-  color: var(--code-color, inherit);
-  background: var(--code-bg, var(--bg-sunken));
-  border: var(--border-width) solid var(--code-border, var(--border));
-  padding: 0.1em 0.35em;
-  border-radius: 4px;
-}
-
-pre {
-  color: var(--pre-color, inherit);
-  background: var(--pre-bg, var(--bg-sunken));
-  border: var(--border-width) solid var(--pre-border, var(--border));
-  padding: var(--spacing);
-  border-radius: var(--radius);
-  overflow-x: auto;
-  margin-bottom: var(--spacing);
-  line-height: 1.5;
-}
-
-pre>code {
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: inherit;
+/* ===== css/16-misc.css ===== */
+/**
+ * Misc
+ */
+hr {
+  height: 0;
+  margin: var(--pico-typography-spacing-vertical) 0;
+  border: 0;
+  border-top: 1px solid var(--pico-muted-border-color);
   color: inherit;
 }
 
-kbd {
-  color: var(--kbd-color, inherit);
-  background: var(--kbd-bg, var(--bg-raised));
-  border: var(--border-width) solid var(--kbd-border, var(--border-strong));
-  border-bottom-width: 2px;
-  padding: 0.1em 0.4em;
-  border-radius: 4px;
-  font-size: 0.85em;
-}
-
-
-/* ===== ./css/100-nav.css ===== */
-/* Nav */
-nav {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing);
-  flex-wrap: wrap;
-}
-
-nav ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  gap: var(--spacing);
-  flex-wrap: wrap;
-}
-
-[role="navigation"] {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing);
-  flex-wrap: wrap;
-}
-
-[role="navigation"]:has(ul) {
-  justify-content: space-between;
-}
-
-nav a {
-  text-decoration: none;
-  color: var(--nav-link-color, var(--text));
-  padding: 0.3em 0.5em;
-  border-radius: var(--radius);
-}
-
-nav a:hover {
-  color: var(--nav-link-color-hover, var(--primary));
-  background: var(--nav-link-bg-hover, var(--bg-raised));
-}
-
-nav a[aria-current="page"] {
-  color: var(--nav-link-color-current, var(--primary));
-  font-weight: 600;
-}
-
-
-/* ===== ./css/110-details.css ===== */
-/* Details / Summary */
-details {
-  border: var(--border-width) solid var(--details-border, var(--border));
-  border-radius: var(--radius);
-  padding: 0.5em var(--spacing);
-  margin-bottom: var(--spacing);
-  color: var(--details-color, inherit);
-  background: var(--details-bg, var(--bg-raised));
-}
-
-summary {
-  cursor: pointer;
-  font-weight: 500;
-  list-style: none;
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-}
-
-summary::-webkit-details-marker {
-  display: none;
-}
-
-summary::before {
-  content: "";
-  display: inline-block;
-  width: 0.5em;
-  height: 0.5em;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  transform: rotate(-45deg);
-  transition: transform var(--transition);
-}
-
-details[open]>summary::before {
-  transform: rotate(45deg);
-}
-
-details[open]>summary {
-  margin-bottom: 0.5em;
-  padding-bottom: 0.5em;
-  border-bottom: var(--border-width) solid var(--details-divider, var(--border));
-}
-
-
-/* ===== ./css/120-card.css ===== */
-/* Cards — <article> or .card */
-article,
-.card {
-  color: var(--card-color, inherit);
-  background: var(--card-bg, var(--bg-raised));
-  border: var(--border-width) solid var(--card-border, var(--border));
-  border-radius: var(--radius);
-  padding: calc(var(--spacing) * 1.25);
-  margin-bottom: var(--spacing);
-  box-shadow: var(--card-shadow, var(--shadow));
-}
-
-article>header,
-.card>header {
-  margin: calc(var(--spacing) * -1.25) calc(var(--spacing) * -1.25) var(--spacing);
-  padding: var(--spacing) calc(var(--spacing) * 1.25);
-  color: var(--card-header-color, inherit);
-  background: var(--card-header-bg, var(--bg-sunken));
-  border-bottom: var(--border-width) solid var(--card-header-border, var(--border));
-  border-start-start-radius: var(--radius);
-  border-start-end-radius: var(--radius);
-}
-
-article>footer,
-.card>footer {
-  margin: var(--spacing) calc(var(--spacing) * -1.25) calc(var(--spacing) * -1.25);
-  padding: var(--spacing) calc(var(--spacing) * 1.25);
-  color: var(--card-footer-color, inherit);
-  background: var(--card-footer-bg, var(--bg-sunken));
-  border-top: var(--border-width) solid var(--card-footer-border, var(--border));
-  border-end-start-radius: var(--radius);
-  border-end-end-radius: var(--radius);
-}
-
-
-/* ===== ./css/130-container.css ===== */
-/* Layout helpers — opt-in via class. */
-.container {
-  width: 100%;
-  max-width: var(--container-max, var(--measure));
-  margin-inline: auto;
-  padding-inline: var(--spacing);
-}
-
-.container-fluid {
-  width: 100%;
-  margin-inline: auto;
-  padding-inline: var(--spacing);
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(var(--grid-cols, auto-fit), minmax(var(--grid-min, 220px), 1fr));
-  gap: var(--grid-gap, var(--spacing));
-}
-
-.grid>* {
-  margin: 0;
-}
-
-
-/* ===== ./css/140-group.css ===== */
-/* Input groups — [role="group"] / [role="search"]. Inline form fragments. */
-[role="group"],
-[role="search"] {
-  display: inline-flex;
-  width: 100%;
-  align-items: stretch;
-  border-radius: var(--radius);
-  box-shadow: var(--group-shadow, none);
-  margin-bottom: var(--spacing);
-}
-
-[role="group"]>*,
-[role="search"]>* {
-  flex: 1 1 auto;
-  margin: 0;
-  border-radius: 0;
-  position: relative;
-}
-
-[role="group"]> :not(:first-child),
-[role="search"]> :not(:first-child) {
-  margin-inline-start: calc(var(--border-width) * -1);
-}
-
-[role="group"]> :first-child,
-[role="search"]> :first-child {
-  border-start-start-radius: var(--radius);
-  border-end-start-radius: var(--radius);
-}
-
-[role="group"]> :last-child,
-[role="search"]> :last-child {
-  border-start-end-radius: var(--radius);
-  border-end-end-radius: var(--radius);
-}
-
-[role="group"]> :is(button, [role="button"], input[type="submit"], input[type="button"]),
-[role="search"]> :is(button, [role="button"], input[type="submit"], input[type="button"]) {
-  flex: 0 0 auto;
-}
-
-[role="group"]> :focus,
-[role="search"]> :focus {
-  z-index: 1;
-}
-
-[role="search"]>input[type="search"]::-webkit-search-cancel-button {
-  appearance: none;
-}
-
-
-/* ===== ./css/150-dropdown.css ===== */
-/* Dropdown — <details class="dropdown"> with a single <summary> and a sibling list. */
-details.dropdown {
-  position: relative;
-  display: inline-block;
-  border: none;
-  background: none;
-  padding: 0;
-  margin-bottom: var(--spacing);
-}
-
-details.dropdown>summary {
-  padding: 0.5em 2.25em 0.5em 0.75em;
-  border: var(--border-width) solid var(--dropdown-border, var(--border-strong));
-  border-radius: var(--radius);
-  background: var(--dropdown-bg, var(--bg));
-  color: var(--dropdown-color, var(--text));
-  cursor: pointer;
-  position: relative;
-}
-
-details.dropdown>summary::before {
-  content: none;
-}
-
-details.dropdown>summary::after {
-  content: "";
-  position: absolute;
-  inset-inline-end: 0.75em;
-  top: 50%;
-  width: 0.4em;
-  height: 0.4em;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  transform: translateY(-75%) rotate(45deg);
-  transition: transform var(--transition);
-}
-
-details.dropdown[open]>summary::after {
-  transform: translateY(-25%) rotate(-135deg);
-}
-
-details.dropdown>summary+* {
-  position: absolute;
-  inset-block-start: calc(100% + 4px);
-  inset-inline-start: 0;
-  min-width: 100%;
-  z-index: 50;
-  margin: 0;
-  padding: 0.25em 0;
-  list-style: none;
-  background: var(--dropdown-menu-bg, var(--bg-raised));
-  border: var(--border-width) solid var(--dropdown-menu-border, var(--border));
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  white-space: nowrap;
-}
-
-details.dropdown>summary+*>li,
-details.dropdown>summary+*>a,
-details.dropdown>summary+*>label,
-details.dropdown>summary+*>button {
-  display: block;
-  padding: 0.4em 0.75em;
-  margin: 0;
-  color: inherit;
-  text-decoration: none;
-  background: none;
-  border: none;
-  width: 100%;
-  text-align: start;
-  cursor: pointer;
-}
-
-details.dropdown>summary+* :is(a, button, label):hover {
-  background: var(--dropdown-item-bg-hover, var(--bg-sunken));
-  color: var(--dropdown-item-color-hover, var(--primary));
-}
-
-/* Inside <nav>, drop the border so it reads as a menu trigger */
-nav details.dropdown>summary {
-  border-color: transparent;
-  background: transparent;
-}
-
-
-/* ===== ./css/160-progress.css ===== */
-/* Progress */
-progress {
-  display: block;
-  width: 100%;
-  height: 0.5rem;
-  appearance: none;
-  border: none;
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: var(--progress-bg, var(--bg-sunken));
-  color: var(--progress-color, var(--primary));
-  margin-bottom: var(--spacing);
-}
-
-progress::-webkit-progress-bar {
-  background: var(--progress-bg, var(--bg-sunken));
-}
-
-progress::-webkit-progress-value {
-  background: var(--progress-color, var(--primary));
-  transition: inline-size var(--transition);
-}
-
-progress::-moz-progress-bar {
-  background: var(--progress-color, var(--primary));
-}
-
-/* Indeterminate — animated stripe */
-progress:indeterminate {
-  background:
-    linear-gradient(90deg,
-      var(--progress-bg, var(--bg-sunken)) 0%,
-      var(--progress-color, var(--primary)) 50%,
-      var(--progress-bg, var(--bg-sunken)) 100%) no-repeat;
-  background-size: 200% 100%;
-  animation: progress-slide 1.4s linear infinite;
-}
-
-progress:indeterminate::-webkit-progress-bar {
-  background: transparent;
-}
-
-progress:indeterminate::-moz-progress-bar {
-  background: transparent;
-}
-
-@keyframes progress-slide {
-  0% {
-    background-position: 200% 0;
-  }
-
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-
-/* ===== ./css/170-loading.css ===== */
-/* Loading state — [aria-busy="true"] appends a spinning indicator. */
-[aria-busy="true"]:not(input, select, textarea) {
-  cursor: progress;
-}
-
-[aria-busy="true"]:not(input, select, textarea, progress)::before {
-  content: "";
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  margin-inline-end: 0.5em;
-  vertical-align: -0.15em;
-  border: 2px solid currentColor;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  opacity: 0.7;
-}
-
-/* When applied to a button-like element, swap label out */
-button[aria-busy="true"],
-[role="button"][aria-busy="true"],
-input[type="submit"][aria-busy="true"] {
-  pointer-events: none;
-  opacity: 0.85;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  [aria-busy="true"]::before {
-    animation: none;
-  }
-}
-
-
-/* ===== ./css/180-dialog.css ===== */
-/* Native <dialog>. Use dialog.showModal() to open; the ::backdrop styles the scrim. */
-dialog {
-  margin: auto;
-  padding: calc(var(--spacing) * 1.25);
-  color: var(--dialog-color, inherit);
-  background: var(--dialog-bg, var(--bg-raised));
-  border: var(--border-width) solid var(--dialog-border, var(--border));
-  border-radius: var(--radius);
-  box-shadow: var(--dialog-shadow, var(--shadow));
-  max-width: min(90vw, 480px);
-  max-height: 90dvh;
-  overflow: auto;
-}
-
-dialog::backdrop {
-  background: oklch(0% 0 0 / 0.4);
-  backdrop-filter: blur(2px);
-}
-
-dialog[open] {
-  animation: dialog-in 150ms ease-out;
-}
-
-dialog[open]::backdrop {
-  animation: dialog-fade 150ms ease-out;
-}
-
-dialog>header,
-dialog>footer {
-  margin: calc(var(--spacing) * -1.25) calc(var(--spacing) * -1.25) var(--spacing);
-  padding: var(--spacing) calc(var(--spacing) * 1.25);
-  background: var(--dialog-header-bg, var(--bg-sunken));
-  border-bottom: var(--border-width) solid var(--border);
-  border-start-start-radius: var(--radius);
-  border-start-end-radius: var(--radius);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing);
-}
-
-dialog>footer {
-  margin: var(--spacing) calc(var(--spacing) * -1.25) calc(var(--spacing) * -1.25);
-  border-bottom: none;
-  border-top: var(--border-width) solid var(--border);
-  border-radius: 0 0 var(--radius) var(--radius);
-  justify-content: flex-end;
-}
-
-/* Close button — <button class="close" aria-label="Close"> or <form method="dialog"><button>×</button></form> */
-dialog .close,
-dialog button[aria-label="Close"] {
-  background: transparent;
-  color: var(--text-muted);
-  border: none;
-  padding: 0.25em;
-  font-size: 1.5em;
-  line-height: 1;
-  cursor: pointer;
-}
-
-dialog .close:hover {
-  color: var(--text);
-  background: transparent;
-}
-
-@keyframes dialog-in {
-  from {
-    opacity: 0;
-    transform: translateY(-8px) scale(0.98);
-  }
-
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes dialog-fade {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-
-  dialog[open],
-  dialog[open]::backdrop {
-    animation: none;
-  }
-}
-
-
-/* ===== ./css/190-tooltip.css ===== */
-/* Tooltip — [data-tooltip="text"]. Placement via data-placement="top|bottom|left|right". */
-[data-tooltip] {
-  position: relative;
-  cursor: help;
-}
-
-[data-tooltip]::before,
-[data-tooltip]::after {
-  position: absolute;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity var(--transition), transform var(--transition);
-}
-
-[data-tooltip]::before {
-  content: attr(data-tooltip);
-  inset-inline-start: 50%;
-  inset-block-end: calc(100% + 8px);
-  transform: translateX(-50%) translateY(4px);
-  padding: 0.3em 0.6em;
-  font-size: 0.8125rem;
-  line-height: 1.3;
-  white-space: nowrap;
-  color: var(--tooltip-color, var(--on-primary));
-  background: var(--tooltip-bg, oklch(from var(--text) l c h));
-  border-radius: 4px;
-  z-index: 100;
-}
-
-[data-tooltip]::after {
-  content: "";
-  inset-inline-start: 50%;
-  inset-block-end: calc(100% + 2px);
-  transform: translateX(-50%) translateY(4px);
-  border: 4px solid transparent;
-  border-top-color: var(--tooltip-bg, oklch(from var(--text) l c h));
-}
-
-[data-tooltip]:is(:hover, :focus-visible)::before,
-[data-tooltip]:is(:hover, :focus-visible)::after {
-  opacity: 1;
-  transform: translateX(-50%);
-}
-
-/* Placement: bottom */
-[data-tooltip][data-placement="bottom"]::before {
-  inset-block-end: auto;
-  inset-block-start: calc(100% + 8px);
-  transform: translateX(-50%) translateY(-4px);
-}
-
-[data-tooltip][data-placement="bottom"]::after {
-  inset-block-end: auto;
-  inset-block-start: calc(100% + 2px);
-  transform: translateX(-50%) translateY(-4px);
-  border-top-color: transparent;
-  border-bottom-color: var(--tooltip-bg, oklch(from var(--text) l c h));
-}
-
-[data-tooltip][data-placement="bottom"]:is(:hover, :focus-visible)::before,
-[data-tooltip][data-placement="bottom"]:is(:hover, :focus-visible)::after {
-  transform: translateX(-50%);
-}
-
-/* Placement: left / right */
-[data-tooltip][data-placement="left"]::before,
-[data-tooltip][data-placement="right"]::before {
-  inset-block: 50% auto;
-  inset-inline-start: auto;
-  transform: translateY(-50%);
-}
-
-[data-tooltip][data-placement="left"]::before {
-  inset-inline-end: calc(100% + 8px);
-}
-
-[data-tooltip][data-placement="right"]::before {
-  inset-inline-start: calc(100% + 8px);
-}
-
-[data-tooltip][data-placement="left"]::after,
-[data-tooltip][data-placement="right"]::after {
-  display: none;
-}
-
-
-/* ===== ./css/200-utilities.css ===== */
-/* Utilities & accessibility */
-
-[aria-hidden="true"] {
+[hidden],
+template {
   display: none !important;
 }
 
-[aria-disabled="true"] {
-  opacity: 0.6;
-  cursor: not-allowed;
+canvas {
+  display: inline-block;
+}
+
+/* ===== css/17-basics-form-elements.css ===== */
+/**
+ * Basics form elements
+ */
+input,
+optgroup,
+select,
+textarea {
+  margin: 0;
+  font-size: 1rem;
+  line-height: var(--pico-line-height);
+  font-family: inherit;
+  letter-spacing: inherit;
+}
+
+input {
+  overflow: visible;
+}
+
+select {
+  text-transform: none;
+}
+
+legend {
+  max-width: 100%;
+  padding: 0;
+  color: inherit;
+  white-space: normal;
+}
+
+textarea {
+  overflow: auto;
+}
+
+[type=checkbox],
+[type=radio] {
+  padding: 0;
+}
+
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+
+[type=search] {
+  -webkit-appearance: textfield;
+  outline-offset: -2px;
+}
+
+[type=search]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+::-webkit-file-upload-button {
+  -webkit-appearance: button;
+  font: inherit;
+}
+
+::-moz-focus-inner {
+  padding: 0;
+  border-style: none;
+}
+
+:-moz-focusring {
+  outline: none;
+}
+
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+
+::-ms-expand {
+  display: none;
+}
+
+[type=file],
+[type=range] {
+  padding: 0;
+  border-width: 0;
+}
+
+input:not([type=checkbox], [type=radio], [type=range]) {
+  height: calc(1rem * var(--pico-line-height) + var(--pico-form-element-spacing-vertical) * 2 + var(--pico-border-width) * 2);
+}
+
+fieldset {
+  width: 100%;
+  margin: 0;
+  margin-bottom: var(--pico-spacing);
+  padding: 0;
+  border: 0;
+}
+
+label,
+fieldset legend {
+  display: block;
+  margin-bottom: calc(var(--pico-spacing) * 0.375);
+  color: var(--pico-color);
+  font-weight: var(--pico-form-label-font-weight, var(--pico-font-weight));
+}
+
+fieldset legend {
+  margin-bottom: calc(var(--pico-spacing) * 0.5);
+}
+
+input:not([type=checkbox], [type=radio]),
+button[type=submit],
+select,
+textarea {
+  width: 100%;
+}
+
+input:not([type=checkbox], [type=radio], [type=range], [type=file]),
+select,
+textarea {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: var(--pico-form-element-spacing-vertical) var(--pico-form-element-spacing-horizontal);
+}
+
+input,
+select,
+textarea {
+  --pico-background-color: var(--pico-form-element-background-color);
+  --pico-border-color: var(--pico-form-element-border-color);
+  --pico-color: var(--pico-form-element-color);
+  --pico-box-shadow: none;
+  border: var(--pico-border-width) solid var(--pico-border-color);
+  border-radius: var(--pico-border-radius);
+  outline: none;
+  background-color: var(--pico-background-color);
+  box-shadow: var(--pico-box-shadow);
+  color: var(--pico-color);
+  font-weight: var(--pico-font-weight);
+  transition: background-color var(--pico-transition), border-color var(--pico-transition), color var(--pico-transition), box-shadow var(--pico-transition);
+}
+
+input:not([type=submit],
+  [type=button],
+  [type=reset],
+  [type=checkbox],
+  [type=radio],
+  [readonly]):is(:active, :focus),
+:where(select, textarea):not([readonly]):is(:active, :focus) {
+  --pico-background-color: var(--pico-form-element-active-background-color);
+}
+
+input:not([type=submit], [type=button], [type=reset], [role=switch], [readonly]):is(:active, :focus),
+:where(select, textarea):not([readonly]):is(:active, :focus) {
+  --pico-border-color: var(--pico-form-element-active-border-color);
+}
+
+input:not([type=submit],
+  [type=button],
+  [type=reset],
+  [type=range],
+  [type=file],
+  [readonly]):focus,
+:where(select, textarea):not([readonly]):focus {
+  --pico-box-shadow: 0 0 0 var(--pico-outline-width) var(--pico-form-element-focus-color);
+}
+
+input:not([type=submit], [type=button], [type=reset])[disabled],
+select[disabled],
+textarea[disabled],
+label[aria-disabled=true],
+:where(fieldset[disabled]) :is(input:not([type=submit], [type=button], [type=reset]), select, textarea) {
+  opacity: var(--pico-form-element-disabled-opacity);
   pointer-events: none;
 }
 
+label[aria-disabled=true] input[disabled] {
+  opacity: 1;
+}
+
+:where(input, select, textarea):not([type=checkbox],
+  [type=radio],
+  [type=date],
+  [type=datetime-local],
+  [type=month],
+  [type=time],
+  [type=week],
+  [type=range])[aria-invalid] {
+  padding-right: calc(var(--pico-form-element-spacing-horizontal) + 1.5rem) !important;
+  padding-left: var(--pico-form-element-spacing-horizontal);
+  padding-inline-start: var(--pico-form-element-spacing-horizontal) !important;
+  padding-inline-end: calc(var(--pico-form-element-spacing-horizontal) + 1.5rem) !important;
+  background-position: center right 0.75rem;
+  background-size: 1rem auto;
+  background-repeat: no-repeat;
+}
+
+:where(input, select, textarea):not([type=checkbox],
+  [type=radio],
+  [type=date],
+  [type=datetime-local],
+  [type=month],
+  [type=time],
+  [type=week],
+  [type=range])[aria-invalid=false]:not(select) {
+  background-image: var(--pico-icon-valid);
+}
+
+:where(input, select, textarea):not([type=checkbox],
+  [type=radio],
+  [type=date],
+  [type=datetime-local],
+  [type=month],
+  [type=time],
+  [type=week],
+  [type=range])[aria-invalid=true]:not(select) {
+  background-image: var(--pico-icon-invalid);
+}
+
+:where(input, select, textarea)[aria-invalid=false] {
+  --pico-border-color: var(--pico-form-element-valid-border-color);
+}
+
+:where(input, select, textarea)[aria-invalid=false]:is(:active, :focus) {
+  --pico-border-color: var(--pico-form-element-valid-active-border-color) !important;
+}
+
+:where(input, select, textarea)[aria-invalid=false]:is(:active, :focus):not([type=checkbox], [type=radio]) {
+  --pico-box-shadow: 0 0 0 var(--pico-outline-width) var(--pico-form-element-valid-focus-color) !important;
+}
+
+:where(input, select, textarea)[aria-invalid=true] {
+  --pico-border-color: var(--pico-form-element-invalid-border-color);
+}
+
+:where(input, select, textarea)[aria-invalid=true]:is(:active, :focus) {
+  --pico-border-color: var(--pico-form-element-invalid-active-border-color) !important;
+}
+
+:where(input, select, textarea)[aria-invalid=true]:is(:active, :focus):not([type=checkbox], [type=radio]) {
+  --pico-box-shadow: 0 0 0 var(--pico-outline-width) var(--pico-form-element-invalid-focus-color) !important;
+}
+
+[dir=rtl] :where(input, select, textarea):not([type=checkbox], [type=radio]):is([aria-invalid], [aria-invalid=true], [aria-invalid=false]) {
+  background-position: center left 0.75rem;
+}
+
+input::placeholder,
+input::-webkit-input-placeholder,
+textarea::placeholder,
+textarea::-webkit-input-placeholder,
+select:invalid {
+  color: var(--pico-form-element-placeholder-color);
+  opacity: 1;
+}
+
+input:not([type=checkbox], [type=radio]),
+select,
+textarea {
+  margin-bottom: var(--pico-spacing);
+}
+
+select::-ms-expand {
+  border: 0;
+  background-color: transparent;
+}
+
+select:not([multiple], [size]) {
+  padding-right: calc(var(--pico-form-element-spacing-horizontal) + 1.5rem);
+  padding-left: var(--pico-form-element-spacing-horizontal);
+  padding-inline-start: var(--pico-form-element-spacing-horizontal);
+  padding-inline-end: calc(var(--pico-form-element-spacing-horizontal) + 1.5rem);
+  background-image: var(--pico-icon-chevron);
+  background-position: center right 0.75rem;
+  background-size: 1rem auto;
+  background-repeat: no-repeat;
+}
+
+select[multiple] option:checked {
+  background: var(--pico-form-element-selected-background-color);
+  color: var(--pico-form-element-color);
+}
+
+[dir=rtl] select:not([multiple], [size]) {
+  background-position: center left 0.75rem;
+}
+
+textarea {
+  display: block;
+  resize: vertical;
+}
+
+textarea[aria-invalid] {
+  --pico-icon-height: calc(1rem * var(--pico-line-height) + var(--pico-form-element-spacing-vertical) * 2 + var(--pico-border-width) * 2);
+  background-position: top right 0.75rem !important;
+  background-size: 1rem var(--pico-icon-height) !important;
+}
+
+:where(input, select, textarea, fieldset, .grid)+small {
+  display: block;
+  width: 100%;
+  margin-top: calc(var(--pico-spacing) * -0.75);
+  margin-bottom: var(--pico-spacing);
+  color: var(--pico-muted-color);
+}
+
+:where(input, select, textarea, fieldset, .grid)[aria-invalid=false]+small {
+  color: var(--pico-ins-color);
+}
+
+:where(input, select, textarea, fieldset, .grid)[aria-invalid=true]+small {
+  color: var(--pico-del-color);
+}
+
+label> :where(input, select, textarea) {
+  margin-top: calc(var(--pico-spacing) * 0.25);
+}
+
+/* ===== css/18-checkboxes-radios-switches.css ===== */
+/**
+ * Checkboxes, Radios and Switches
+ */
+label:has([type=checkbox], [type=radio]) {
+  width: -moz-fit-content;
+  width: fit-content;
+  cursor: pointer;
+}
+
+[type=checkbox],
+[type=radio] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 1.25em;
+  height: 1.25em;
+  margin-top: -0.125em;
+  margin-inline-end: 0.5em;
+  border-width: var(--pico-border-width);
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+[type=checkbox]::-ms-check,
+[type=radio]::-ms-check {
+  display: none;
+}
+
+[type=checkbox]:checked,
+[type=checkbox]:checked:active,
+[type=checkbox]:checked:focus,
+[type=radio]:checked,
+[type=radio]:checked:active,
+[type=radio]:checked:focus {
+  --pico-background-color: var(--pico-primary-background);
+  --pico-border-color: var(--pico-primary-border);
+  background-image: var(--pico-icon-checkbox);
+  background-position: center;
+  background-size: 0.75em auto;
+  background-repeat: no-repeat;
+}
+
+[type=checkbox]~label,
+[type=radio]~label {
+  display: inline-block;
+  margin-bottom: 0;
+  cursor: pointer;
+}
+
+[type=checkbox]~label:not(:last-of-type),
+[type=radio]~label:not(:last-of-type) {
+  margin-inline-end: 1em;
+}
+
+[type=checkbox]:indeterminate {
+  --pico-background-color: var(--pico-primary-background);
+  --pico-border-color: var(--pico-primary-border);
+  background-image: var(--pico-icon-minus);
+  background-position: center;
+  background-size: 0.75em auto;
+  background-repeat: no-repeat;
+}
+
+[type=radio] {
+  border-radius: 50%;
+}
+
+[type=radio]:checked,
+[type=radio]:checked:active,
+[type=radio]:checked:focus {
+  --pico-background-color: var(--pico-primary-inverse);
+  border-width: 0.35em;
+  background-image: none;
+}
+
+[type=checkbox][role=switch] {
+  --pico-background-color: var(--pico-switch-background-color);
+  --pico-color: var(--pico-switch-color);
+  width: 2.25em;
+  height: 1.25em;
+  border: var(--pico-border-width) solid var(--pico-border-color);
+  border-radius: 1.25em;
+  background-color: var(--pico-background-color);
+  line-height: 1.25em;
+}
+
+[type=checkbox][role=switch]:not([aria-invalid]) {
+  --pico-border-color: var(--pico-switch-background-color);
+}
+
+[type=checkbox][role=switch]:before {
+  display: block;
+  aspect-ratio: 1;
+  height: 100%;
+  border-radius: 50%;
+  background-color: var(--pico-color);
+  box-shadow: var(--pico-switch-thumb-box-shadow);
+  content: "";
+  transition: margin 0.1s ease-in-out;
+}
+
+[type=checkbox][role=switch]:focus {
+  --pico-background-color: var(--pico-switch-background-color);
+  --pico-border-color: var(--pico-switch-background-color);
+}
+
+[type=checkbox][role=switch]:checked {
+  --pico-background-color: var(--pico-switch-checked-background-color);
+  --pico-border-color: var(--pico-switch-checked-background-color);
+  background-image: none;
+}
+
+[type=checkbox][role=switch]:checked::before {
+  margin-inline-start: calc(2.25em - 1.25em);
+}
+
+[type=checkbox][role=switch][disabled] {
+  --pico-background-color: var(--pico-border-color);
+}
+
+[type=checkbox][aria-invalid=false]:checked,
+[type=checkbox][aria-invalid=false]:checked:active,
+[type=checkbox][aria-invalid=false]:checked:focus,
+[type=checkbox][role=switch][aria-invalid=false]:checked,
+[type=checkbox][role=switch][aria-invalid=false]:checked:active,
+[type=checkbox][role=switch][aria-invalid=false]:checked:focus {
+  --pico-background-color: var(--pico-form-element-valid-border-color);
+}
+
+[type=checkbox]:checked[aria-invalid=true],
+[type=checkbox]:checked:active[aria-invalid=true],
+[type=checkbox]:checked:focus[aria-invalid=true],
+[type=checkbox][role=switch]:checked[aria-invalid=true],
+[type=checkbox][role=switch]:checked:active[aria-invalid=true],
+[type=checkbox][role=switch]:checked:focus[aria-invalid=true] {
+  --pico-background-color: var(--pico-form-element-invalid-border-color);
+}
+
+[type=checkbox][aria-invalid=false]:checked,
+[type=checkbox][aria-invalid=false]:checked:active,
+[type=checkbox][aria-invalid=false]:checked:focus,
+[type=radio][aria-invalid=false]:checked,
+[type=radio][aria-invalid=false]:checked:active,
+[type=radio][aria-invalid=false]:checked:focus,
+[type=checkbox][role=switch][aria-invalid=false]:checked,
+[type=checkbox][role=switch][aria-invalid=false]:checked:active,
+[type=checkbox][role=switch][aria-invalid=false]:checked:focus {
+  --pico-border-color: var(--pico-form-element-valid-border-color);
+}
+
+[type=checkbox]:checked[aria-invalid=true],
+[type=checkbox]:checked:active[aria-invalid=true],
+[type=checkbox]:checked:focus[aria-invalid=true],
+[type=radio]:checked[aria-invalid=true],
+[type=radio]:checked:active[aria-invalid=true],
+[type=radio]:checked:focus[aria-invalid=true],
+[type=checkbox][role=switch]:checked[aria-invalid=true],
+[type=checkbox][role=switch]:checked:active[aria-invalid=true],
+[type=checkbox][role=switch]:checked:focus[aria-invalid=true] {
+  --pico-border-color: var(--pico-form-element-invalid-border-color);
+}
+
+/* ===== css/20-input-type-datetime.css ===== */
+/**
+ * Input type datetime
+ */
+input:not([type=checkbox], [type=radio], [type=range], [type=file]):is([type=date], [type=datetime-local], [type=month], [type=time], [type=week]) {
+  --pico-icon-position: 0.75rem;
+  --pico-icon-width: 1rem;
+  padding-right: calc(var(--pico-icon-width) + var(--pico-icon-position));
+  background-image: var(--pico-icon-date);
+  background-position: center right var(--pico-icon-position);
+  background-size: var(--pico-icon-width) auto;
+  background-repeat: no-repeat;
+}
+
+input:not([type=checkbox], [type=radio], [type=range], [type=file])[type=time] {
+  background-image: var(--pico-icon-time);
+}
+
+[type=date]::-webkit-calendar-picker-indicator,
+[type=datetime-local]::-webkit-calendar-picker-indicator,
+[type=month]::-webkit-calendar-picker-indicator,
+[type=time]::-webkit-calendar-picker-indicator,
+[type=week]::-webkit-calendar-picker-indicator {
+  width: var(--pico-icon-width);
+  margin-right: calc(var(--pico-icon-width) * -1);
+  margin-left: var(--pico-icon-position);
+  opacity: 0;
+}
+
+@-moz-document url-prefix() {
+
+  [type=date],
+  [type=datetime-local],
+  [type=month],
+  [type=time],
+  [type=week] {
+    padding-right: var(--pico-form-element-spacing-horizontal) !important;
+    background-image: none !important;
+  }
+}
+
+[dir=rtl] :is([type=date], [type=datetime-local], [type=month], [type=time], [type=week]) {
+  text-align: right;
+}
+
+/* ===== css/25-card.css ===== */
+/**
+ * Card (<article>)
+ */
+article {
+  margin-bottom: var(--pico-block-spacing-vertical);
+  padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal);
+  border-radius: var(--pico-border-radius);
+  background: var(--pico-card-background-color);
+  box-shadow: var(--pico-card-box-shadow);
+}
+
+article>header,
+article>footer {
+  margin-right: calc(var(--pico-block-spacing-horizontal) * -1);
+  margin-left: calc(var(--pico-block-spacing-horizontal) * -1);
+  padding: calc(var(--pico-block-spacing-vertical) * 0.66) var(--pico-block-spacing-horizontal);
+  background-color: var(--pico-card-sectioning-background-color);
+}
+
+article>header {
+  margin-top: calc(var(--pico-block-spacing-vertical) * -1);
+  margin-bottom: var(--pico-block-spacing-vertical);
+  border-bottom: var(--pico-border-width) solid var(--pico-card-border-color);
+  border-top-right-radius: var(--pico-border-radius);
+  border-top-left-radius: var(--pico-border-radius);
+}
+
+article>footer {
+  margin-top: var(--pico-block-spacing-vertical);
+  margin-bottom: calc(var(--pico-block-spacing-vertical) * -1);
+  border-top: var(--pico-border-width) solid var(--pico-card-border-color);
+  border-bottom-right-radius: var(--pico-border-radius);
+  border-bottom-left-radius: var(--pico-border-radius);
+}
+
+/* ===== css/26-dropdown.css ===== */
+/**
+ * Dropdown (details.dropdown)
+ */
+details.dropdown {
+  position: relative;
+  border-bottom: none;
+}
+
+details.dropdown>summary::after,
+details.dropdown>button::after,
+details.dropdown>a::after {
+  display: block;
+  width: 1rem;
+  height: calc(1rem * var(--pico-line-height, 1.5));
+  margin-inline-start: 0.25rem;
+  float: right;
+  transform: rotate(0deg) translateX(0.2rem);
+  background-image: var(--pico-icon-chevron);
+  background-position: right center;
+  background-size: 1rem auto;
+  background-repeat: no-repeat;
+  content: "";
+}
+
+nav details.dropdown {
+  margin-bottom: 0;
+}
+
+details.dropdown>summary:not([role]) {
+  height: calc(1rem * var(--pico-line-height) + var(--pico-form-element-spacing-vertical) * 2 + var(--pico-border-width) * 2);
+  padding: var(--pico-form-element-spacing-vertical) var(--pico-form-element-spacing-horizontal);
+  border: var(--pico-border-width) solid var(--pico-form-element-border-color);
+  border-radius: var(--pico-border-radius);
+  background-color: var(--pico-form-element-background-color);
+  color: var(--pico-form-element-placeholder-color);
+  line-height: inherit;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  transition: background-color var(--pico-transition), border-color var(--pico-transition), color var(--pico-transition), box-shadow var(--pico-transition);
+}
+
+details.dropdown>summary:not([role]):active,
+details.dropdown>summary:not([role]):focus {
+  border-color: var(--pico-form-element-active-border-color);
+  background-color: var(--pico-form-element-active-background-color);
+}
+
+details.dropdown>summary:not([role]):focus {
+  box-shadow: 0 0 0 var(--pico-outline-width) var(--pico-form-element-focus-color);
+}
+
+details.dropdown>summary:not([role]):focus-visible {
+  outline: none;
+}
+
+details.dropdown>summary:not([role])[aria-invalid=false] {
+  --pico-form-element-border-color: var(--pico-form-element-valid-border-color);
+  --pico-form-element-active-border-color: var(--pico-form-element-valid-focus-color);
+  --pico-form-element-focus-color: var(--pico-form-element-valid-focus-color);
+}
+
+details.dropdown>summary:not([role])[aria-invalid=true] {
+  --pico-form-element-border-color: var(--pico-form-element-invalid-border-color);
+  --pico-form-element-active-border-color: var(--pico-form-element-invalid-focus-color);
+  --pico-form-element-focus-color: var(--pico-form-element-invalid-focus-color);
+}
+
+nav details.dropdown {
+  display: inline;
+  margin: calc(var(--pico-nav-element-spacing-vertical) * -1) 0;
+}
+
+nav details.dropdown>summary::after {
+  transform: rotate(0deg) translateX(0rem);
+}
+
+nav details.dropdown>summary:not([role]) {
+  height: calc(1rem * var(--pico-line-height) + var(--pico-nav-link-spacing-vertical) * 2);
+  padding: calc(var(--pico-nav-link-spacing-vertical) - var(--pico-border-width) * 2) var(--pico-nav-link-spacing-horizontal);
+}
+
+nav details.dropdown>summary:not([role]):focus-visible {
+  box-shadow: 0 0 0 var(--pico-outline-width) var(--pico-primary-focus);
+}
+
+details.dropdown>summary+ul {
+  display: flex;
+  z-index: 99;
+  position: absolute;
+  left: 0;
+  flex-direction: column;
+  width: 100%;
+  min-width: -moz-fit-content;
+  min-width: fit-content;
+  margin: 0;
+  margin-top: var(--pico-outline-width);
+  padding: 0;
+  border: var(--pico-border-width) solid var(--pico-dropdown-border-color);
+  border-radius: var(--pico-border-radius);
+  background-color: var(--pico-dropdown-background-color);
+  box-shadow: var(--pico-dropdown-box-shadow);
+  color: var(--pico-dropdown-color);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity var(--pico-transition), transform 0s ease-in-out 1s;
+}
+
+details.dropdown>summary+ul[dir=rtl] {
+  right: 0;
+  left: auto;
+}
+
+details.dropdown>summary+ul li {
+  width: 100%;
+  margin-bottom: 0;
+  padding: calc(var(--pico-form-element-spacing-vertical) * 0.5) var(--pico-form-element-spacing-horizontal);
+  list-style: none;
+}
+
+details.dropdown>summary+ul li:first-of-type {
+  margin-top: calc(var(--pico-form-element-spacing-vertical) * 0.5);
+}
+
+details.dropdown>summary+ul li:last-of-type {
+  margin-bottom: calc(var(--pico-form-element-spacing-vertical) * 0.5);
+}
+
+details.dropdown>summary+ul li a {
+  display: block;
+  margin: calc(var(--pico-form-element-spacing-vertical) * -0.5) calc(var(--pico-form-element-spacing-horizontal) * -1);
+  padding: calc(var(--pico-form-element-spacing-vertical) * 0.5) var(--pico-form-element-spacing-horizontal);
+  overflow: hidden;
+  border-radius: 0;
+  color: var(--pico-dropdown-color);
+  text-decoration: none;
+  text-overflow: ellipsis;
+}
+
+details.dropdown>summary+ul li a:hover,
+details.dropdown>summary+ul li a:focus,
+details.dropdown>summary+ul li a:active,
+details.dropdown>summary+ul li a:focus-visible,
+details.dropdown>summary+ul li a[aria-current]:not([aria-current=false]) {
+  background-color: var(--pico-dropdown-hover-background-color);
+}
+
+details.dropdown>summary+ul li label {
+  width: 100%;
+}
+
+details.dropdown>summary+ul li:has(label):hover {
+  background-color: var(--pico-dropdown-hover-background-color);
+}
+
+details.dropdown[open]>summary {
+  margin-bottom: 0;
+}
+
+details.dropdown[open]>summary+ul {
+  transform: scaleY(1);
+  opacity: 1;
+  transition: opacity var(--pico-transition), transform 0s ease-in-out 0s;
+}
+
+details.dropdown[open]>summary::before {
+  display: block;
+  z-index: 1;
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  inset: 0;
+  background: none;
+  content: "";
+  cursor: default;
+}
+
+label>details.dropdown {
+  margin-top: calc(var(--pico-spacing) * 0.25);
+}
+
+/* ===== css/27-group.css ===== */
+/**
+ * Group ([role="group"], [role="search"])
+ */
+[role=search],
+[role=group] {
+  display: inline-flex;
+  position: relative;
+  width: 100%;
+  margin-bottom: var(--pico-spacing);
+  border-radius: var(--pico-border-radius);
+  box-shadow: var(--pico-group-box-shadow, 0 0 0 rgba(0, 0, 0, 0));
+  vertical-align: middle;
+  transition: box-shadow var(--pico-transition);
+}
+
+[role=search]>*,
+[role=search] input:not([type=checkbox], [type=radio]),
+[role=search] select,
+[role=group]>*,
+[role=group] input:not([type=checkbox], [type=radio]),
+[role=group] select {
+  position: relative;
+  flex: 1 1 auto;
+  margin-bottom: 0;
+}
+
+[role=search]>*:not(:first-child),
+[role=search] input:not([type=checkbox], [type=radio]):not(:first-child),
+[role=search] select:not(:first-child),
+[role=group]>*:not(:first-child),
+[role=group] input:not([type=checkbox], [type=radio]):not(:first-child),
+[role=group] select:not(:first-child) {
+  margin-left: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+[role=search]>*:not(:last-child),
+[role=search] input:not([type=checkbox], [type=radio]):not(:last-child),
+[role=search] select:not(:last-child),
+[role=group]>*:not(:last-child),
+[role=group] input:not([type=checkbox], [type=radio]):not(:last-child),
+[role=group] select:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+[role=search]>*:focus,
+[role=search] input:not([type=checkbox], [type=radio]):focus,
+[role=search] select:focus,
+[role=group]>*:focus,
+[role=group] input:not([type=checkbox], [type=radio]):focus,
+[role=group] select:focus {
+  z-index: 2;
+}
+
+[role=search] button:not(:first-child),
+[role=search] [type=submit]:not(:first-child),
+[role=search] [type=reset]:not(:first-child),
+[role=search] [type=button]:not(:first-child),
+[role=search] [role=button]:not(:first-child),
+[role=search] input:not([type=checkbox], [type=radio]):not(:first-child),
+[role=search] select:not(:first-child),
+[role=group] button:not(:first-child),
+[role=group] [type=submit]:not(:first-child),
+[role=group] [type=reset]:not(:first-child),
+[role=group] [type=button]:not(:first-child),
+[role=group] [role=button]:not(:first-child),
+[role=group] input:not([type=checkbox], [type=radio]):not(:first-child),
+[role=group] select:not(:first-child) {
+  margin-left: calc(var(--pico-border-width) * -1);
+}
+
+[role=search] button,
+[role=search] [type=submit],
+[role=search] [type=reset],
+[role=search] [type=button],
+[role=search] [role=button],
+[role=group] button,
+[role=group] [type=submit],
+[role=group] [type=reset],
+[role=group] [type=button],
+[role=group] [role=button] {
+  width: auto;
+}
+
+@supports selector(:has(*)) {
+
+  [role=search]:has(button:focus, [type=submit]:focus, [type=button]:focus, [role=button]:focus),
+  [role=group]:has(button:focus, [type=submit]:focus, [type=button]:focus, [role=button]:focus) {
+    --pico-group-box-shadow: var(--pico-group-box-shadow-focus-with-button);
+  }
+
+  [role=search]:has(button:focus, [type=submit]:focus, [type=button]:focus, [role=button]:focus) input:not([type=checkbox], [type=radio]),
+  [role=search]:has(button:focus, [type=submit]:focus, [type=button]:focus, [role=button]:focus) select,
+  [role=group]:has(button:focus, [type=submit]:focus, [type=button]:focus, [role=button]:focus) input:not([type=checkbox], [type=radio]),
+  [role=group]:has(button:focus, [type=submit]:focus, [type=button]:focus, [role=button]:focus) select {
+    border-color: transparent;
+  }
+
+  [role=search]:has(input:not([type=submit], [type=button]):focus, select:focus),
+  [role=group]:has(input:not([type=submit], [type=button]):focus, select:focus) {
+    --pico-group-box-shadow: var(--pico-group-box-shadow-focus-with-input);
+  }
+
+  [role=search]:has(input:not([type=submit], [type=button]):focus, select:focus) button,
+  [role=search]:has(input:not([type=submit], [type=button]):focus, select:focus) [type=submit],
+  [role=search]:has(input:not([type=submit], [type=button]):focus, select:focus) [type=button],
+  [role=search]:has(input:not([type=submit], [type=button]):focus, select:focus) [role=button],
+  [role=group]:has(input:not([type=submit], [type=button]):focus, select:focus) button,
+  [role=group]:has(input:not([type=submit], [type=button]):focus, select:focus) [type=submit],
+  [role=group]:has(input:not([type=submit], [type=button]):focus, select:focus) [type=button],
+  [role=group]:has(input:not([type=submit], [type=button]):focus, select:focus) [role=button] {
+    --pico-button-box-shadow: 0 0 0 var(--pico-border-width) var(--pico-primary-border);
+    --pico-button-hover-box-shadow: 0 0 0 var(--pico-border-width) var(--pico-primary-hover-border);
+  }
+
+  [role=search] button:focus,
+  [role=search] [type=submit]:focus,
+  [role=search] [type=reset]:focus,
+  [role=search] [type=button]:focus,
+  [role=search] [role=button]:focus,
+  [role=group] button:focus,
+  [role=group] [type=submit]:focus,
+  [role=group] [type=reset]:focus,
+  [role=group] [type=button]:focus,
+  [role=group] [role=button]:focus {
+    box-shadow: none;
+  }
+}
+
+[role=search]>*:first-child {
+  border-top-left-radius: 5rem;
+  border-bottom-left-radius: 5rem;
+}
+
+[role=search]>*:last-child {
+  border-top-right-radius: 5rem;
+  border-bottom-right-radius: 5rem;
+}
+
+/* ===== css/30-nav.css ===== */
+/**
+ * Nav
+ */
+:where(nav li)::before {
+  float: left;
+  content: "​";
+}
+
+nav,
+nav ul {
+  display: flex;
+}
+
+nav {
+  justify-content: space-between;
+  overflow: visible;
+}
+
+nav ol,
+nav ul {
+  align-items: center;
+  margin-bottom: 0;
+  padding: 0;
+  list-style: none;
+}
+
+nav ol:first-of-type,
+nav ul:first-of-type {
+  margin-left: calc(var(--pico-nav-element-spacing-horizontal) * -1);
+}
+
+nav ol:last-of-type,
+nav ul:last-of-type {
+  margin-right: calc(var(--pico-nav-element-spacing-horizontal) * -1);
+}
+
+nav li {
+  display: inline-block;
+  margin: 0;
+  padding: var(--pico-nav-element-spacing-vertical) var(--pico-nav-element-spacing-horizontal);
+}
+
+nav li :where(a, [role=link]) {
+  display: inline-block;
+  margin: calc(var(--pico-nav-link-spacing-vertical) * -1) calc(var(--pico-nav-link-spacing-horizontal) * -1);
+  padding: var(--pico-nav-link-spacing-vertical) var(--pico-nav-link-spacing-horizontal);
+  border-radius: var(--pico-border-radius);
+}
+
+nav li :where(a, [role=link]):not(:hover) {
+  text-decoration: none;
+}
+
+nav li button,
+nav li [role=button],
+nav li [type=button],
+nav li input:not([type=checkbox], [type=radio], [type=range], [type=file]),
+nav li select {
+  height: auto;
+  margin-right: inherit;
+  margin-bottom: 0;
+  margin-left: inherit;
+  padding: calc(var(--pico-nav-link-spacing-vertical) - var(--pico-border-width) * 2) var(--pico-nav-link-spacing-horizontal);
+}
+
+nav[aria-label=breadcrumb] {
+  align-items: center;
+  justify-content: start;
+}
+
+nav[aria-label=breadcrumb] ul li:not(:first-child) {
+  margin-inline-start: var(--pico-nav-link-spacing-horizontal);
+}
+
+nav[aria-label=breadcrumb] ul li a {
+  margin: calc(var(--pico-nav-link-spacing-vertical) * -1) 0;
+  margin-inline-start: calc(var(--pico-nav-link-spacing-horizontal) * -1);
+}
+
+nav[aria-label=breadcrumb] ul li:not(:last-child)::after {
+  display: inline-block;
+  position: absolute;
+  width: calc(var(--pico-nav-link-spacing-horizontal) * 4);
+  margin: 0 calc(var(--pico-nav-link-spacing-horizontal) * -1);
+  content: var(--pico-nav-breadcrumb-divider);
+  color: var(--pico-muted-color);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+nav[aria-label=breadcrumb] a[aria-current]:not([aria-current=false]) {
+  background-color: transparent;
+  color: inherit;
+  text-decoration: none;
+  pointer-events: none;
+}
+
+aside nav,
+aside ol,
+aside ul,
+aside li {
+  display: block;
+}
+
+aside li {
+  padding: calc(var(--pico-nav-element-spacing-vertical) * 0.5) var(--pico-nav-element-spacing-horizontal);
+}
+
+aside li a {
+  display: block;
+}
+
+aside li [role=button] {
+  margin: inherit;
+}
+
+[dir=rtl] nav[aria-label=breadcrumb] ul li:not(:last-child) ::after {
+  content: "\\";
+}
+
+/* ===== css/33-accessibility.css ===== */
+/**
+ * Accessibility & User interaction
+ */
 [aria-controls] {
   cursor: pointer;
 }
 
-.sr-only,
-.visually-hidden {
-  position: absolute !important;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+[aria-disabled=true],
+[disabled] {
+  cursor: not-allowed;
 }
 
-[dir="rtl"] {
+[aria-hidden=false][hidden] {
+  display: initial;
+}
+
+[aria-hidden=false][hidden]:not(:focus) {
+  clip: rect(0, 0, 0, 0);
+  position: absolute;
+}
+
+a,
+area,
+button,
+input,
+label,
+select,
+summary,
+textarea,
+[tabindex] {
+  -ms-touch-action: manipulation;
+}
+
+[dir=rtl] {
   direction: rtl;
 }
 
+/* ===== css/34-reduce-motion.css ===== */
+/**
+ * Reduce Motion Features
+ */
 @media (prefers-reduced-motion: reduce) {
 
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
+  *:not([aria-busy=true]),
+  :not([aria-busy=true])::before,
+  :not([aria-busy=true])::after {
+    background-attachment: initial !important;
+    animation-duration: 1ms !important;
+    animation-delay: -1ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+    transition-delay: 0s !important;
+    transition-duration: 0s !important;
   }
+}
+
+/* ===== theme (accent color) — overrides 02-color-schemes ===== */
+:root {
+  --accent-h: 278.00;
+  --accent-c: 0.1970;
+  --accent-l: 0.5500;
 }
