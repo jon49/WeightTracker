@@ -103,7 +103,7 @@ function getWakeUp(bedtime: string | undefined, sleep: number | undefined) {
 function getBedtime(bedtime: string | undefined) {
   if (!bedtime) {
     return html`
-      <button class="w-100" formaction="?handler=startSleep">Bedtime</button>
+      <button formaction="?handler=startSleep">Bedtime</button>
     `;
   }
   return html`
