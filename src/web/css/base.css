@@ -1,6 +1,6 @@
 @charset "UTF-8";
 
-/* pico-builder v1 | h=278.00 c=0.1970 l=0.5500 | sections=00-header,01-styles,02-color-schemes,03-document,04-landmarks,05-section,06-container,09-typography,11-button,12-table,16-misc,17-basics-form-elements,18-checkboxes-radios-switches,20-input-type-datetime,25-card,26-dropdown,27-group,30-nav,33-accessibility,34-reduce-motion */
+/* pico-builder v1 | h=278.00 c=0.1970 l=0.5500 | sections=00-header,01-styles,02-color-schemes,03-document,04-landmarks,05-section,06-container,07-grid,09-typography,11-button,12-table,16-misc,17-basics-form-elements,18-checkboxes-radios-switches,20-input-type-datetime,25-card,26-dropdown,27-group,30-nav,33-accessibility,34-reduce-motion */
 /* Generated 2026-05-20 — paste the line above into the Restore field to rebuild this selection. */
 
 /* ===== css/00-header.css ===== */
@@ -284,7 +284,7 @@ details summary[role=button]:not(.outline)::after {
   --pico-primary-hover-border: var(--pico-primary-hover-background);
   --pico-primary-hover-underline: var(--pico-primary-hover);
   --pico-primary-focus: oklch(calc(var(--accent-l) - 0.23) var(--accent-c) var(--accent-h) / 0.5);
-  --pico-primary-inverse: #000;
+  --pico-primary-inverse: oklch(clamp(0, (0.62 - var(--accent-l)) * 100, 1) 0 0);
   --pico-secondary: #5d6b89;
   --pico-secondary-background: #525f7a;
   --pico-secondary-border: var(--pico-secondary-background);
@@ -420,7 +420,7 @@ details summary[role=button]:not(.outline)::after {
     --pico-primary-hover-border: var(--pico-primary-hover-background);
     --pico-primary-hover-underline: var(--pico-primary-hover);
     --pico-primary-focus: oklch(calc(var(--accent-l) - 0.17) var(--accent-c) var(--accent-h) / 0.375);
-    --pico-primary-inverse: #000;
+    --pico-primary-inverse: oklch(clamp(0, (0.62 - var(--accent-l)) * 100, 1) 0 0);
     --pico-secondary: #969eaf;
     --pico-secondary-background: #525f7a;
     --pico-secondary-border: var(--pico-secondary-background);
@@ -563,7 +563,7 @@ details summary[role=button]:not(.outline)::after {
   --pico-primary-hover-border: var(--pico-primary-hover-background);
   --pico-primary-hover-underline: var(--pico-primary-hover);
   --pico-primary-focus: oklch(calc(var(--accent-l) - 0.17) var(--accent-c) var(--accent-h) / 0.375);
-  --pico-primary-inverse: #000;
+  --pico-primary-inverse: oklch(clamp(0, (0.62 - var(--accent-l)) * 100, 1) 0 0);
   --pico-secondary: #969eaf;
   --pico-secondary-background: #525f7a;
   --pico-secondary-border: var(--pico-secondary-background);
@@ -800,6 +800,28 @@ section {
   .container {
     max-width: 1450px;
   }
+}
+
+/* ===== css/07-grid.css ===== */
+/**
+ * Grid
+ * Minimal grid system with auto-layout columns
+ */
+.grid {
+  grid-column-gap: var(--pico-grid-column-gap);
+  grid-row-gap: var(--pico-grid-row-gap);
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(0%, 1fr));
+  }
+}
+
+.grid>* {
+  min-width: 0;
 }
 
 /* ===== css/09-typography.css ===== */
