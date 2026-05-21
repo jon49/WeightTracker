@@ -60,16 +60,25 @@ body {
 }
 
 .toast {
-  max-width: 80vw;
+  width: 100%;
   height: fit-content;
   min-height: auto;
   top: auto;
   bottom: 10px;
-  background-color: var(--primary);
+  color: var(--pico-primary-inverse);
+  background-color: var(--pico-primary-background);
+  border: none;
   opacity: 0.95;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .toast p {
-  margin-top: var(--spacing);
-  color: var(--on-primary);
+  margin: 0;
+  width: 100%;
+  text-align: center;
+  color: var(--pico-primary-inverse);
+  font-weight: 600;
 }
