@@ -60,15 +60,17 @@ body {
 }
 
 .toast {
+  position: fixed;
   width: 100%;
   height: fit-content;
   min-height: auto;
   top: auto;
   bottom: 10px;
+  left: 0;
+  right: 0;
   color: var(--pico-primary-inverse);
-  background-color: var(--pico-primary-background);
+  background-color: color-mix(in srgb, var(--pico-primary-background) 80%, transparent);
   border: none;
-  opacity: 0.95;
   display: flex;
   align-items: center;
   justify-content: center;
