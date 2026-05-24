@@ -11,7 +11,10 @@ export function themeView(theme: Theme | undefined) {
   const current: "light" | "dark" = theme === "dark" ? "dark" : "light";
   const next: "light" | "dark" = current === "dark" ? "light" : "dark";
   const icon = current === "dark" ? sunIcon : moonIcon;
-  return html`<span id=themeView>
+  // id="theme" is required by base.css's :has(#theme input[value="..."]:checked)
+  // selector — the rendered radio below must live inside #theme for the
+  // theme toggle to actually switch the cascade.
+  return html`<span id=theme>
 <button form=post formaction="/web/api/settings?handler=theme" name=theme value="${next}" class=bg>$${icon}</button>
 ${when(isSet, () => html`<input type=radio name=theme value="${current}" checked hidden>`)}
 ${when(!isSet, () => html`<script>
