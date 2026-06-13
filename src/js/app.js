@@ -57,7 +57,7 @@
     }
 
     if (!response.ok) {
-      writeMessage(data?.message || data?.error || `Error: ${response.status}`);
+      writeMessage(data?.message || data?.error || friendlyStatus(response.status));
       return;
     }
 
@@ -93,6 +93,14 @@
     const template = doc.createElement("template");
     template.innerHTML = text.trim();
     return template.content;
+  }
+
+  function friendlyStatus(status) {
+    if (status === 429) return "Too many attempts. Please wait a minute and try again.";
+    if (status >= 500) {
+      return "The server is temporarily unavailable. Please try again in a moment.";
+    }
+    return `Something went wrong (error ${status}). Please try again.`;
   }
 
   function writeMessage(msg) {
