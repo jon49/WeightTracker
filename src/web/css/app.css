@@ -7,8 +7,69 @@
  */
 @import url("/web/css/base.css");
 
+:root {
+  /* Keep the purple accent from the old Pico build (oklch 0.55 0.197 278).
+   * nimble derives hover/focus from this. */
+  --nc-primary: light-dark(oklch(0.55 0.197 278), oklch(0.65 0.197 278));
+  --nc-content-width: 1200px;
+}
+
+/* Theme toggle: the radio rendered inside #theme (see themeView in
+ * _layout.html.ts) forces the scheme, which flips every light-dark() value. */
+:root:has(#theme input[value=light]:checked) {
+  color-scheme: light;
+}
+
+:root:has(#theme input[value=dark]:checked) {
+  color-scheme: dark;
+}
+
+html {
+  font-size: 1.25em;
+}
+
 body {
-  padding: 1em 0.5em 50vh 0.5em;
+  padding-bottom: 50vh;
+}
+
+/* nimble's content-panel shadow collapses to a visible 1px seam whenever the
+ * viewport is narrower than --nc-content-width; Pico had no panel anyway. */
+body::before {
+  content: none;
+}
+
+/* nimble tints visited links purple; keep them the same color as unvisited. */
+a:not(.nc-button):visited {
+  color: var(--nc-primary);
+  text-decoration-color: color-mix(in oklch, var(--nc-primary), transparent 50%);
+}
+
+/* nimble adds a top margin to every field after the first in a form/fieldset,
+ * which pushes later grid columns down. The grid's gap already spaces them. */
+.grid > * {
+  margin-block-start: 0;
+}
+
+/* nimble doesn't style <nav>; lay it out like Pico did. */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+nav ul {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+nav li {
+  margin: 0;
 }
 
 .inline {
@@ -68,8 +129,10 @@ body {
   bottom: 10px;
   left: 0;
   right: 0;
-  color: var(--pico-primary-inverse);
-  background-color: color-mix(in srgb, var(--pico-primary-background) 80%, transparent);
+  max-width: none;
+  margin: 0;
+  color: var(--nc-primary-contrast);
+  background-color: color-mix(in srgb, var(--nc-primary) 80%, transparent);
   border: none;
   display: flex;
   align-items: center;
@@ -81,6 +144,6 @@ body {
   margin: 0;
   width: 100%;
   text-align: center;
-  color: var(--pico-primary-inverse);
+  color: var(--nc-primary-contrast);
   font-weight: 600;
 }

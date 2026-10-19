@@ -66,7 +66,7 @@ async function render(query: any) {
     </table>
 </div>
 
-<a href="#" class="back-to-top" role="button" style="opacity:0.75;">Back to Top</a>`,
+<a href="#" class="back-to-top nc-button" role="button" style="opacity:0.75;">Back to Top</a>`,
   };
 }
 

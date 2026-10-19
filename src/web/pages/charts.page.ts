@@ -58,12 +58,12 @@ const render = ({
 </div>
 
 <div id=create-chart class="flex m-1">
-    <a id=history-chart-btn role=button target=htmz href="?handler=historyChart">History</a>
-    <a id=avg-chart-btn role=button target=htmz href="?handler=averageChart">Average</a>
-    <a id=histogram-chart-btn role=button target=htmz href="?handler=histogramChart">Histogram</a>
-    <a id=bedtime-chart-btn role=button target=htmz href="?handler=bedtimeChart">Bedtime</a>
-    <a id=sleep-chart-btn role=button target=htmz href="?handler=sleepChart">Sleep</a>
-    <a id=rate-chart-btn role=button target=htmz href="?handler=rateChart">Rate</a>
+    <a id=history-chart-btn class=nc-button role=button target=htmz href="?handler=historyChart">History</a>
+    <a id=avg-chart-btn class=nc-button role=button target=htmz href="?handler=averageChart">Average</a>
+    <a id=histogram-chart-btn class=nc-button role=button target=htmz href="?handler=histogramChart">Histogram</a>
+    <a id=bedtime-chart-btn class=nc-button role=button target=htmz href="?handler=bedtimeChart">Bedtime</a>
+    <a id=sleep-chart-btn class=nc-button role=button target=htmz href="?handler=sleepChart">Sleep</a>
+    <a id=rate-chart-btn class=nc-button role=button target=htmz href="?handler=rateChart">Rate</a>
 </div>
 
 <div id=charts-location></div>

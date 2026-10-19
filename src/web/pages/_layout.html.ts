@@ -11,7 +11,7 @@ export function themeView(theme: Theme | undefined) {
   const current: "light" | "dark" = theme === "dark" ? "dark" : "light";
   const next: "light" | "dark" = current === "dark" ? "light" : "dark";
   const icon = current === "dark" ? sunIcon : moonIcon;
-  // id="theme" is required by base.css's :has(#theme input[value="..."]:checked)
+  // id="theme" is required by app.css's :has(#theme input[value="..."]:checked)
   // selector — the rendered radio below must live inside #theme for the
   // theme toggle to actually switch the cascade.
   return html`<span id=theme>
@@ -72,8 +72,8 @@ const render = async ({ main, head, scripts, nav, title, cssLinks }: LayoutTempl
 <body>
     <div id=head>$${head}</div>
 
-    <div id=sw-message class=container></div>
-    <header class="container">
+    <div id=sw-message></div>
+    <header>
         <nav role=navigation>
             <ul>
                 <li>
@@ -88,7 +88,7 @@ const render = async ({ main, head, scripts, nav, title, cssLinks }: LayoutTempl
 
                     ${isLoggedIn
       ? html`
-                            <a id="auth-link" href="/login?logout" role="button">Logout</a>
+                            <a id="auth-link" href="/login?logout" role="button" class="nc-button">Logout</a>
                           `
       : loginView()
     }
@@ -109,14 +109,14 @@ const render = async ({ main, head, scripts, nav, title, cssLinks }: LayoutTempl
         </nav>
     </header>
 
-    <main class="container">
+    <main>
         ${main}
     </main>
 
     <div id=toasts></div>
     <div id=temp></div>
 
-    <footer class="container"></footer>
+    <footer></footer>
 
     <form id=post method=post target=htmz hidden></form>
 
