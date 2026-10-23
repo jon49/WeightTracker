@@ -97,7 +97,7 @@ const render = async ({ main, head, scripts, nav, title, cssLinks }: LayoutTempl
         </nav>
 
         <nav role=navigation>
-            <ul>
+            <ul class=overflow-auto>
                 <li><a href="/web/entries">Entries</a></li>
                 <li><a href="/web/entries/edit">Entry</a></li>
                 <li><a href="/web/charts">Charts</a></li>

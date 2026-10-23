@@ -64,18 +64,18 @@ function getEntryForm(o: WeightData) {
 <input name=date type=hidden value=${date}>
 <input name=_rev type=hidden value=${_rev}>
 
-<fieldset class="grid">
+<div class="grid">
 ${getWakeUp(bedtime, sleep)}
 ${getBedtime(bedtime)}
-</fieldset>
+</div>
 
-<fieldset class="grid">
+<div class="grid">
     <label>Weight
     <input name=weight type=number step=any value="${weight}"></label>
     <label>Waist Size (cm)
         <input name=waist type=number step=any value="${waist}">
     </label>
-</fieldset>
+</div>
 
 <button hidden></button>
 

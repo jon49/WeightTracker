@@ -72,6 +72,21 @@ nav li {
   margin: 0;
 }
 
+header nav {
+  margin-block-end: 0.5rem;
+}
+
+/* Scroll the nav links sideways on narrow screens instead of wrapping. */
+nav ul.overflow-auto {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+nav :where(button, .nc-button) {
+  --_btn-padding-v: 0.2em;
+  --_btn-padding-h: 0.5em;
+}
+
 .inline {
   display: inline;
 }
