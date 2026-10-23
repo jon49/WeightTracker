@@ -80,6 +80,11 @@ header nav {
 nav ul.overflow-auto {
   flex-wrap: nowrap;
   white-space: nowrap;
+  scrollbar-width: none;
+}
+
+nav ul.overflow-auto::-webkit-scrollbar {
+  display: none;
 }
 
 nav :where(button, .nc-button) {
