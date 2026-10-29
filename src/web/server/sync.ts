@@ -1,12 +1,16 @@
+import type { UserSettings } from "./db.js";
+
 const {
   globalDb: db,
-  db: { getMany, setMany, set, update },
+  db: { get, getMany, setMany, set, update },
 } = self.sw;
 
 const SYNC_URL = "/api/data/weight";
 const REFRESH_URL = "/api/auth/v1/refresh";
 
-export default async function sync() {
+// `uploadMerge` is false on the follow-up sync that uploads merged user
+// settings, so a sync never repeats more than once.
+export default async function sync(uploadMerge = true): Promise<{ status: number }> {
   let tokens = await db.authTokens();
   if (!tokens) {
     await db.setLoggedIn(false);
@@ -50,11 +54,21 @@ export default async function sync() {
     return { status: res.status };
   }
 
+  // Records edited while the request was in flight are newer than what was
+  // sent or received: keep them, and leave them marked for the next sync.
+  let editedDuringSync = await changedSince(keys, items);
+
+  let localSettings = await get("user-settings");
   let toSaveNewData = [];
   for (let saved of newData.data) {
     let key = parse(saved.key);
+    if (editedDuringSync.has(updatedId(key))) continue;
     let data = parse(saved.data);
     data._rev = saved.id;
+    if (key === "user-settings") {
+      // Keep entries from before the other device's start date in the history.
+      data.earliestDate = earlierDate(data.earliestDate, localSettings?.earliestDate);
+    }
     toSaveNewData.push([key, data]);
   }
   await setMany(<any>toSaveNewData);
@@ -79,13 +93,85 @@ export default async function sync() {
       (val) => ({ ...val, lastSynced: +new Date(), lastSyncedId: newData.lastSyncedId }),
       { sync: false },
     ),
-    update("updated", (val) => (val?.clear(), val), { sync: false }),
+    update(
+      "updated",
+      (val) => {
+        for (let key of keys) {
+          let id = updatedId(key);
+          if (!editedDuringSync.has(id)) val?.delete(id);
+        }
+        return val;
+      },
+      { sync: false },
+    ),
   ]);
 
-  if (toSaveNewData.length > 0) {
+  let merged = await mergeConflictedUserSettings(newData.conflicted);
+  if (merged && uploadMerge) {
+    await sync(false);
+  }
+
+  if (toSaveNewData.length > 0 || merged) {
     return { status: 200 };
   }
   return { status: 204 };
+}
+
+// Another device changed the user settings since this one last synced, and
+// the upload above replaced them (last write wins), which would lose, say, a
+// height set elsewhere. Keep this device's values, fill in the ones it lacks,
+// keep the earlier start date, and mark the merge for upload.
+async function mergeConflictedUserSettings(conflicted: ConflictedDto[] | undefined) {
+  let remote = (conflicted ?? [])
+    .filter((x) => parse(x.key) === "user-settings" && x.data)
+    .sort((a, b) => b.id - a.id)[0];
+  if (!remote) return false;
+  let theirs: Partial<UserSettings> = parse(remote.data) ?? {};
+  let ours = await get("user-settings");
+  if (!ours) return false;
+  let merged: UserSettings = {
+    ...ours,
+    earliestDate: earlierDate(ours.earliestDate, theirs.earliestDate),
+    height: ours.height || theirs.height,
+    goalWeight: ours.goalWeight || theirs.goalWeight,
+    bedtime: ours.bedtime || theirs.bedtime,
+  };
+  if (
+    merged.earliestDate === ours.earliestDate &&
+    merged.height === ours.height &&
+    merged.goalWeight === ours.goalWeight &&
+    merged.bedtime === ours.bedtime
+  ) {
+    return false;
+  }
+  await set("user-settings", merged);
+  return true;
+}
+
+// changedSince returns the pending keys whose value is not what was sent,
+// including keys that were not pending when the sync started.
+async function changedSince(sentKeys: (string | number)[], sentItems: any[]) {
+  let sent = new Map(sentKeys.map((key, i) => [updatedId(key), JSON.stringify(sentItems[i])]));
+  let pending = await db.updated();
+  let current = await getMany(pending);
+  let changed = new Set<IDBValidKey>();
+  pending.forEach((key, i) => {
+    let id = updatedId(key);
+    if (sent.get(id) !== JSON.stringify(current[i])) changed.add(id);
+  });
+  return changed;
+}
+
+// updatedId is how a key is stored in the "updated" set (see db.ts).
+function updatedId(key: unknown): IDBValidKey {
+  return Array.isArray(key) ? JSON.stringify(key) : (key as IDBValidKey);
+}
+
+// Dates are YYYY-MM-DD, so they compare as strings.
+function earlierDate(a: string | undefined, b: string | undefined) {
+  if (!a) return b;
+  if (!b) return a;
+  return a < b ? a : b;
 }
 
 function postSync(body: PostData, authToken: string) {
