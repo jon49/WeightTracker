@@ -14,6 +14,22 @@
   --nc-content-width: 1200px;
 }
 
+/* White text on buttons and the toast in both schemes (WCAG AA, >= 4.5:1).
+ * nimble's dark scheme uses a lighter primary with dark text, so pin the
+ * filled backgrounds to the darker shade here and darken on hover instead of
+ * lightening. Scoped to these elements so dark-mode links keep the lighter,
+ * readable-on-dark primary from :root. */
+:where(button, [type=submit], [type=reset], [type=button], [type=file], .nc-button, .toast):not(.outline) {
+  --nc-primary: oklch(0.55 0.197 278);
+  --nc-primary-hover: oklch(from var(--nc-primary) calc(l - 0.1) c h);
+  --nc-primary-focus: oklch(from var(--nc-primary) l c h / 0.4);
+  --nc-primary-contrast: #fff;
+  --nc-secondary: light-dark(oklch(0.45 0.05 250), oklch(0.5 0.05 250));
+  --nc-secondary-hover: oklch(from var(--nc-secondary) calc(l - 0.1) c h);
+  --nc-secondary-focus: oklch(from var(--nc-secondary) l c h / 0.3);
+  --nc-secondary-contrast: #fff;
+}
+
 /* Theme toggle: the radio rendered inside #theme (see themeView in
  * _layout.html.ts) forces the scheme, which flips every light-dark() value. */
 :root:has(#theme input[value=light]:checked) {
@@ -156,7 +172,8 @@ nav :where(button, .nc-button) {
   max-width: none;
   margin: 0;
   color: var(--nc-primary-contrast);
-  background-color: color-mix(in srgb, var(--nc-primary) 80%, transparent);
+  /* Solid: a translucent fill over the light page drops white text below AA. */
+  background-color: var(--nc-primary);
   border: none;
   display: flex;
   align-items: center;
