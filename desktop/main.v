@@ -66,13 +66,22 @@ fn main() {
 		frame_fn:          on_frame
 		event_fn:          on_event
 		cleanup_fn:        on_cleanup
+		resized_fn:        on_resized
 	)
 	app.ui.ctx = app.gg
 	app.gg.run()
 }
 
 fn on_init(mut app App) {
+	app.base_scale = app.gg.scale
+	app.apply_zoom()
 	app.start_sync(false)
+}
+
+// gg has just reset its scale for the window's screen; zoom it again.
+fn on_resized(_ &gg.Event, mut app App) {
+	app.base_scale = app.gg.scale
+	app.apply_zoom()
 }
 
 fn on_frame(mut app App) {

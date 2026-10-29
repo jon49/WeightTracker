@@ -194,6 +194,39 @@ fn (mut app App) draw_settings(x f32, y0 f32, w f32) f32 {
 	app.on_settings_field(ev)
 	y += 8
 
+	// Text size.
+	y = app.subheading(x, y, 'Text size')
+	minus_w := bh
+	if ui.button(gui.Rect{x, y, minus_w, bh}, '−', .outline) {
+		app.zoom_by(-1)
+	}
+	pct := zoom_percent(app.store.zoom)
+	pw := ui.text_width('300%', gui.TextStyle{}) + 24
+	ui.text(x + minus_w + pw / 2, y + bh / 2, pct, gui.TextStyle{
+		align:  .center
+		valign: .middle
+	})
+	plus_x := x + minus_w + pw
+	if ui.button(gui.Rect{plus_x, y, bh, bh}, '+', .outline) {
+		app.zoom_by(1)
+	}
+	reset_w := ui.button_width('Reset')
+	if app.store.zoom != 1.0 {
+		if ui.button(gui.Rect{plus_x + bh + 8, y, reset_w, bh}, 'Reset', .outline) {
+			app.set_zoom(1.0)
+		}
+	}
+	y += bh + 8
+	for line in ui.wrap('Shortcuts: Ctrl + and Ctrl − (or Ctrl and the scroll wheel); Ctrl 0 resets.',
+		w, gui.TextStyle{ size: 13 }) {
+		ui.text(x, y, line, gui.TextStyle{
+			size:  13
+			color: t.muted
+		})
+		y += ui.line_height(13)
+	}
+	y += 16
+
 	// Data.
 	y = app.subheading(x, y, 'Data')
 	for line in ui.wrap('Stored in ${app.store.data_path()}', w, gui.TextStyle{ size: 13 }) {

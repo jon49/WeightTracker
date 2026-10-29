@@ -88,6 +88,15 @@ synced data downloads again on the next sync.
   branch for the app's internal files directory.
 - Safe-area insets (notch, home indicator) are not handled yet.
 
+## Keyboard and mouse
+
+- **Text size:** Ctrl + and Ctrl − (also Ctrl with the scroll wheel, or the
+  keypad + and −), Ctrl 0 to reset, or Settings → Text size. It changes in 10% steps from 50%
+  to 300% and is saved between runs.
+- **Scrolling:** the wheel, dragging the scroll bar or clicking its track,
+  and, when no field is focused, Page Up/Down, Home/End (with or without Ctrl) and the arrow keys.
+- **Sync now:** Ctrl+R.
+
 Text fields are single-line except the comment, which grows with its text.
 Enter adds a line there; Ctrl+Enter or clicking elsewhere saves. Clipboard
 paste is not supported yet because `gg` does not expose sokol's clipboard

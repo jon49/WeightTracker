@@ -113,21 +113,22 @@ pub mut:
 	// Base font size; widgets scale from it.
 	font_size int = 16
 mut:
-	mx        f32
-	my        f32
-	down      bool
-	pressed   bool
-	released  bool
-	press_x   f32
-	press_y   f32
-	drag      bool
-	touch     bool
-	last_ty   f32
-	scroll_dy f32
-	keys      []KeyPress
-	chars     []rune
-	focus     string
-	tab_from  string
+	mx         f32
+	my         f32
+	down       bool
+	pressed    bool
+	released   bool
+	press_x    f32
+	press_y    f32
+	drag       bool
+	touch      bool
+	last_ty    f32
+	scroll_dy  f32
+	zoom_steps int
+	keys       []KeyPress
+	chars      []rune
+	focus      string
+	tab_from   string
 	// Shift+Tab: the field to focus when it is drawn next.
 	focus_request string
 	focus_ids     []string
@@ -135,8 +136,13 @@ mut:
 	clip          Rect
 	clips         []Rect
 	scrolls       map[string]f32
-	cursor        sapp.MouseCursor = .default
-	want          sapp.MouseCursor = .default
+	// Content heights from the last frame, to place the scroll bars.
+	content_hs map[string]f32
+	// The scroll area whose bar is being dragged, and where on the thumb.
+	bar_drag string
+	bar_grab f32
+	cursor   sapp.MouseCursor = .default
+	want     sapp.MouseCursor = .default
 	// Set when something changed after it was drawn, so another frame is needed.
 	redraw bool
 }
@@ -145,12 +151,26 @@ pub fn new_ui() &Ui {
 	return &Ui{}
 }
 
+// width and height are in layout units, which shrink as the app zooms in
+// (gg.window_size only accounts for the screen's DPI).
 pub fn (ui &Ui) width() f32 {
-	return f32(gg.window_size().width)
+	return f32(sapp.width()) / ui.scale()
 }
 
 pub fn (ui &Ui) height() f32 {
-	return f32(gg.window_size().height)
+	return f32(sapp.height()) / ui.scale()
+}
+
+fn (ui &Ui) scale() f32 {
+	return if ui.ctx != unsafe { nil } && ui.ctx.scale > 0 { ui.ctx.scale } else { 1 }
+}
+
+// take_zoom_steps returns the Ctrl+scroll wheel notches since the last call
+// (positive to zoom in).
+pub fn (mut ui Ui) take_zoom_steps() int {
+	n := ui.zoom_steps
+	ui.zoom_steps = 0
+	return n
 }
 
 pub fn (ui &Ui) has_focus() bool {
@@ -190,13 +210,21 @@ pub fn (mut ui Ui) handle_event(e &gg.Event) {
 			}
 		}
 		.mouse_scroll {
-			ui.scroll_dy -= e.scroll_y * 48
+			if e.modifiers & (u32(2) | u32(8)) != 0 {
+				if e.scroll_y > 0 {
+					ui.zoom_steps++
+				} else if e.scroll_y < 0 {
+					ui.zoom_steps--
+				}
+			} else {
+				ui.scroll_dy -= e.scroll_y * 48
+			}
 		}
 		.touches_began, .touches_moved, .touches_ended, .touches_cancelled {
 			if e.num_touches < 1 {
 				return
 			}
-			scale := if ui.ctx != unsafe { nil } && ui.ctx.scale > 0 { ui.ctx.scale } else { 1 }
+			scale := ui.scale()
 			x := e.touches[0].pos_x / scale
 			y := e.touches[0].pos_y / scale
 			ui.touch = true
@@ -382,6 +410,34 @@ pub fn (mut ui Ui) begin_scroll(id string, r Rect) f32 {
 		off += ui.scroll_dy
 		ui.scroll_dy = 0
 	}
+	// The scroll bar: drag the thumb, or click the track to page.
+	if bar := ui.scroll_bar(id, r) {
+		if ui.pressed && !ui.touch && bar.track.contains(ui.press_x, ui.press_y)
+			&& ui.in_clip(ui.press_x, ui.press_y) {
+			ui.pressed = false
+			if bar.thumb.contains(ui.press_x, ui.press_y) {
+				ui.bar_drag = id
+				ui.bar_grab = ui.press_y - bar.thumb.y
+			} else if ui.press_y < bar.thumb.y {
+				off -= r.h * 0.9
+			} else {
+				off += r.h * 0.9
+			}
+		}
+		if ui.bar_drag == id {
+			if ui.down {
+				span := r.h - bar.thumb.h
+				if span > 0 {
+					off = (ui.my - ui.bar_grab - r.y) / span * bar.max
+				}
+			} else {
+				ui.bar_drag = ''
+			}
+		}
+		if off > bar.max {
+			off = bar.max
+		}
+	}
 	if off < 0 {
 		off = 0
 	}
@@ -392,21 +448,69 @@ pub fn (mut ui Ui) begin_scroll(id string, r Rect) f32 {
 
 pub fn (mut ui Ui) end_scroll(id string, r Rect, content_h f32) {
 	ui.pop_clip()
+	ui.content_hs[id] = content_h
 	max := if content_h > r.h { content_h - r.h } else { 0 }
 	off := ui.scrolls[id] or { 0 }
 	if off > max {
 		ui.scrolls[id] = max
 		ui.redraw = true
 	}
-	if max > 0 {
-		th := r.h * r.h / content_h
-		ty := r.y + (r.h - th) * (if max > 0 { off / max } else { 0 })
-		ui.ctx.draw_rounded_rect_filled(r.right() - 6, ty, 4, th, 2, hexa(0x808080, 110))
+	if bar := ui.scroll_bar(id, r) {
+		active := ui.bar_drag == id || ui.hovered(bar.track)
+		if active {
+			ui.rect(bar.track, hexa(0x808080, 40))
+		}
+		w := if active { f32(8) } else { f32(5) }
+		ui.ctx.draw_rounded_rect_filled(bar.track.right() - w - 3, bar.thumb.y, w, bar.thumb.h,
+			w / 2, hexa(0x808080, if active { u8(180) } else { u8(110) }))
+	}
+}
+
+struct ScrollBar {
+	track Rect
+	thumb Rect
+	max   f32 // the largest scroll offset
+}
+
+const scroll_bar_width = f32(14)
+
+// scroll_bar places a scroll area's bar from last frame's content height,
+// or returns none when everything fits.
+fn (ui &Ui) scroll_bar(id string, r Rect) ?ScrollBar {
+	content_h := ui.content_hs[id] or { return none }
+	if content_h <= r.h {
+		return none
+	}
+	max := content_h - r.h
+	mut off := ui.scrolls[id] or { 0 }
+	off = if off < 0 {
+		0
+	} else if off > max {
+		max
+	} else {
+		off
+	}
+	mut th := r.h * r.h / content_h
+	if th < 32 {
+		th = 32
+	}
+	track := Rect{r.right() - scroll_bar_width, r.y, scroll_bar_width, r.h}
+	return ScrollBar{
+		track: track
+		thumb: Rect{track.x, r.y + (r.h - th) * off / max, scroll_bar_width, th}
+		max:   max
 	}
 }
 
 pub fn (mut ui Ui) set_scroll(id string, off f32) {
 	ui.scrolls[id] = off
+}
+
+// scroll_by moves a scroll area; end_scroll keeps it in range.
+pub fn (mut ui Ui) scroll_by(id string, dy f32) {
+	off := (ui.scrolls[id] or { 0 }) + dy
+	ui.scrolls[id] = if off < 0 { 0 } else { off }
+	ui.redraw = true
 }
 
 // ---- drawing helpers ----

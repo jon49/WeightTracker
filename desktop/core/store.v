@@ -23,6 +23,7 @@ pub mut:
 	edit_seq       int
 	last_synced_id i64
 	theme          string // 'light', 'dark' or '' for the system default
+	zoom           f64    = 1.0 // text and layout scale
 	server_url     string = default_server_url
 	auth           AuthTokens
 	// version is bumped on every change so views can cache derived data.
@@ -91,6 +92,10 @@ fn (mut s Store) load() ! {
 		}
 		s.last_synced_id = i64(any_num(root['lastSyncedId'] or { json2.null }))
 		s.theme = any_str(root['theme'] or { json2.null })
+		zoom := any_num(root['zoom'] or { json2.null })
+		if zoom > 0 {
+			s.zoom = zoom
+		}
 		url := any_str(root['serverUrl'] or { json2.null })
 		if url != '' {
 			s.server_url = url
@@ -127,6 +132,7 @@ pub fn (mut s Store) save() ! {
 		'pending':       pending
 		'lastSyncedId':  s.last_synced_id
 		'theme':         s.theme
+		'zoom':          s.zoom
 		'serverUrl':     s.server_url
 	})
 	write_atomic(s.data_path(), json2.encode(root, prettify: true))!
@@ -218,6 +224,15 @@ pub fn (mut s Store) set_chart_settings(cs ChartSettings) ! {
 
 pub fn (mut s Store) set_theme(theme string) ! {
 	s.theme = theme
+	s.version++
+	s.save()!
+}
+
+pub fn (mut s Store) set_zoom(zoom f64) ! {
+	if zoom == s.zoom {
+		return
+	}
+	s.zoom = zoom
 	s.version++
 	s.save()!
 }

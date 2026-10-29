@@ -1,6 +1,7 @@
 module main
 
 import gg
+import math
 import os
 import time
 import core
@@ -25,6 +26,10 @@ fn (s Screen) title() string {
 }
 
 const pad = f32(16)
+// Text size limits and step, in percent.
+const zoom_min = 50
+const zoom_max = 300
+const zoom_step = 10
 const max_content_width = f32(760)
 
 struct SyncDone {
@@ -62,6 +67,9 @@ mut:
 	settings       SettingsForm
 	login          LoginForm
 	theme_resolved string
+	// gg's own scale for the screen's DPI; the zoom multiplies it.
+	base_scale   f32 = 1
+	zoom_changed bool
 }
 
 fn new_app(store &core.Store) &App {
@@ -102,6 +110,50 @@ fn system_prefers_dark() bool {
 		return res.exit_code == 0 && res.output.contains('dark')
 	}
 	return false
+}
+
+// apply_zoom scales everything gg draws (and the pointer coordinates it
+// reports) by the saved zoom. gg resets its scale on resize, so this runs
+// after every resize too.
+fn (mut app App) apply_zoom() {
+	app.gg.scale = app.base_scale * f32(app.store.zoom)
+	app.gg.ft.scale = app.gg.scale
+	app.ui.request_redraw()
+}
+
+// zoom_by changes the text size in 10% steps. A size between steps (from an
+// older version) moves to the next step in that direction.
+fn (mut app App) zoom_by(steps int) {
+	pct := int(math.round(app.store.zoom * 100))
+	mut next := if steps > 0 {
+		pct / zoom_step * zoom_step + steps * zoom_step
+	} else {
+		(pct + zoom_step - 1) / zoom_step * zoom_step + steps * zoom_step
+	}
+	next = if next < zoom_min {
+		zoom_min
+	} else if next > zoom_max {
+		zoom_max
+	} else {
+		next
+	}
+	app.set_zoom(f64(next) / 100)
+}
+
+fn (mut app App) set_zoom(zoom f64) {
+	if zoom == app.store.zoom {
+		return
+	}
+	app.store.set_zoom(zoom) or { app.show_error('Could not save the text size: ${err}') }
+	// Applied at the start of the next frame, so a frame is never drawn
+	// half at one size and half at another.
+	app.zoom_changed = true
+	app.ui.request_redraw()
+	app.show_toast('Text size ${zoom_percent(zoom)}')
+}
+
+fn zoom_percent(zoom f64) string {
+	return '${int(math.round(zoom * 100))}%'
 }
 
 fn (mut app App) toggle_theme() {
@@ -307,6 +359,10 @@ fn open_in_browser(url string) {
 
 fn (mut app App) frame() {
 	app.poll_workers()
+	if app.zoom_changed {
+		app.zoom_changed = false
+		app.apply_zoom()
+	}
 	mut ui := app.ui
 	ui.begin_frame()
 	app.gg.begin()
@@ -331,6 +387,42 @@ fn (mut app App) frame() {
 	// Keyboard shortcuts that no field used.
 	if ui.key_pressed(.r, true) {
 		app.start_sync(true)
+	}
+	if !ui.has_focus() {
+		page := area.h * 0.9
+		if ui.key_pressed(.page_down, false) {
+			ui.scroll_by('main', page)
+		}
+		if ui.key_pressed(.page_up, false) {
+			ui.scroll_by('main', -page)
+		}
+		if ui.key_pressed(.down, false) {
+			ui.scroll_by('main', 48)
+		}
+		if ui.key_pressed(.up, false) {
+			ui.scroll_by('main', -48)
+		}
+		// Home/End, with or without Ctrl, go to the top or bottom.
+		if ui.key_pressed(.home, false) || ui.key_pressed(.home, true) {
+			ui.set_scroll('main', 0)
+			ui.request_redraw()
+		}
+		if ui.key_pressed(.end, false) || ui.key_pressed(.end, true) {
+			ui.scroll_by('main', content_h)
+		}
+	}
+	if ui.key_pressed(.equal, true) || ui.key_pressed(.kp_add, true) {
+		app.zoom_by(1)
+	}
+	if ui.key_pressed(.minus, true) || ui.key_pressed(.kp_subtract, true) {
+		app.zoom_by(-1)
+	}
+	if ui.key_pressed(._0, true) || ui.key_pressed(.kp_0, true) {
+		app.set_zoom(1.0)
+	}
+	steps := ui.take_zoom_steps()
+	if steps != 0 {
+		app.zoom_by(steps)
 	}
 	app.gg.end()
 	if ui.end_frame() {
