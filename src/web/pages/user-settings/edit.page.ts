@@ -52,9 +52,8 @@ const postHandlers: RoutePostHandler = {
     if (!original) {
       original = {} as UserSettings;
     }
-    if (!("_ref" in original)) {
-      original._rev = 0;
-    }
+    // Without a _rev, db.set does not mark the settings for sync.
+    original._rev ??= 0;
     await db.set("user-settings", { ...original, ...o });
     return { status: 200 };
   },

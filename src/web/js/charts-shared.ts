@@ -1,4 +1,5 @@
 import {
+  avg,
   dateAdd,
   dateFill,
   formatNumber,
@@ -86,6 +87,35 @@ export function getGoalWeight(userSettings: UserSettings | undefined): string | 
     goalWeight = formatNumber(userSettings?.goalWeight ?? goalWeight, 2);
   }
   return <string | undefined>goalWeight;
+}
+
+// estimateWeeksToGo returns how many weeks until the goal weight as a range:
+// at the average weekly loss, and at the average weekly change overall.
+// Weeks without weigh-ins have no average and are skipped, rather than
+// counted as a weight of 0.
+export function estimateWeeksToGo(
+  avgValues: (number | null | undefined)[],
+  goalWeight: number,
+): string | undefined {
+  const currentWeight = avgValues[avgValues.length - 1];
+  if (!currentWeight || !goalWeight) return;
+  const all: number[] = [];
+  const losses: number[] = [];
+  for (let index = 1; index < avgValues.length; index++) {
+    const previous = avgValues[index - 1];
+    const current = avgValues[index];
+    if (!previous || !current) continue;
+    const difference = current - previous;
+    all.push(difference);
+    if (difference < 0) {
+      losses.push(difference);
+    }
+  }
+  const avgAll = avg(all);
+  const avgLoss = avg(losses);
+  if (!avgAll || !avgLoss) return;
+  const diff = currentWeight - goalWeight;
+  return `${formatNumber(diff / -avgLoss, 1)} to ${formatNumber(diff / -avgAll, 1)}`;
 }
 
 interface WeeklyData {

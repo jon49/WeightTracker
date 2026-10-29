@@ -82,13 +82,18 @@ export function avg(numbers: (number | undefined | null)[] | null | undefined): 
   return sum / count;
 }
 
+// stdev is the population standard deviation of the values that are set.
+// (avg skips zeros, so it cannot average the squared deviations: values equal
+// to the mean have a deviation of 0 and must still count.)
 export function stdev(numbers: (number | undefined | null)[] | undefined): number | undefined {
-  if ((numbers?.length ?? 0) < 1) return undefined;
-  numbers = numbers!.filter((x) => x);
-  let average = avg(numbers);
-  if (isNil(average)) return undefined;
-  let averages = avg(numbers!.map((x) => (!isNil(x) ? Math.pow(average! - x, 2) : undefined)));
-  return averages ? Math.sqrt(averages) : undefined;
+  let values = (numbers ?? []).filter((x): x is number => !!x);
+  if (values.length === 0) return undefined;
+  let average = avg(values)!;
+  let sumOfSquares = 0;
+  for (let x of values) {
+    sumOfSquares += Math.pow(x - average, 2);
+  }
+  return Math.sqrt(sumOfSquares / values.length);
 }
 
 export function isNil(value: unknown): value is undefined | null {

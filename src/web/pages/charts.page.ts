@@ -3,7 +3,7 @@ import { RouteGetHandler, RoutePage } from "@jon49/sw/routes.middleware.js";
 import { createChartHtml } from "./charts/_chart.js";
 
 let {
-  charts: { getGoalWeight, getStartDate, getWeeklyData },
+  charts: { estimateWeeksToGo, getGoalWeight, getStartDate, getWeeklyData },
   db: { get, getMany },
   html,
   layout,
@@ -75,29 +75,9 @@ async function weeksToGo(
   weightDataGetter: (start: Date) => Promise<WeightData[]>,
 ) {
   const weeklyData = await getWeeklyData(chartSettings, weightDataGetter);
-  if (!weeklyData) return;
-  let { avgValues } = weeklyData;
-  const length = avgValues.length,
-    currentWeight = avgValues[length - 1],
-    goalWeight = getGoalWeight(userSettings);
-  if (!goalWeight) return;
-  let all = new Array(length - 1),
-    neg = new Array(length - 1);
-  for (let index = 1; index < length; index++) {
-    let difference = avgValues[index] - avgValues[index - 1];
-    if (Number.isNaN(difference)) continue;
-    all[index - 1] = difference;
-    if (difference < 0) {
-      neg[index - 1] = difference;
-    }
-  }
-  let avgAll = avg(all);
-  let avgNeg = avg(neg);
-  if (isNil(avgAll) || isNil(avgNeg)) return;
-  avgAll = -avgAll;
-  avgNeg = -avgNeg;
-  let diff = currentWeight - +goalWeight;
-  return `${formatNumber(diff / avgNeg, 1)} to ${formatNumber(diff / avgAll, 1)}`;
+  const goalWeight = getGoalWeight(userSettings);
+  if (!weeklyData || !goalWeight) return;
+  return estimateWeeksToGo(weeklyData.avgValues, +goalWeight);
 }
 
 async function setupStats(): Promise<{ statsHeaderText: string; statsData: StatsData }> {
@@ -246,7 +226,7 @@ const getHanders: RouteGetHandler = {
         { label: "Weight Gained", data: posValues, lineColor: "#6391ff" },
         { label: "Weight Lost", data: negValues, lineColor: "#ff6384" },
         { label: "Overall Weight Change", data: rateLabels.map(() => overallChange), lineColor: "#63ff83" },
-        { label: "Overall Weight Loss", data: rateLabels.map(() => overallLoss), lineColor: "#ff6384" },
+        { label: "Overall Weight Loss", data: rateLabels.map(() => overallLoss), lineColor: "#ff9f40" },
       ],
       xPaddingPercent: 5,
     });

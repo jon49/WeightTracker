@@ -135,19 +135,11 @@ const postHandlers: RoutePostHandler = {
       "user-settings",
       (settings) => {
         const earliestDate = settings?.earliestDate;
-        return !earliestDate
-          ? ((shouldSyncUserSettings.sync = true),
-          {
-            ...settings,
-            earliestDate: o.date,
-          })
-          : new Date(earliestDate) < new Date(o.date)
-            ? settings
-            : ((shouldSyncUserSettings.sync = true),
-            {
-              ...settings,
-              earliestDate: o.date,
-            });
+        // Dates are YYYY-MM-DD, so they compare as strings.
+        if (earliestDate && earliestDate <= o.date) return settings;
+        shouldSyncUserSettings.sync = true;
+        // New settings need a _rev, or db.update will not mark them for sync.
+        return { ...settings, _rev: settings?._rev ?? 0, earliestDate: o.date };
       },
       shouldSyncUserSettings,
     );
@@ -178,12 +170,12 @@ const postHandlers: RoutePostHandler = {
     }
     let wakeUpTime = new Date().toTimeString().slice(0, 5);
     if (o.bedtime) {
-      let bedtime = new Date(`1970-01-01T${o.bedtime}`);
-      let wakeUpDateTime = new Date(
-        `1970-01-0${+(+o.bedtime.slice(0, 2) > +wakeUpTime.slice(0, 2)) + 1}T${wakeUpTime}`,
-      );
-      // time slept (milliseconds) / 1000 (milliseconds) / 60 (seconds) / 60 (hours)
-      o.sleep = round((+wakeUpDateTime - +bedtime) / 36e5, 2);
+      const minutes = (time: string) => +time.slice(0, 2) * 60 + +time.slice(3, 5);
+      let slept = minutes(wakeUpTime) - minutes(o.bedtime);
+      // Woke up the next day. (Comparing whole minutes, not just hours, so
+      // going to bed at 23:40 and waking at 23:20 is not negative.)
+      if (slept < 0) slept += 24 * 60;
+      o.sleep = round(slept / 60, 2);
     }
     cleanWeightData(o);
     await db.set(o.date, o);
