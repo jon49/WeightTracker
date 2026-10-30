@@ -3,6 +3,7 @@ module main
 import gg
 import os
 import core
+import gui
 
 // Fonts are embedded so text looks the same on every platform and nothing
 // depends on what is installed (DejaVu Sans, see assets/fonts/LICENSE-DejaVu.txt).
@@ -78,6 +79,7 @@ fn main() {
 }
 
 fn on_init(mut app App) {
+	gui.present_on_demand()
 	app.base_scale = platform_scale() or { app.gg.scale }
 	app.apply_zoom()
 	platform_start(mut app)

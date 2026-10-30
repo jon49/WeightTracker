@@ -342,7 +342,21 @@ pub fn (mut ui Ui) handle_event(e &gg.Event) {
 	}
 }
 
+// In gg's ui_mode most frames are not drawn, but sokol still presents them,
+// which shows whatever the driver's next buffer last held: after a long
+// scroll the idle window flickers between old scroll positions. On X11 sokol
+// can instead present only the frames that ask (other platforms ignore it).
+fn C.sapp_set_present_on_demand(enabled bool) bool
+fn C.sapp_request_present()
+
+// present_on_demand stops sokol presenting frames the ui didn't draw; call it
+// once, from gg's init_fn.
+pub fn present_on_demand() {
+	C.sapp_set_present_on_demand(true)
+}
+
 pub fn (mut ui Ui) begin_frame() {
+	C.sapp_request_present()
 	ui.focus_ids.clear()
 	ui.want = .default
 	ui.clip = Rect{0, 0, ui.width(), ui.height()}
