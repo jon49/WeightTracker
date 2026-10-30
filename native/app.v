@@ -12,8 +12,12 @@ enum Screen {
 	entries
 	charts
 	settings
+	// Reached from Settings' login form; they have no tab.
+	register
+	forgot
 }
 
+// The screens with a tab.
 const screens = [Screen.entry, .entries, .charts, .settings]
 
 fn (s Screen) title() string {
@@ -22,7 +26,14 @@ fn (s Screen) title() string {
 		.entries { 'Entries' }
 		.charts { 'Charts' }
 		.settings { 'Settings' }
+		.register { 'Register' }
+		.forgot { 'Reset Password' }
 	}
+}
+
+// tab is the screen whose tab is shown as current.
+fn (s Screen) tab() Screen {
+	return if s in [.register, .forgot] { .settings } else { s }
 }
 
 const pad = f32(16)
@@ -43,6 +54,12 @@ struct LoginDone {
 	error  string
 }
 
+// AccountDone is the result of registering or asking for a password reset.
+struct AccountDone {
+	screen Screen
+	error  string
+}
+
 @[heap]
 struct App {
 mut:
@@ -55,17 +72,23 @@ mut:
 	toast_error bool
 	toast_until i64
 	// Sync runs on a worker thread; results come back on these channels.
-	syncing        bool
-	sync_ch        chan SyncDone
-	sync_due       i64
-	last_sync      i64
-	logging_in     bool
-	login_ch       chan LoginDone
+	syncing    bool
+	sync_ch    chan SyncDone
+	sync_due   i64
+	last_sync  i64
+	logging_in bool
+	login_ch   chan LoginDone
+	// Registering or asking for a reset link (.register or .forgot), on a
+	// worker thread.
+	account_busy   map[Screen]bool
+	account_ch     chan AccountDone
 	entry          EntryForm
 	entries        EntriesView
 	charts         ChartsView
 	settings       SettingsForm
 	login          LoginForm
+	register       RegisterForm
+	forgot         ForgotForm
 	theme_resolved string
 	// gg's own scale for the screen's DPI; the zoom multiplies it.
 	base_scale   f32 = 1
@@ -74,10 +97,11 @@ mut:
 
 fn new_app(store &core.Store) &App {
 	mut app := &App{
-		ui:       gui.new_ui()
-		store:    store
-		sync_ch:  chan SyncDone{cap: 1}
-		login_ch: chan LoginDone{cap: 1}
+		ui:         gui.new_ui()
+		store:      store
+		sync_ch:    chan SyncDone{cap: 1}
+		login_ch:   chan LoginDone{cap: 1}
+		account_ch: chan AccountDone{cap: 2}
 	}
 	app.apply_theme()
 	app.load_entry(core.default_entry_date().str())
@@ -100,12 +124,16 @@ fn (mut app App) apply_theme() {
 	}
 }
 
-// system_prefers_dark makes a best guess at the desktop's color scheme.
+// system_prefers_dark makes a best guess at the system's color scheme.
 fn system_prefers_dark() bool {
+	if dark := platform_prefers_dark() {
+		return dark
+	}
+	// A GTK theme forced from the environment, then GNOME's setting.
+	if os.getenv('GTK_THEME').to_lower().contains('dark') {
+		return true
+	}
 	$if linux {
-		if os.getenv('GTK_THEME').to_lower().contains('dark') {
-			return true
-		}
 		res := os.exec(['gsettings', 'get', 'org.gnome.desktop.interface', 'color-scheme'])
 		return res.exit_code == 0 && res.output.contains('dark')
 	}
@@ -156,9 +184,15 @@ fn zoom_percent(zoom f64) string {
 	return '${int(math.round(zoom * 100))}%'
 }
 
+// toggle_theme switches between light and dark. The theme follows the
+// system until this overrides it, and follows it again once toggled back to
+// what the system shows.
 fn (mut app App) toggle_theme() {
 	next := if app.theme_resolved == 'dark' { 'light' } else { 'dark' }
-	app.store.set_theme(next) or { app.show_error('Could not save the theme: ${err}') }
+	system := if system_prefers_dark() { 'dark' } else { 'light' }
+	app.store.set_theme(if next == system { '' } else { next }) or {
+		app.show_error('Could not save the theme: ${err}')
+	}
 	app.apply_theme()
 }
 
@@ -225,6 +259,10 @@ fn (mut app App) schedule_sync() {
 }
 
 fn (mut app App) on_focus() {
+	// The system may have switched between light and dark meanwhile.
+	if app.store.theme == '' {
+		app.apply_theme()
+	}
 	// Pick up changes made on other devices.
 	if now_ms() - app.last_sync > 60_000 {
 		app.start_sync(false)
@@ -292,6 +330,11 @@ fn (mut app App) poll_workers() {
 		app.show_toast('Logged in as ${login.tokens.email}')
 		app.start_sync(false)
 	}
+	mut account := AccountDone{}
+	if app.account_ch.try_pop(mut account) == .success {
+		app.account_busy[account.screen] = false
+		app.on_account_done(account)
+	}
 	if app.sync_due > 0 && now_ms() >= app.sync_due {
 		app.start_sync(false)
 	}
@@ -351,10 +394,6 @@ fn (mut app App) refresh_forms() {
 	}
 }
 
-fn open_in_browser(url string) {
-	os.open_uri(url) or {}
-}
-
 // ---- frame ----
 
 fn (mut app App) frame() {
@@ -366,6 +405,8 @@ fn (mut app App) frame() {
 	mut ui := app.ui
 	ui.begin_frame()
 	app.gg.begin()
+	// The status bar's strip, on phones, in the web app's theme color.
+	ui.begin_drawing(ui.theme.primary)
 	w := ui.width()
 	h := ui.height()
 
@@ -380,6 +421,8 @@ fn (mut app App) frame() {
 		.entries { app.draw_entries(x, y, cw, area) }
 		.charts { app.draw_charts(x, y, cw) }
 		.settings { app.draw_settings(x, y, cw) }
+		.register { app.draw_register(x, y, cw) }
+		.forgot { app.draw_forgot(x, y, cw) }
 	} + 2 * pad
 	ui.end_scroll('main', area, content_h)
 	app.draw_toast(w, h)
@@ -485,7 +528,11 @@ fn (mut app App) draw_header(w f32) f32 {
 	for s in screens {
 		label := s.title()
 		bw := ui.button_width(label)
-		style := if s == app.screen { gui.ButtonStyle.tab_active } else { gui.ButtonStyle.tab }
+		style := if s == app.screen.tab() {
+			gui.ButtonStyle.tab_active
+		} else {
+			gui.ButtonStyle.tab
+		}
 		if ui.button(gui.Rect{nx, nav_y + 4, bw, bh}, label, style) {
 			app.navigate(s)
 		}

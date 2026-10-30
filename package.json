@@ -10,8 +10,9 @@
     "server": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=server --target=./server/public",
     "start:full": "concurrently -k -n start,server,trail -c blue,green,yellow \"npm:start\" \"npm:server\" \"make -C ../ImageBase dev\"",
     "build": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=prod --target=deploy",
-    "build:linux": "make -C desktop build",
-    "install:linux": "make -C desktop install",
+    "build:native": "make -C native build",
+    "install:native": "make -C native install",
+    "test:native": "make -C native test",
     "check": "tsc --noEmit",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check"

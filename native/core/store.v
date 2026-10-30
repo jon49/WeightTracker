@@ -49,6 +49,8 @@ pub fn default_data_dir() string {
 	}
 	$if ios {
 		return os.join_path(os.home_dir(), 'Documents')
+	} $else $if android {
+		return os.getenv_opt('ANDROID_DATA_DIR') or { '.' }
 	} $else $if windows || macos {
 		base := os.config_dir() or { os.home_dir() }
 		return os.join_path(base, 'Weight')

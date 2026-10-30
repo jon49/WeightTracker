@@ -127,7 +127,7 @@ fn (mut app App) draw_charts(x f32, y0 f32, w f32) f32 {
 		'9')
 	match ev {
 		.changed { app.charts.dirty = true }
-		.committed { app.save_chart_settings() }
+		.committed, .submitted { app.save_chart_settings() }
 		.cancelled { app.charts.dirty = false }
 		.none {}
 	}

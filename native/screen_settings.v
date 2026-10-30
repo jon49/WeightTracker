@@ -80,7 +80,7 @@ fn (mut app App) save_settings() {
 fn (mut app App) on_settings_field(ev gui.FieldEvent) {
 	match ev {
 		.changed { app.settings.dirty = true }
-		.committed { app.save_settings() }
+		.committed, .submitted { app.save_settings() }
 		.cancelled { app.settings.dirty = false }
 		.none {}
 	}
@@ -170,7 +170,7 @@ fn (mut app App) draw_settings(x f32, y0 f32, w f32) f32 {
 			'')
 		ev, y = app.labeled_field('login-password', 'Password', x, y, fw, mut app.login.password,
 			.password, '')
-		if ev == .committed && app.login.password.text != '' {
+		if ev == .submitted && app.login.password.text != '' {
 			app.start_login()
 		}
 		label := if app.logging_in { 'Logging in…' } else { 'Login' }
@@ -179,13 +179,12 @@ fn (mut app App) draw_settings(x f32, y0 f32, w f32) f32 {
 			app.start_login()
 		}
 		y += bh + 12
-		server := app.store.server_url
 		if ui.link(x, y, 'Register', gui.TextStyle{}) {
-			open_in_browser('${server}/register/')
+			app.open_register()
 		}
 		if ui.link(x + ui.text_width('Register', gui.TextStyle{}) + 24, y, 'Forgot password?',
 			gui.TextStyle{}) {
-			open_in_browser('${server}/forgot-password/')
+			app.open_forgot()
 		}
 		y += 36
 	}

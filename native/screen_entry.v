@@ -120,7 +120,7 @@ fn (mut app App) draw_entry(x f32, y0 f32, w f32) f32 {
 	date_w := if fw > 200 { f32(200) } else { fw }
 	ev := ui.field('entry-date', gui.Rect{x + bh + 8, y, date_w, bh}, mut app.entry.date,
 		.date, 'YYYY-MM-DD')
-	if ev == .committed {
+	if ev in [.committed, .submitted] {
 		if d := core.parse_date(app.entry.date.text) {
 			app.change_date(d.str())
 		} else {
@@ -210,7 +210,7 @@ fn (mut app App) draw_entry(x f32, y0 f32, w f32) f32 {
 fn (mut app App) on_entry_field(ev gui.FieldEvent) {
 	match ev {
 		.changed { app.entry.dirty = true }
-		.committed { app.save_entry() }
+		.committed, .submitted { app.save_entry() }
 		.cancelled { app.entry.dirty = false }
 		.none {}
 	}

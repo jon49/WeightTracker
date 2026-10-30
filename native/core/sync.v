@@ -326,6 +326,60 @@ pub fn logout(server string, refresh_token string) {
 	post_json(server + '/api/auth/v1/logout', body.json_str(), '') or {}
 }
 
+// register creates an account. TrailBase requires email verification before
+// login works, so this does not log in.
+pub fn register(server string, email string, password string, password_repeat string) ! {
+	body := json2.Any({
+		'email':           json2.Any(email)
+		'password':        password
+		'password_repeat': password_repeat
+	})
+	res := post_json(server + '/api/auth/v1/register', body.json_str(), '') or {
+		return error('Network error. Please try again.')
+	}
+	if res.status_code < 200 || res.status_code >= 300 {
+		msg := server_message(res)
+		return error(if msg != '' { msg } else { friendly_status(res.status_code) })
+	}
+}
+
+// request_password_reset asks the server to email a link for setting a new
+// password. The link opens the web app's reset page.
+pub fn request_password_reset(server string, email string) ! {
+	body := json2.Any({
+		'email': json2.Any(email)
+	})
+	res := post_json(server + '/api/auth/v1/reset_password/request', body.json_str(), '') or {
+		return error('Network error. Please try again.')
+	}
+	if res.status_code < 200 || res.status_code >= 300 {
+		msg := server_message(res)
+		return error(if msg != '' { msg } else { friendly_status(res.status_code) })
+	}
+}
+
+// friendly_status and server_message word failures as the web app's auth
+// pages do (src/js/app.js).
+fn friendly_status(status int) string {
+	if status == 429 {
+		return 'Too many attempts. Please wait a minute and try again.'
+	}
+	if status >= 500 {
+		return 'The server is temporarily unavailable. Please try again in a moment.'
+	}
+	return 'Something went wrong (error ${status}). Please try again.'
+}
+
+// server_message is the error message TrailBase sent, if any.
+fn server_message(res http.Response) string {
+	m := as_map(json2.decode[json2.Any](res.body) or { return '' })
+	msg := any_str(m['message'] or { json2.null })
+	if msg != '' {
+		return msg
+	}
+	return any_str(m['error'] or { json2.null })
+}
+
 fn refresh_auth_token(server string, refresh_token string) ?string {
 	body := json2.Any({
 		'refresh_token': json2.Any(refresh_token)

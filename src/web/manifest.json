@@ -5,12 +5,12 @@
   "icons": [
     {
       "src": "/web/images/weight.ico",
-      "sizes": "16x16",
+      "sizes": "16x16 32x32 48x48",
       "type": "image/ico"
     },
     {
       "src": "/web/images/weight.png",
-      "sizes": "any",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ],
