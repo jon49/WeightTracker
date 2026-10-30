@@ -120,9 +120,11 @@ fn (mut app App) draw_charts(x f32, y0 f32, w f32) f32 {
 	}
 	y += 16
 
-	// Chart period: [9] [Weeks|Months|Years]
+	// Chart period: [9] [Months ▾]
 	y = app.subheading(x, y, 'Chart period')
 	bh := ui.button_height()
+	units := [core.DurationUnit.week, .month, .year]
+	labels := units.map('${it.str().capitalize()}s')
 	ev := ui.field('chart-duration', gui.Rect{x, y, 80, bh}, mut app.charts.duration, .number,
 		'9')
 	match ev {
@@ -131,21 +133,17 @@ fn (mut app App) draw_charts(x f32, y0 f32, w f32) f32 {
 		.cancelled { app.charts.dirty = false }
 		.none {}
 	}
-	mut bx := x + 92
-	for u in [core.DurationUnit.week, .month, .year] {
-		label := '${u.str().capitalize()}s'
-		bw := ui.button_width('Months')
-		style := if cs.duration_unit == u {
-			gui.ButtonStyle.tab_active
-		} else {
-			gui.ButtonStyle.tab
-		}
-		if ui.button(gui.Rect{bx, y, bw, bh}, label, style) {
-			app.set_duration_unit(u)
-		}
-		bx += bw + 4
+	// The unit goes beside the number, or under it when there's no room.
+	dw := ui.dropdown_width(labels)
+	mut ux, mut uy := x + 92, y
+	if ux + dw > x + w {
+		ux, uy = x, y + bh + 8
 	}
-	y += bh + 20
+	choice := ui.dropdown('chart-unit', gui.Rect{ux, uy, dw, bh}, labels, units.index(cs.duration_unit))
+	if choice >= 0 {
+		app.set_duration_unit(units[choice])
+	}
+	y = uy + bh + 20
 
 	// Chart toggles.
 	mut cx := x

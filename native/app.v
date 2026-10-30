@@ -89,9 +89,11 @@ mut:
 	settings     SettingsForm
 	login        LoginForm
 	register     RegisterForm
+	forgot       ForgotForm
 	// The tab the account screens were opened from, and go back to.
-	account_from   Screen = .settings
-	forgot         ForgotForm
+	account_from Screen = .settings
+	// The screen whose tab was last scrolled into view (-1: none yet).
+	nav_screen     int = -1
 	theme_resolved string
 	// gg's own scale for the screen's DPI; the zoom multiplies it.
 	base_scale   f32 = 1
@@ -435,6 +437,7 @@ fn (mut app App) frame() {
 		.forgot { app.draw_forgot(x, y, cw) }
 	} + 2 * pad
 	ui.end_scroll('main', area, content_h)
+	ui.draw_menu()
 	app.draw_toast(w, h)
 
 	// Keyboard shortcuts that no field used.
@@ -489,25 +492,9 @@ fn (mut app App) draw_header(w f32) f32 {
 	bh := ui.button_height()
 	top_h := bh + 16
 	ui.rect(gui.Rect{0, 0, w, top_h}, t.surface)
-	ui.text(pad, top_h / 2, '⚖ Weight', gui.TextStyle{
-		size:   20
-		bold:   true
-		valign: .middle
-	})
-
-	// Right side: theme, sync, login.
-	mut rx := w - pad
 	logged_in := app.store.auth.logged_in()
 	auth_label := if logged_in { 'Logout' } else { 'Login' }
 	aw := ui.button_width(auth_label)
-	rx -= aw
-	if ui.button(gui.Rect{rx, 8, aw, bh}, auth_label, .outline) {
-		if logged_in {
-			app.logout()
-		} else {
-			app.open_login()
-		}
-	}
 	pending := app.store.pending.len
 	sync_label := if app.syncing {
 		'↻ Syncing…'
@@ -517,6 +504,39 @@ fn (mut app App) draw_header(w f32) f32 {
 		'↻'
 	}
 	sw := ui.button_width(sync_label)
+
+	// Left: the logo and the app name, which go to Entry. When zoomed in or
+	// on a narrow phone the name gives way to the buttons on the right.
+	title := gui.TextStyle{
+		size:   20
+		bold:   true
+		valign: .middle
+	}
+	right_x := w - pad - aw - sw - bh - 2 * 8
+	logo := f32(28)
+	mut brand_w := logo + 8 + ui.text_width('Weight', title)
+	if pad + brand_w + 8 > right_x {
+		brand_w = logo
+	} else {
+		ui.text(pad + logo + 8, top_h / 2, 'Weight', title)
+	}
+	draw_logo(ui, pad, (top_h - logo) / 2, logo)
+	brand := gui.Rect{pad, 8, brand_w, bh}
+	ui.pointer_cursor(brand)
+	if ui.clicked(brand) {
+		app.navigate(.entry)
+	}
+
+	// Right side: theme, sync, login.
+	mut rx := w - pad
+	rx -= aw
+	if ui.button(gui.Rect{rx, 8, aw, bh}, auth_label, .outline) {
+		if logged_in {
+			app.logout()
+		} else {
+			app.open_login()
+		}
+	}
 	rx -= sw + 8
 	if ui.button(gui.Rect{rx, 8, sw, bh}, sync_label, .ghost) {
 		app.start_sync(true)
@@ -528,27 +548,56 @@ fn (mut app App) draw_header(w f32) f32 {
 		app.toggle_theme()
 	}
 
-	// Navigation tabs.
+	// Navigation tabs. They scroll sideways when they don't fit (zoomed in,
+	// or on a phone), and a newly opened screen brings its tab into view.
 	nav_y := top_h
 	nav_h := bh + 8
-	ui.rect(gui.Rect{0, nav_y, w, nav_h}, t.bg)
+	nav_r := gui.Rect{0, nav_y, w, nav_h}
+	ui.rect(nav_r, t.bg)
 	ui.hline(0, nav_y + nav_h - 1, w, t.border)
+	current := if app.screen.is_account() { app.account_from } else { app.screen }
+	off := ui.begin_hscroll('nav', nav_r)
 	mut nx := pad
+	mut active_x, mut active_w := f32(0), f32(0)
 	for s in screens {
 		label := s.title()
 		bw := ui.button_width(label)
-		current := if app.screen.is_account() { app.account_from } else { app.screen }
+		if s == current {
+			active_x, active_w = nx, bw
+		}
 		style := if s == current {
 			gui.ButtonStyle.tab_active
 		} else {
 			gui.ButtonStyle.tab
 		}
-		if ui.button(gui.Rect{nx, nav_y + 4, bw, bh}, label, style) {
+		if ui.button(gui.Rect{nx - off, nav_y + 4, bw, bh}, label, style) {
 			app.navigate(s)
 		}
 		nx += bw + 4
 	}
+	ui.end_hscroll('nav', nav_r, nx - 4 + pad)
+	if app.nav_screen != int(current) {
+		app.nav_screen = int(current)
+		if active_x + active_w + pad > off + w {
+			ui.set_hscroll('nav', active_x + active_w + pad - w)
+		} else if active_x - pad < off {
+			ui.set_hscroll('nav', active_x - pad)
+		}
+	}
 	return nav_y + nav_h
+}
+
+// draw_logo draws the app's logo (src/web/images/weight.svg, 64 units
+// square) as a `size` square at x, y: a crescent moon over a scale.
+fn draw_logo(ui &gui.Ui, x f32, y f32, size f32) {
+	k := size / 64
+	bg := ui.theme.primary
+	white := gui.hex(0xffffff)
+	ui.rounded(gui.Rect{x, y, size, size}, 14 * k, bg)
+	ui.ctx.draw_circle_filled(x + 38 * k, y + 22 * k, 10 * k, white)
+	ui.ctx.draw_circle_filled(x + 43.5 * k, y + 17.5 * k, 8.5 * k, bg)
+	ui.rounded(gui.Rect{x + 12 * k, y + 38 * k, 40 * k, 15 * k}, 4.5 * k, white)
+	ui.rounded(gui.Rect{x + 25 * k, y + 41.5 * k, 14 * k, 5.5 * k}, 1.5 * k, bg)
 }
 
 fn (mut app App) draw_toast(w f32, h f32) {

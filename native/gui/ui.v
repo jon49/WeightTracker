@@ -146,6 +146,15 @@ mut:
 	want     sapp.MouseCursor = .default
 	// Set when something changed after it was drawn, so another frame is needed.
 	redraw bool
+	// Horizontal scrolling, like scroll_dy.
+	last_tx    f32
+	scroll_dx  f32
+	hscrolls   map[string]f32
+	content_ws map[string]f32
+	hbar_drag  string
+	hbar_grab  f32
+	// The open drop-down menu (see dropdown in widgets.v).
+	menu Menu
 	// The keyboard as this frame left it, applied in end_frame: moving
 	// from one field to the next hides and shows it in the same frame, and
 	// Android drops a show that comes right after a hide.
@@ -262,9 +271,12 @@ pub fn (mut ui Ui) handle_event(e &gg.Event) {
 				} else if e.scroll_y < 0 {
 					ui.zoom_steps--
 				}
+			} else if e.modifiers & u32(1) != 0 {
+				ui.scroll_dx -= e.scroll_y * 48
 			} else {
 				ui.scroll_dy -= e.scroll_y * 48
 			}
+			ui.scroll_dx -= e.scroll_x * 48
 		}
 		.touches_began, .touches_moved, .touches_ended, .touches_cancelled {
 			if e.num_touches < 1 {
@@ -283,6 +295,7 @@ pub fn (mut ui Ui) handle_event(e &gg.Event) {
 					ui.press_x = x
 					ui.press_y = y
 					ui.last_ty = y
+					ui.last_tx = x
 					ui.drag = false
 				}
 				.touches_moved {
@@ -291,8 +304,10 @@ pub fn (mut ui Ui) handle_event(e &gg.Event) {
 					}
 					if ui.drag {
 						ui.scroll_dy -= y - ui.last_ty
+						ui.scroll_dx -= x - ui.last_tx
 					}
 					ui.last_ty = y
+					ui.last_tx = x
 				}
 				.touches_cancelled {
 					ui.down = false
@@ -340,6 +355,7 @@ pub fn (mut ui Ui) end_frame() bool {
 	ui.keys.clear()
 	ui.chars.clear()
 	ui.scroll_dy = 0
+	ui.scroll_dx = 0
 	if !ui.down {
 		ui.drag = false
 	}
@@ -414,16 +430,12 @@ fn (mut ui Ui) set_focus(id string, value string, cursor int, kind FieldKind) {
 	ui.redraw = true
 }
 
-// focus_field focuses the field `id` when it is drawn next.
-pub fn (mut ui Ui) focus_field(id string) {
-	ui.focus_request = id
-	ui.redraw = true
-}
-
 // ---- hit testing ----
 
+// in_clip reports whether a point is visible: inside the clip, and not
+// under an open drop-down menu (unless that menu is asking).
 fn (ui &Ui) in_clip(x f32, y f32) bool {
-	return ui.clip.contains(x, y)
+	return ui.clip.contains(x, y) && !ui.under_menu(x, y)
 }
 
 pub fn (ui &Ui) hovered(r Rect) bool {
@@ -465,6 +477,10 @@ pub fn (mut ui Ui) push_clip(r Rect) {
 	ui.clips << ui.clip
 	ui.clip = ui.clip.intersect(r)
 	ui.apply_clip()
+}
+
+pub fn (ui &Ui) clip_rect() Rect {
+	return ui.clip
 }
 
 pub fn (mut ui Ui) pop_clip() {

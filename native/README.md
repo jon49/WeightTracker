@@ -53,8 +53,9 @@ platform_*.c.v    per-platform bits: Android's data folder, screen density,
                   HTTPS roots, keyboard, insets and Back button
 android/          the Android manifest and activity (Java), and the JNI
                   bridge between them and the app (text_bridge.h)
-gui/              a small immediate-mode toolkit on gg: buttons, text fields, scrolling,
-                  mouse, touch and keyboard. It knows nothing about the app.
+gui/              a small immediate-mode toolkit on gg: buttons, text fields, drop-downs,
+                  scrolling both ways, mouse, touch and keyboard. It knows
+                  nothing about the app.
 core/             no GUI imports: models, dates, stats and charts, the JSON store,
                   and the TrailBase sync client
 assets/fonts/     DejaVu Sans, embedded in the binary so text looks the same everywhere
@@ -151,6 +152,10 @@ Touch (tap, drag to scroll) and the on-screen keyboard are handled.
   to 300% and is saved between runs.
 - **Scrolling:** the wheel, dragging the scroll bar or clicking its track,
   and, when no field is focused, Page Up/Down, Home/End (with or without Ctrl) and the arrow keys.
+  The entries table and the tabs scroll sideways when they don't fit: Shift
+  with the wheel, a sideways wheel or touchpad, their scroll bar, or a
+  sideways swipe on a phone. The table's date column and header row stay
+  in view, as in `../soccer`'s stats tables.
 - **Sync now:** Ctrl+R.
 
 Text fields are single-line except the comment, which grows with its text.
