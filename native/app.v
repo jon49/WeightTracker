@@ -12,7 +12,8 @@ enum Screen {
 	entries
 	charts
 	settings
-	// Reached from Settings' login form; they have no tab.
+	// The account screens, which have no tab.
+	login
 	register
 	forgot
 }
@@ -26,14 +27,14 @@ fn (s Screen) title() string {
 		.entries { 'Entries' }
 		.charts { 'Charts' }
 		.settings { 'Settings' }
+		.login { 'Login' }
 		.register { 'Register' }
 		.forgot { 'Reset Password' }
 	}
 }
 
-// tab is the screen whose tab is shown as current.
-fn (s Screen) tab() Screen {
-	return if s in [.register, .forgot] { .settings } else { s }
+fn (s Screen) is_account() bool {
+	return s in [.login, .register, .forgot]
 }
 
 const pad = f32(16)
@@ -80,14 +81,16 @@ mut:
 	login_ch   chan LoginDone
 	// Registering or asking for a reset link (.register or .forgot), on a
 	// worker thread.
-	account_busy   map[Screen]bool
-	account_ch     chan AccountDone
-	entry          EntryForm
-	entries        EntriesView
-	charts         ChartsView
-	settings       SettingsForm
-	login          LoginForm
-	register       RegisterForm
+	account_busy map[Screen]bool
+	account_ch   chan AccountDone
+	entry        EntryForm
+	entries      EntriesView
+	charts       ChartsView
+	settings     SettingsForm
+	login        LoginForm
+	register     RegisterForm
+	// The tab the account screens were opened from, and go back to.
+	account_from   Screen = .settings
 	forgot         ForgotForm
 	theme_resolved string
 	// gg's own scale for the screen's DPI; the zoom multiplies it.
@@ -231,6 +234,7 @@ fn (mut app App) navigate(s Screen) {
 	match s {
 		.entry { app.load_entry(app.entry.date.text) }
 		.settings { app.load_settings() }
+		.login { app.load_login() }
 		else {}
 	}
 }
@@ -276,7 +280,7 @@ fn (mut app App) start_sync(manual bool) {
 	if !app.store.auth.logged_in() {
 		if manual {
 			app.show_error('You are not logged in!')
-			app.navigate(.settings)
+			app.open_login()
 		}
 		return
 	}
@@ -321,14 +325,18 @@ fn (mut app App) poll_workers() {
 	if app.login_ch.try_pop(mut login) == .success {
 		app.logging_in = false
 		if login.error != '' {
-			app.show_error(login.error)
+			app.login.error = login.error
 			return
 		}
 		app.store.auth = login.tokens
 		app.store.save_auth() or { app.show_error('Could not save the login: ${err}') }
 		app.login.password = gui.Input{}
+		app.login.error = ''
 		app.show_toast('Logged in as ${login.tokens.email}')
 		app.start_sync(false)
+		if app.screen == .login {
+			app.navigate(app.account_from)
+		}
 	}
 	mut account := AccountDone{}
 	if app.account_ch.try_pop(mut account) == .success {
@@ -347,9 +355,10 @@ fn (mut app App) start_login() {
 	email := app.login.email.text.trim_space()
 	password := app.login.password.text
 	if email == '' || password == '' {
-		app.show_error('Enter your email and password.')
+		app.login.error = 'Enter your email and password.'
 		return
 	}
+	app.login.error = ''
 	app.logging_in = true
 	server := app.store.server_url
 	spawn fn (ch chan LoginDone, server string, email string, password string, ctx &gg.Context) {
@@ -421,6 +430,7 @@ fn (mut app App) frame() {
 		.entries { app.draw_entries(x, y, cw, area) }
 		.charts { app.draw_charts(x, y, cw) }
 		.settings { app.draw_settings(x, y, cw) }
+		.login { app.draw_login(x, y, cw) }
 		.register { app.draw_register(x, y, cw) }
 		.forgot { app.draw_forgot(x, y, cw) }
 	} + 2 * pad
@@ -495,8 +505,7 @@ fn (mut app App) draw_header(w f32) f32 {
 		if logged_in {
 			app.logout()
 		} else {
-			app.navigate(.settings)
-			app.login.focus_email = true
+			app.open_login()
 		}
 	}
 	pending := app.store.pending.len
@@ -528,7 +537,8 @@ fn (mut app App) draw_header(w f32) f32 {
 	for s in screens {
 		label := s.title()
 		bw := ui.button_width(label)
-		style := if s == app.screen.tab() {
+		current := if app.screen.is_account() { app.account_from } else { app.screen }
+		style := if s == current {
 			gui.ButtonStyle.tab_active
 		} else {
 			gui.ButtonStyle.tab

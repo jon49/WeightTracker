@@ -46,8 +46,8 @@ Options: `weight [--data-dir DIR] [--size WxH] [--screen entry|entries|charts|se
 ```
 main.v            entry point: window, embedded fonts, event wiring
 app.v             app state, header and navigation, toasts, sync and login workers
-screen_*.v        the four tabs (entry, entries, charts, settings), and register
-                  and reset password (screen_account.v)
+screen_*.v        the four tabs (entry, entries, charts, settings), and login,
+                  register and reset password (screen_account.v)
 chart_view.v      draws core.ChartData with gg (lines, bars, two axes, tooltip, legend)
 platform_*.c.v    per-platform bits: Android's data folder, screen density,
                   HTTPS roots, keyboard, insets and Back button
@@ -81,9 +81,10 @@ run on macOS, Windows, iOS and Android.
   reports a conflict. The app keeps its own values, fills in the ones it lacks
   (such as height), keeps the earlier start date, and uploads the merge.
 - Chart settings stay on each device, as on the web.
-- Login is on Settings; Register and Reset Password are screens of their
-  own, like the web app's pages. The links they email (verifying the
-  address, setting a new password) open the web app.
+- Login, Register and Reset Password are screens of their own, like the
+  web app's pages, opened from Settings or the header's Login button; they
+  go back to the tab they were opened from. The links they email
+  (verifying the address, setting a new password) open the web app.
 - The theme follows the system's light or dark mode (checked again when the
   window regains focus). ☾/☀ overrides it on this device; toggling back to
   what the system shows follows the system again.
@@ -113,8 +114,9 @@ Touch (tap, drag to scroll) and the on-screen keyboard are handled.
     cover, so the gui lays out between them and scrolls the focused field
     into view.
   - sokol ends the app on Back. A `#flag` hides Back from it, so Java gets
-    it: Back leaves the field being edited, then goes to the Entry screen,
-    and on the Entry screen puts the app in the background.
+    it: Back goes from Register or Reset
+    Password to Login and from Login to the tab it was opened from, then
+    to Entry, and on Entry puts the app in the background.
   - Text is scaled by the screen's density; gg on Android would fit the
     window size we ask for to the screen instead.
   - V's TLS looks for a CA bundle in the usual Linux places. Android keeps

@@ -13,13 +13,6 @@ mut:
 	confirm_clear bool
 }
 
-struct LoginForm {
-mut:
-	email       gui.Input
-	password    gui.Input
-	focus_email bool
-}
-
 fn (mut app App) load_settings() {
 	us := app.store.user_settings
 	app.settings = SettingsForm{
@@ -27,9 +20,6 @@ fn (mut app App) load_settings() {
 		goal_weight: gui.input(core.format_number(us.goal_weight))
 		bedtime:     gui.input(us.bedtime)
 		server:      gui.input(app.store.server_url)
-	}
-	if app.login.email.text == '' {
-		app.login.email = gui.input(app.store.auth.email)
 	}
 }
 
@@ -162,31 +152,15 @@ fn (mut app App) draw_settings(x f32, y0 f32, w f32) f32 {
 			color: t.muted
 		})
 		y += 32
-		fw := if w > 420 { f32(420) } else { w }
-		if app.login.focus_email {
-			app.login.focus_email = false
+		lw := ui.button_width('Login')
+		if ui.button(gui.Rect{x, y, lw, bh}, 'Login', .primary) {
+			app.open_login()
 		}
-		ev, y = app.labeled_field('login-email', 'Email', x, y, fw, mut app.login.email, .email,
-			'')
-		ev, y = app.labeled_field('login-password', 'Password', x, y, fw, mut app.login.password,
-			.password, '')
-		if ev == .submitted && app.login.password.text != '' {
-			app.start_login()
-		}
-		label := if app.logging_in { 'Logging in…' } else { 'Login' }
-		lw := ui.button_width('Logging in…')
-		if ui.button(gui.Rect{x, y, lw, bh}, label, .primary) {
-			app.start_login()
-		}
-		y += bh + 12
-		if ui.link(x, y, 'Register', gui.TextStyle{}) {
+		rw := ui.button_width('Register')
+		if ui.button(gui.Rect{x + lw + 8, y, rw, bh}, 'Register', .outline) {
 			app.open_register()
 		}
-		if ui.link(x + ui.text_width('Register', gui.TextStyle{}) + 24, y, 'Forgot password?',
-			gui.TextStyle{}) {
-			app.open_forgot()
-		}
-		y += 36
+		y += bh + 20
 	}
 	ev, y = app.labeled_field('settings-server', 'Server', x, y, if w > 420 { f32(420) } else { w }, mut
 		app.settings.server, .text, core.default_server_url)

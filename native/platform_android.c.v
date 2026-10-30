@@ -54,16 +54,13 @@ fn platform_prefers_dark() ?bool {
 	return if night < 0 { none } else { night == 1 }
 }
 
-// android_back: the Back button leaves the field being edited, then goes
-// from Register or Reset Password to Settings, then to the Entry screen. On
-// the Entry screen it puts the app in the background, as Android's own apps
-// do, rather than ending it.
+// android_back: the Back button goes from Register or Reset Password to
+// Login, from Login to the tab it was opened from, and from a tab to Entry.
+// On Entry it puts the app in the background, as Android's own apps do,
+// rather than ending it. (The keyboard takes the first Back to hide itself.)
 fn android_back(mut app App) {
-	if app.ui.has_focus() {
-		app.ui.blur()
-		app.commit_forms()
-	} else if app.screen.tab() != app.screen {
-		app.navigate(app.screen.tab())
+	if app.screen.is_account() {
+		app.account_back()
 	} else if app.screen != .entry {
 		app.navigate(.entry)
 	} else {

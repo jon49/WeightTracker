@@ -4,9 +4,18 @@ import core
 import gg
 import gui
 
-// Register and Reset Password, the web app's /register and /forgot-password
-// pages. Logging in stays on Settings. The emailed links (verifying the
-// address, setting a new password) open the web app.
+// Login, Register and Reset Password, the web app's /login, /register and
+// /forgot-password pages. They have no tab: they are opened from Settings or
+// the header's Login button, and go back to the tab they were opened from.
+// The emailed links (verifying the address, setting a new password) open
+// the web app.
+
+struct LoginForm {
+mut:
+	email    gui.Input
+	password gui.Input
+	error    string
+}
 
 struct RegisterForm {
 mut:
@@ -24,26 +33,52 @@ mut:
 	error   bool
 }
 
+// open_account goes to an account screen, remembering the tab to return to.
+fn (mut app App) open_account(s Screen) {
+	if !app.screen.is_account() {
+		app.account_from = app.screen
+	}
+	app.navigate(s)
+}
+
+fn (mut app App) open_login() {
+	app.login.error = ''
+	app.open_account(.login)
+}
+
 fn (mut app App) open_register() {
 	app.register = RegisterForm{
 		email: gui.input(app.login.email.text)
 	}
-	app.navigate(.register)
+	app.open_account(.register)
 }
 
 fn (mut app App) open_forgot() {
 	app.forgot = ForgotForm{
 		email: gui.input(app.login.email.text)
 	}
-	app.navigate(.forgot)
+	app.open_account(.forgot)
 }
 
-// back_to_login returns to the login form on Settings with this email.
+// account_back is Back on an account screen: Register and Reset Password
+// go to Login, and Login to the tab it was opened from.
+fn (mut app App) account_back() {
+	app.navigate(if app.screen == .login { app.account_from } else { Screen.login })
+}
+
+// back_to_login goes to Login with this email.
 fn (mut app App) back_to_login(email string) {
 	if email.trim_space() != '' {
 		app.login.email = gui.input(email.trim_space())
 	}
-	app.navigate(.settings)
+	app.open_login()
+}
+
+fn (mut app App) load_login() {
+	if app.login.email.text == '' {
+		app.login.email = gui.input(app.store.auth.email)
+	}
+	app.ui.focus_field(if app.login.email.text == '' { 'login-email' } else { 'login-password' })
 }
 
 // account_form places the form: no wider than the login form, and centered
@@ -91,6 +126,38 @@ fn (mut app App) question_link(x f32, y f32, question string, link string) bool 
 	mut ui := app.ui
 	ui.text(x, y, question, gui.TextStyle{})
 	return ui.link(x + ui.text_width(question + ' ', gui.TextStyle{}), y, link, gui.TextStyle{})
+}
+
+fn (mut app App) draw_login(x f32, y0 f32, w f32) f32 {
+	mut ui := app.ui
+	bh := ui.button_height()
+	lh := ui.line_height(0)
+	fx, fw, mut y := app.account_form(x, y0, w, 'Login')
+	if app.store.auth.logged_in() {
+		ui.text(fx, y, "You're logged in as ${app.store.auth.email}.", gui.TextStyle{})
+		return y + lh - y0
+	}
+	if app.login.error != '' {
+		y = app.message_box(fx, y, fw, app.login.error, true)
+	}
+	_, y = app.labeled_field('login-email', 'Email', fx, y, fw, mut app.login.email, .email,
+		'')
+	ev, y2 := app.labeled_field('login-password', 'Password', fx, y, fw, mut app.login.password,
+		.password, '')
+	y = y2
+	if ui.button(gui.Rect{fx, y, fw, bh}, if app.logging_in { 'Logging in…' } else { 'Login' },
+		.primary) || ev == .submitted {
+		app.start_login()
+	}
+	y += bh + 20
+	if app.question_link(fx, y, 'First time user?', 'Register here.') {
+		app.open_register()
+	}
+	y += lh + 10
+	if app.question_link(fx, y, 'Forgot password?', 'Reset password here.') {
+		app.open_forgot()
+	}
+	return y + lh - y0
 }
 
 fn (mut app App) draw_register(x f32, y0 f32, w f32) f32 {

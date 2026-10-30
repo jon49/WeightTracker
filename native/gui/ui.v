@@ -414,6 +414,12 @@ fn (mut ui Ui) set_focus(id string, value string, cursor int, kind FieldKind) {
 	ui.redraw = true
 }
 
+// focus_field focuses the field `id` when it is drawn next.
+pub fn (mut ui Ui) focus_field(id string) {
+	ui.focus_request = id
+	ui.redraw = true
+}
+
 // ---- hit testing ----
 
 fn (ui &Ui) in_clip(x f32, y f32) bool {
