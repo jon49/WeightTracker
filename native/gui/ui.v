@@ -153,6 +153,10 @@ mut:
 	content_ws map[string]f32
 	hbar_drag  string
 	hbar_grab  f32
+	// The widget that holds the pointer until it is released (see grab in
+	// widgets.v), and whether the touch drag started sideways.
+	grabbed   string
+	drag_side bool
 	// The open drop-down menu (see dropdown in widgets.v).
 	menu Menu
 	// The keyboard as this frame left it, applied in end_frame: moving
@@ -232,6 +236,10 @@ pub fn (ui &Ui) has_focus() bool {
 	return ui.focus != ''
 }
 
+pub fn (ui &Ui) is_focused(id string) bool {
+	return ui.focus == id
+}
+
 pub fn (ui &Ui) is_touch() bool {
 	return ui.touch
 }
@@ -301,6 +309,7 @@ pub fn (mut ui Ui) handle_event(e &gg.Event) {
 				.touches_moved {
 					if !ui.drag && (abs(x - ui.press_x) > 10 || abs(y - ui.press_y) > 10) {
 						ui.drag = true
+						ui.drag_side = abs(x - ui.press_x) > abs(y - ui.press_y)
 					}
 					if ui.drag {
 						ui.scroll_dy -= y - ui.last_ty
@@ -358,6 +367,7 @@ pub fn (mut ui Ui) end_frame() bool {
 	ui.scroll_dx = 0
 	if !ui.down {
 		ui.drag = false
+		ui.grabbed = ''
 	}
 	if ui.want != ui.cursor {
 		ui.cursor = ui.want
@@ -499,7 +509,7 @@ fn (ui &Ui) apply_clip() {
 // Draw the content at `r.y - offset`, then call end_scroll with its height.
 pub fn (mut ui Ui) begin_scroll(id string, r Rect) f32 {
 	mut off := ui.scrolls[id] or { 0 }
-	if ui.scroll_dy != 0 && (r.contains(ui.mx, ui.my) || (ui.drag
+	if ui.scroll_dy != 0 && ui.grabbed == '' && (r.contains(ui.mx, ui.my) || (ui.drag
 		&& r.contains(ui.press_x, ui.press_y))) {
 		off += ui.scroll_dy
 		ui.scroll_dy = 0

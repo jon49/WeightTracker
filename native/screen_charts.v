@@ -14,6 +14,9 @@ mut:
 	duration gui.Input
 	loaded   bool
 	dirty    bool
+	// What part of each chart is on show, by kind.
+	views []ChartView = []ChartView{len: core.all_charts.len}
+	drag  ChartDrag
 }
 
 fn (mut app App) save_chart_settings() {
@@ -42,10 +45,14 @@ fn (mut app App) refresh_chart_cache(now core.Date) {
 		return
 	}
 	app.charts.cache_id = id
+	old := app.charts.cache.clone()
 	app.charts.cache.clear()
 	for kind in app.charts.open {
 		if c := app.store.chart(kind, now) {
 			app.charts.cache[int(kind)] = c
+			if o := old[int(kind)] {
+				app.keep_window(o, c)
+			}
 		}
 	}
 	app.charts.stats = app.store.stats(now)
@@ -53,13 +60,18 @@ fn (mut app App) refresh_chart_cache(now core.Date) {
 
 fn (mut app App) toggle_chart(kind core.ChartKind, now core.Date) {
 	if kind in app.charts.open {
-		app.charts.open = app.charts.open.filter(it != kind)
+		app.close_chart(kind)
 		return
 	}
 	app.charts.open.prepend(kind)
 	if c := app.store.chart(kind, now) {
 		app.charts.cache[int(kind)] = c
 	}
+}
+
+fn (mut app App) close_chart(kind core.ChartKind) {
+	app.charts.open = app.charts.open.filter(it != kind)
+	app.charts.views[int(kind)].zoomed = false
 }
 
 fn (mut app App) draw_charts(x f32, y0 f32, w f32) f32 {
@@ -170,7 +182,7 @@ fn (mut app App) draw_charts(x f32, y0 f32, w f32) f32 {
 		card := gui.Rect{x, y, w, 0}
 		y = app.subheading(x, y, kind.title())
 		if ui.button(gui.Rect{x + w - bh, card.y - 6, bh, bh}, '×', .ghost) {
-			app.charts.open = app.charts.open.filter(it != kind)
+			app.close_chart(kind)
 		}
 		if c := app.charts.cache[int(kind)] {
 			y += app.draw_chart(c, x, y, w) + 28

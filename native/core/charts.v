@@ -32,11 +32,11 @@ pub enum ChartStyle {
 
 pub struct Series {
 pub:
-	label      string
-	values     []f64 // NaN where there is no value
-	color      u32   // 0xRRGGBB
-	show_lines bool = true
-	right_axis bool
+	label       string
+	values      []f64 // NaN where there is no value
+	color       u32   // 0xRRGGBB
+	show_points bool = true
+	right_axis  bool
 }
 
 // AxisLimits pins an axis end; NaN means "fit the data".
@@ -58,6 +58,32 @@ pub:
 
 pub fn (c ChartData) has_right_axis() bool {
 	return c.series.any(it.right_axis)
+}
+
+// window returns the part of the chart from label lo to label hi, inclusive.
+pub fn (c ChartData) window(lo int, hi int) ChartData {
+	return ChartData{
+		...c
+		labels: c.labels[lo..hi + 1]
+		series: c.series.map(Series{
+			...it
+			values: it.values[lo..hi + 1]
+		})
+	}
+}
+
+// label_index returns the last label at or before `key` (a date, or a
+// weight for the histogram), or 0 when key comes before them all.
+pub fn (c ChartData) label_index(key string) int {
+	mut i := 0
+	for j, l in c.labels {
+		before := if c.kind == .histogram { l.f64() <= key.f64() } else { l <= key }
+		if !before {
+			break
+		}
+		i = j
+	}
+	return i
 }
 
 pub fn (s &Store) chart(kind ChartKind, now Date) ?ChartData {
@@ -142,10 +168,9 @@ fn (s &Store) history_chart(now Date) ?ChartData {
 		labels: labels
 		series: [
 			Series{
-				label:      'Weight'
-				values:     values
-				color:      red
-				show_lines: labels.len < 500
+				label:  'Weight'
+				values: values
+				color:  red
 			},
 		]
 	}
@@ -230,14 +255,16 @@ fn (s &Store) rate_chart(now Date) ?ChartData {
 				color:  red
 			},
 			Series{
-				label:  'Overall Weight Change'
-				values: []f64{len: labels.len, init: overall}
-				color:  green
+				label:       'Overall Weight Change'
+				values:      []f64{len: labels.len, init: overall}
+				color:       green
+				show_points: false
 			},
 			Series{
-				label:  'Overall Weight Loss'
-				values: []f64{len: labels.len, init: overall_loss}
-				color:  0xff9f40
+				label:       'Overall Weight Loss'
+				values:      []f64{len: labels.len, init: overall_loss}
+				color:       0xff9f40
+				show_points: false
 			},
 		]
 	}

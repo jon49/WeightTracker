@@ -8,7 +8,7 @@ module gui
 pub fn (mut ui Ui) begin_hscroll(id string, r Rect) f32 {
 	mut off := ui.hscrolls[id] or { 0 }
 	inside := r.contains(ui.mx, ui.my) || (ui.drag && r.contains(ui.press_x, ui.press_y))
-	if ui.scroll_dx != 0 && inside {
+	if ui.scroll_dx != 0 && inside && ui.grabbed == '' {
 		off += ui.scroll_dx
 		ui.scroll_dx = 0
 	}
@@ -95,6 +95,44 @@ fn (ui &Ui) hscroll_bar(id string, r Rect) ?ScrollBar {
 		thumb: Rect{r.x + (r.w - tw) * off / max, track.y, tw, hscroll_bar_height}
 		max:   max
 	}
+}
+
+// ---- dragging ----
+
+// Grab is a drag held by one widget: where it was pressed and where the
+// pointer is now.
+pub struct Grab {
+pub:
+	started bool // the widget took the pointer this frame
+	press_x f32
+	press_y f32
+	x       f32
+	y       f32
+}
+
+// grab lets the widget `id` drag what is in r: a press there gives it the
+// pointer until release, and scroll areas leave the drag alone. With
+// `sideways`, a touch drag is only taken when it starts sideways, so up and
+// down still scroll the page.
+pub fn (mut ui Ui) grab(id string, r Rect, sideways bool) ?Grab {
+	mut started := false
+	if ui.grabbed == '' && ui.down && r.contains(ui.press_x, ui.press_y)
+		&& ui.in_clip(ui.press_x, ui.press_y) {
+		take := if ui.touch {
+			ui.drag && (ui.drag_side || !sideways)
+		} else {
+			ui.pressed
+		}
+		if take {
+			ui.grabbed = id
+			started = true
+		}
+	}
+	if ui.grabbed != id || !ui.down {
+		return none
+	}
+	ui.want = .resize_ew
+	return Grab{started, ui.press_x, ui.press_y, ui.mx, ui.my}
 }
 
 // ---- focus ----

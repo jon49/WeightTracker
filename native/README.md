@@ -156,6 +156,11 @@ Touch (tap, drag to scroll) and the on-screen keyboard are handled.
   with the wheel, a sideways wheel or touchpad, their scroll bar, or a
   sideways swipe on a phone. The table's date column and header row stay
   in view, as in `../soccer`'s stats tables.
+- **Chart range:** the strip under each chart shows all of it, with the part
+  on show between two handles. Drag a handle to zoom, drag between them (or
+  the zoomed chart itself, sideways on a phone) to move along, or press
+  beside them to jump there. The fields under the strip set the first and
+  last date (weight, for the histogram); Show all zooms back out.
 - **Sync now:** Ctrl+R.
 
 Text fields are single-line except the comment, which grows with its text.

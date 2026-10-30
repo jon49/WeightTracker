@@ -233,3 +233,29 @@ fn test_charts_and_stats() {
 	assert st.bmi_prime != ''
 	assert st.weeks_to_go.contains(' to ')
 }
+
+fn test_chart_window() {
+	c := ChartData{
+		kind:   .history
+		labels: ['2026-10-01', '2026-10-02', '2026-10-03', '2026-10-04']
+		series: [Series{
+			label:  'Weight'
+			values: [1.0, 2, 3, 4]
+		}]
+	}
+	w := c.window(1, 2)
+	assert w.labels == ['2026-10-02', '2026-10-03']
+	assert w.series[0].values == [2.0, 3]
+	assert w.kind == .history
+	assert c.label_index('2026-09-01') == 0
+	assert c.label_index('2026-10-03') == 2
+	assert c.label_index('2026-10-03x') == 2
+	assert c.label_index('2027-01-01') == 3
+	h := ChartData{
+		kind:   .histogram
+		labels: ['8', '9', '10', '11']
+	}
+	// Weights compare as numbers, not text.
+	assert h.label_index('10') == 2
+	assert h.label_index('9.5') == 1
+}

@@ -93,10 +93,13 @@ fn series_color(c u32) gg.Color {
 	return gui.hex(c)
 }
 
-// draw_chart draws a chart into the rect's width and returns the height used.
-fn (mut app App) draw_chart(c core.ChartData, x f32, y f32, w f32) f32 {
+// draw_chart draws the part of a chart on show into the rect's width, with
+// the controls to choose that part, and returns the height used.
+fn (mut app App) draw_chart(full core.ChartData, x f32, y f32, w f32) f32 {
 	mut ui := app.ui
 	t := ui.theme
+	lo, hi := app.chart_window(full)
+	c := if hi - lo < full.labels.len - 1 { full.window(lo, hi) } else { full }
 	small := gui.TextStyle{
 		size:  12
 		color: t.muted
@@ -184,6 +187,7 @@ fn (mut app App) draw_chart(c core.ChartData, x f32, y f32, w f32) f32 {
 		}
 	} else {
 		dot := n <= 160
+		lines := n < 500
 		for s in c.series {
 			sc := scale_for(s)
 			color := series_color(s.color)
@@ -197,7 +201,7 @@ fn (mut app App) draw_chart(c core.ChartData, x f32, y f32, w f32) f32 {
 				}
 				vx := xs[i]
 				vy := sc.y(val, plot)
-				if have_prev && s.show_lines {
+				if have_prev && lines {
 					app.gg.draw_line_with_config(px, py, vx, vy, gg.PenConfig{
 						color:     color
 						thickness: if n > 100 { 1.5 } else { 2.5 }
@@ -208,13 +212,13 @@ fn (mut app App) draw_chart(c core.ChartData, x f32, y f32, w f32) f32 {
 				have_prev = true
 			}
 			for i, val in s.values {
-				if core.is_missing(val) {
+				if core.is_missing(val) || !s.show_points {
 					continue
 				}
 				if dot {
 					app.gg.draw_circle_filled(xs[i], sc.y(val, plot), 4, color)
 					app.gg.draw_circle_filled(xs[i], sc.y(val, plot), 2, t.surface)
-				} else if !s.show_lines {
+				} else if !lines {
 					app.gg.draw_circle_filled(xs[i], sc.y(val, plot), 1.6, color)
 				}
 			}
@@ -235,6 +239,11 @@ fn (mut app App) draw_chart(c core.ChartData, x f32, y f32, w f32) f32 {
 		}
 	}
 	mut bottom := plot.bottom() + 6 + lh + 10
+	mut panning := false
+	if full.labels.len >= 3 {
+		panning = app.pan_chart(full, lo, hi, plot, plot.w - 2 * pad_x)
+		bottom = app.draw_chart_range(full, lo, hi, plot, x, bottom, w) + 12
+	}
 
 	// Legend.
 	mut lx := x
@@ -256,7 +265,7 @@ fn (mut app App) draw_chart(c core.ChartData, x f32, y f32, w f32) f32 {
 
 	// Tooltip for the point nearest the pointer.
 	mx, my, inside := ui.pointer_in(plot)
-	if inside && n > 0 {
+	if inside && n > 0 && !panning {
 		mut best := 0
 		for i in 1 .. n {
 			if math.abs(xs[i] - mx) < math.abs(xs[best] - mx) {
@@ -299,4 +308,273 @@ fn (mut app App) draw_chart(c core.ChartData, x f32, y f32, w f32) f32 {
 		}
 	}
 	return bottom - y
+}
+
+// ---- the part of a chart on show ----
+
+// ChartView is the part of a chart on show, labels lo to hi inclusive when
+// zoomed, and the fields for its first and last label.
+struct ChartView {
+mut:
+	zoomed bool
+	lo     int
+	hi     int
+	from   gui.Input
+	to     gui.Input
+}
+
+enum DragPart {
+	pan
+	start
+	end
+}
+
+// ChartDrag is the window being dragged, as it was when the drag began.
+struct ChartDrag {
+	part DragPart
+	lo   int
+	hi   int
+}
+
+// chart_window returns the first and last label on show.
+fn (app &App) chart_window(c core.ChartData) (int, int) {
+	v := app.charts.views[int(c.kind)]
+	if !v.zoomed || v.hi > c.labels.len - 1 {
+		return 0, c.labels.len - 1
+	}
+	return v.lo, v.hi
+}
+
+// set_window shows labels lo to hi, keeping at least two on show.
+fn (mut app App) set_window(c core.ChartData, lo int, hi int) {
+	n := c.labels.len
+	h := math.min(math.max(hi, 1), n - 1)
+	l := math.min(math.max(lo, 0), h - 1)
+	cur_lo, cur_hi := app.chart_window(c)
+	if l == cur_lo && h == cur_hi {
+		return
+	}
+	k := int(c.kind)
+	app.charts.views[k].zoomed = l > 0 || h < n - 1
+	app.charts.views[k].lo = l
+	app.charts.views[k].hi = h
+	app.ui.request_redraw()
+}
+
+// move_window shows labels lo to hi, sliding them back inside the chart.
+fn (mut app App) move_window(c core.ChartData, lo int, hi int) {
+	last := c.labels.len - 1
+	if lo < 0 {
+		app.set_window(c, 0, hi - lo)
+	} else if hi > last {
+		app.set_window(c, lo - (hi - last), last)
+	} else {
+		app.set_window(c, lo, hi)
+	}
+}
+
+// keep_window moves a zoomed chart's window to the same labels after its
+// data changed. A window at the end stays there, so it follows new weeks.
+fn (mut app App) keep_window(old core.ChartData, c core.ChartData) {
+	k := int(c.kind)
+	v := app.charts.views[k]
+	if !v.zoomed {
+		return
+	}
+	app.charts.views[k].zoomed = false
+	if c.labels.len < 3 || v.hi > old.labels.len - 1 {
+		return
+	}
+	if v.hi == old.labels.len - 1 {
+		last := c.labels.len - 1
+		app.set_window(c, last - (v.hi - v.lo), last)
+	} else {
+		app.set_window(c, c.label_index(old.labels[v.lo]), c.label_index(old.labels[v.hi]))
+	}
+}
+
+// pan_chart lets a zoomed chart's plot be dragged sideways, `span` being
+// the width its labels spread over. It returns whether it is being dragged.
+fn (mut app App) pan_chart(c core.ChartData, lo int, hi int, plot gui.Rect, span f32) bool {
+	if hi - lo >= c.labels.len - 1 {
+		return false
+	}
+	g := app.ui.grab('chart-plot-${int(c.kind)}', plot, true) or { return false }
+	if g.started {
+		app.charts.drag = ChartDrag{.pan, lo, hi}
+	}
+	d := app.charts.drag
+	shift := int(math.round(f64(g.press_x - g.x) / f64(span) * f64(d.hi - d.lo)))
+	app.move_window(c, d.lo + shift, d.hi + shift)
+	return true
+}
+
+// draw_chart_range draws the strip under a chart that shows the whole of it
+// and which part is on show: drag the window to move it, or its edges to
+// zoom; press beside it to move it there. The strip lines up with the
+// plot; under it are fields for the first and last label. It returns the y
+// under them.
+fn (mut app App) draw_chart_range(c core.ChartData, lo int, hi int, plot gui.Rect, x f32, y f32, w f32) f32 {
+	mut ui := app.ui
+	t := ui.theme
+	n := c.labels.len
+	k := int(c.kind)
+	nav := gui.Rect{plot.x, y, plot.w, 32}
+	at := fn [nav, n] (i int) f32 {
+		return nav.x + f32(i) / f32(n - 1) * nav.w
+	}
+	index_at := fn [nav, n] (px f32) f64 {
+		return f64(px - nav.x) / f64(nav.w) * f64(n - 1)
+	}
+
+	// The whole chart in miniature, joined across gaps.
+	ui.rounded(nav, 6, t.surface)
+	left := axis_scale(c, false, c.left) or { AxisScale{0, 1, 0.25} }
+	right := axis_scale(c, true, c.right) or { left }
+	inner := nav.inset(0, 5)
+	ui.push_clip(nav)
+	for s in c.series {
+		sc := if s.right_axis { right } else { left }
+		color := series_color(s.color)
+		mut px := f32(0)
+		mut py := f32(0)
+		mut have_prev := false
+		for i, val in s.values {
+			if core.is_missing(val) {
+				continue
+			}
+			vx := at(i)
+			vy := sc.y(val, inner)
+			if have_prev {
+				app.gg.draw_line(px, py, vx, vy, color)
+			}
+			px = vx
+			py = vy
+			have_prev = true
+		}
+	}
+	wx0 := at(lo)
+	wx1 := at(hi)
+	shade := gui.hexa(0x808080, 90)
+	ui.rect(gui.Rect{nav.x, nav.y, wx0 - nav.x, nav.h}, shade)
+	ui.rect(gui.Rect{wx1, nav.y, nav.right() - wx1, nav.h}, shade)
+	ui.pop_clip()
+	for ex in [wx0, wx1] {
+		ui.rect(gui.Rect{ex - 1, nav.y, 2, nav.h}, t.primary)
+		ui.rounded(gui.Rect{ex - 4, nav.y + nav.h / 2 - 9, 8, 18}, 3, t.primary)
+	}
+
+	// Edges are easier to catch with a finger when they reach further.
+	reach := if ui.is_touch() { f32(22) } else { f32(8) }
+	area := nav.inset(-reach, if ui.is_touch() { f32(-8) } else { f32(0) })
+	if g := ui.grab('chart-range-${k}', area, true) {
+		if g.started {
+			d0 := math.abs(g.press_x - wx0)
+			d1 := math.abs(g.press_x - wx1)
+			part := if d0 <= reach && (d0 < d1 || g.press_x < wx0) {
+				DragPart.start
+			} else if d1 <= reach {
+				DragPart.end
+			} else {
+				DragPart.pan
+			}
+			mut l, mut h := lo, hi
+			if part == .pan && (g.press_x < wx0 || g.press_x > wx1) {
+				l = int(math.round(index_at(g.press_x) - f64(hi - lo) / 2))
+				h = l + hi - lo
+				app.move_window(c, l, h)
+				l, h = app.chart_window(c)
+			}
+			app.charts.drag = ChartDrag{part, l, h}
+		}
+		d := app.charts.drag
+		i := int(math.round(index_at(g.x)))
+		match d.part {
+			.start {
+				app.set_window(c, math.min(i, d.hi - 1), d.hi)
+			}
+			.end {
+				app.set_window(c, d.lo, math.max(i, d.lo + 1))
+			}
+			.pan {
+				shift := int(math.round(index_at(g.x) - index_at(g.press_x)))
+				app.move_window(c, d.lo + shift, d.hi + shift)
+			}
+		}
+	} else if ui.is_touch() && ui.clicked(area) {
+		// A tap that did not drag.
+		mx, _, _ := ui.pointer_in(area)
+		l := int(math.round(index_at(mx) - f64(hi - lo) / 2))
+		app.move_window(c, l, l + hi - lo)
+	}
+
+	// [from] – [to] [Show all]
+	fy := nav.bottom() + 10
+	bh := ui.button_height()
+	dates := c.kind != .histogram
+	kind := if dates { gui.FieldKind.date } else { gui.FieldKind.number }
+	placeholder := if dates { 'YYYY-MM-DD' } else { '' }
+	all_w := ui.button_width('Show all')
+	dash_w := f32(24)
+	// The fields fit a date. They go side by side, then Show all, wrapping
+	// onto more rows when there's no room.
+	fw := math.min(ui.text_width('0000-00-00', gui.TextStyle{}) + 26, w)
+	row := bh + 8
+	from_r := gui.Rect{x, fy, fw, bh}
+	mut to_r := gui.Rect{x + fw + dash_w, fy, fw, bh}
+	if to_r.right() > x + w {
+		to_r = gui.Rect{x, fy + row, fw, bh}
+	}
+	mut all_r := gui.Rect{to_r.right() + dash_w, to_r.y, all_w, bh}
+	if all_r.right() > x + w {
+		all_r = gui.Rect{x, to_r.y + row, all_w, bh}
+	}
+	from_id := 'chart-from-${k}'
+	to_id := 'chart-to-${k}'
+	if !ui.is_focused(from_id) {
+		app.charts.views[k].from.text = c.labels[lo]
+	}
+	if !ui.is_focused(to_id) {
+		app.charts.views[k].to.text = c.labels[hi]
+	}
+	ev_from := ui.field(from_id, from_r, mut app.charts.views[k].from, kind, placeholder)
+	if to_r.y == fy {
+		ui.text(from_r.right() + dash_w / 2, fy + bh / 2, '–', gui.TextStyle{
+			color:  t.muted
+			align:  .center
+			valign: .middle
+		})
+	}
+	ev_to := ui.field(to_id, to_r, mut app.charts.views[k].to, kind, placeholder)
+	if ev_from in [.committed, .submitted] {
+		if key := app.range_key(c, app.charts.views[k].from.text) {
+			app.set_window(c, c.label_index(key), hi)
+		}
+	}
+	if ev_to in [.committed, .submitted] {
+		if key := app.range_key(c, app.charts.views[k].to.text) {
+			app.set_window(c, lo, c.label_index(key))
+		}
+	}
+	if ui.button(all_r, 'Show all', .outline) {
+		app.charts.views[k].zoomed = false
+	}
+	return all_r.bottom()
+}
+
+// range_key checks a range field's text: a date, or a weight for the
+// histogram.
+fn (mut app App) range_key(c core.ChartData, s string) ?string {
+	if c.kind == .histogram {
+		v := core.parse_number(s) or {
+			app.show_error('Enter a weight.')
+			return none
+		}
+		return '${v}'
+	}
+	d := core.parse_date(s) or {
+		app.show_error('Enter a date as YYYY-MM-DD.')
+		return none
+	}
+	return d.str()
 }
