@@ -139,10 +139,14 @@ mut:
 	// Keyboard focus on a control that isn't being typed in: a button, a
 	// link, or a field before Enter starts editing it. Tab and Shift+Tab move
 	// it between this frame's stops; Enter or Space presses it (see nav.v).
-	nav        string
-	nav_rect   Rect // where the control with keyboard focus was last drawn
-	stops      []Stop
-	stop_count map[string]int
+	nav      string
+	nav_rect Rect // where the control with keyboard focus was last drawn
+	// A pressed control, and the frames until it is scrolled into view
+	// (see reveal_after).
+	reveal_id     string
+	reveal_frames int
+	stops         []Stop
+	stop_count    map[string]int
 	// The scroll areas being drawn (innermost last), and where each one is,
 	// to bring a stop into view.
 	vscroll_ids []string
@@ -394,6 +398,7 @@ pub fn (mut ui Ui) end_frame() bool {
 		ui.nav = ui.stop_in_place(ui.nav_rect)
 		ui.redraw = true
 	}
+	ui.reveal_pressed()
 	if ui.focus == '' {
 		ui.keyboard_nav()
 	}

@@ -55,7 +55,21 @@ pub fn (mut ui Ui) focusable(r Rect, name string) bool {
 // tap reports a click on r, or a press of it from the keyboard.
 pub fn (mut ui Ui) tap(r Rect, name string) bool {
 	pressed := ui.focusable(r, name)
-	return ui.clicked(r) || pressed
+	if ui.clicked(r) {
+		// focusable added this control's stop last.
+		ui.reveal_after(ui.stops.last().id)
+		return true
+	}
+	return pressed
+}
+
+// reveal_after scrolls the control `id` into view once the frame after this
+// one has been drawn: what pressing it changes may have moved it (a confirm
+// question shown above it, say).
+fn (mut ui Ui) reveal_after(id string) {
+	ui.reveal_id = id
+	ui.reveal_frames = 2
+	ui.redraw = true
 }
 
 // take_press consumes an Enter (or Space, when `space`) press.
@@ -63,7 +77,7 @@ fn (mut ui Ui) take_press(space bool) bool {
 	for i, k in ui.keys {
 		if (k.code in [.enter, .kp_enter] || (space && k.code == .space)) && !k.ctrl() && !k.alt() {
 			ui.keys.delete(i)
-			ui.redraw = true
+			ui.reveal_after(ui.nav)
 			return true
 		}
 	}
@@ -201,6 +215,30 @@ fn (mut ui Ui) move_nav(i int) {
 	if s.field {
 		ui.focus_request = s.id
 	}
+	ui.scroll_into_view(s)
+	ui.redraw = true
+}
+
+// reveal_pressed, at the end of each frame, does what reveal_after asked
+// for: on the frame after the press, the page has been laid out again.
+fn (mut ui Ui) reveal_pressed() {
+	if ui.reveal_frames == 0 {
+		return
+	}
+	ui.reveal_frames--
+	if ui.reveal_frames > 0 {
+		return
+	}
+	i := ui.stop_index(ui.reveal_id)
+	if i >= 0 && ui.scroll_into_view(ui.stops[i]) {
+		ui.redraw = true
+	}
+}
+
+// scroll_into_view scrolls the areas a stop is drawn in so all of it shows,
+// and reports whether anything moved.
+fn (mut ui Ui) scroll_into_view(s Stop) bool {
+	mut moved := false
 	margin := f32(12)
 	if s.vscroll != '' {
 		if area := ui.vareas[s.vscroll] {
@@ -211,7 +249,9 @@ fn (mut ui Ui) move_nav(i int) {
 			if s.r.y - margin < area.y {
 				off -= area.y - (s.r.y - margin)
 			}
-			ui.scrolls[s.vscroll] = if off < 0 { 0 } else { off }
+			off = if off < 0 { 0 } else { off }
+			moved = moved || off != (ui.scrolls[s.vscroll] or { 0 })
+			ui.scrolls[s.vscroll] = off
 		}
 	}
 	if s.hscroll != '' {
@@ -223,8 +263,10 @@ fn (mut ui Ui) move_nav(i int) {
 			if s.r.x - margin < area.x {
 				off -= area.x - (s.r.x - margin)
 			}
-			ui.hscrolls[s.hscroll] = if off < 0 { 0 } else { off }
+			off = if off < 0 { 0 } else { off }
+			moved = moved || off != (ui.hscrolls[s.hscroll] or { 0 })
+			ui.hscrolls[s.hscroll] = off
 		}
 	}
-	ui.redraw = true
+	return moved
 }
