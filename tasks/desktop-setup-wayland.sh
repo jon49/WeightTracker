@@ -3,4 +3,4 @@
 # desktop-install-wayland.sh): the Wayland, xkbcommon and EGL headers. The
 # default build (desktop-setup.sh) uses X11, which also runs under XWayland.
 set -euo pipefail
-sudo apt install -y libwayland-dev libxkbcommon-dev libegl-dev wayland-protocols
+sudo apt install -y libwayland-dev libxkbcommon-dev libxkbcommon-x11-dev libegl-dev wayland-protocols

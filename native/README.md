@@ -40,7 +40,7 @@ Options: `weight [--data-dir DIR] [--size WxH] [--screen entry|entries|charts|se
 - **Linux (X11, which also runs under XWayland):**
   `sudo apt install libx11-dev libxi-dev libxcursor-dev libxrandr-dev libgl-dev libegl-dev`
 - **Linux, native Wayland:** install
-  `libwayland-dev libxkbcommon-dev libegl-dev wayland-protocols`
+  `libwayland-dev libxkbcommon-dev libxkbcommon-x11-dev libegl-dev wayland-protocols`
   (`tasks/desktop-setup-wayland.sh`), then build with
   `make build VFLAGS='-d sokol_wayland'` (`tasks/desktop-install-wayland.sh`
   builds and installs it).
