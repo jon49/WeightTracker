@@ -4,5 +4,6 @@ Name=Weight
 Comment=Track weight, sleep, and waist
 Exec=weight
 Icon=weight
+StartupWMClass=weight
 Terminal=false
 Categories=Utility;

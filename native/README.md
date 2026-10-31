@@ -193,7 +193,7 @@ Touch (tap, drag to scroll) and the on-screen keyboard are handled.
 - **Remapped keys:** on Linux, Escape, Caps Lock, Tab, Backspace, Enter,
   Delete and the modifiers do what the keymap makes them (Caps Lock and
   Escape swapped with `caps:swapescape`, say), not what is printed on
-  them; sokol alone goes by the printed key (`keymap_linux.h`).
+  them; sokol alone goes by the printed key (`desktop_linux.h`).
 
 Text fields are single-line except the comment, which grows with its text.
 Enter adds a line there; Ctrl+Enter or clicking elsewhere saves. Clipboard

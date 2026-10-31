@@ -80,7 +80,7 @@ fn main() {
 
 fn on_init(mut app App) {
 	gui.present_on_demand()
-	respect_keymap()
+	desktop_setup()
 	app.base_scale = platform_scale() or { app.gg.scale }
 	app.apply_zoom()
 	platform_start(mut app)
