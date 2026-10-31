@@ -188,3 +188,20 @@ nav :where(button, .nc-button) {
   color: var(--nc-primary-contrast);
   font-weight: 600;
 }
+/* Destructive actions. White text is 6.6:1 on this red in both schemes. */
+.danger {
+  --nc-primary: oklch(0.5 0.19 27);
+  --nc-primary-hover: oklch(0.42 0.17 27);
+  --nc-primary-focus: oklch(0.5 0.19 27 / 0.4);
+}
+
+/* Set apart at the bottom of a page, below everything else. */
+.danger-zone {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--nc-border);
+}
+
+.danger-zone h3 {
+  margin-top: 0;
+}

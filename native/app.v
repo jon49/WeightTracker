@@ -77,7 +77,9 @@ mut:
 	toast_error bool
 	toast_until i64
 	// Sync runs on a worker thread; results come back on these channels.
-	syncing    bool
+	syncing bool
+	// Ignore the answer to the sync in flight (the account was deleted).
+	drop_sync  bool
 	sync_ch    chan SyncDone
 	sync_due   i64
 	last_sync  i64
@@ -87,13 +89,16 @@ mut:
 	// worker thread.
 	account_busy map[Screen]bool
 	account_ch   chan AccountDone
-	entry        EntryForm
-	entries      EntriesView
-	charts       ChartsView
-	settings     SettingsForm
-	login        LoginForm
-	register     RegisterForm
-	forgot       ForgotForm
+	// Deleting the account, on a worker thread.
+	deleting  bool
+	delete_ch chan core.DeleteResult
+	entry     EntryForm
+	entries   EntriesView
+	charts    ChartsView
+	settings  SettingsForm
+	login     LoginForm
+	register  RegisterForm
+	forgot    ForgotForm
 	// The tab the account screens were opened from, and go back to.
 	account_from Screen = .settings
 	// The screen whose tab was last scrolled into view (-1: none yet).
@@ -111,6 +116,7 @@ fn new_app(store &core.Store) &App {
 		sync_ch:    chan SyncDone{cap: 1}
 		login_ch:   chan LoginDone{cap: 1}
 		account_ch: chan AccountDone{cap: 2}
+		delete_ch:  chan core.DeleteResult{cap: 1}
 	}
 	app.apply_theme()
 	app.load_entry(core.default_entry_date().str())
@@ -280,6 +286,7 @@ fn (mut app App) show(s Screen) {
 	}
 	app.commit_forms()
 	app.ui.blur()
+	app.ui.clear_nav()
 	// The account screens go back to the tab they were opened from.
 	if s.is_account() && !app.screen.is_account() {
 		app.account_from = app.screen
@@ -358,6 +365,10 @@ fn (mut app App) poll_workers() {
 	mut done := SyncDone{}
 	if app.sync_ch.try_pop(mut done) == .success {
 		app.syncing = false
+		if app.drop_sync {
+			app.drop_sync = false
+			return
+		}
 		was_logged_in := app.store.auth.logged_in()
 		summary := app.store.finish_sync(done.req, done.res) or {
 			if done.manual || (was_logged_in && !app.store.auth.logged_in()) {
@@ -398,6 +409,11 @@ fn (mut app App) poll_workers() {
 	if app.account_ch.try_pop(mut account) == .success {
 		app.account_busy[account.screen] = false
 		app.on_account_done(account)
+	}
+	mut deleted := core.DeleteResult{}
+	if app.delete_ch.try_pop(mut deleted) == .success {
+		app.deleting = false
+		app.on_account_deleted(deleted)
 	}
 	if app.sync_due > 0 && now_ms() >= app.sync_due {
 		app.start_sync(false)
@@ -444,6 +460,57 @@ fn (mut app App) logout() {
 	app.store.save_auth() or {}
 	app.login.email = gui.input(app.store.auth.email)
 	app.show_toast('Logged out.')
+}
+
+// delete_account deletes the account on the server; on_account_deleted
+// then forgets this device's copy.
+fn (mut app App) delete_account() {
+	if app.deleting {
+		return
+	}
+	app.deleting = true
+	spawn fn (ch chan core.DeleteResult, server string, auth core.AuthTokens, ctx &gg.Context) {
+		ch <- core.delete_account(server, auth)
+		mut c := unsafe { ctx }
+		c.refresh_ui()
+	}(app.delete_ch, app.store.server_url, app.store.auth, app.gg)
+}
+
+fn (mut app App) on_account_deleted(res core.DeleteResult) {
+	if !res.ok {
+		msg := if res.status == 401 {
+			'Log in again, then delete your account.'
+		} else {
+			res.message
+		}
+		app.show_error('Could not delete your account. ${msg}')
+		return
+	}
+	// A sync in flight was sent before the delete; its answer must not
+	// write anything back.
+	app.drop_sync = app.syncing
+	app.sync_due = 0
+	app.store.wipe() or { app.show_error(err.msg()) }
+	app.load_entry(core.default_entry_date().str())
+	app.load_settings()
+	app.charts.dirty = false
+	app.charts.loaded = false
+	app.login = LoginForm{}
+	app.show_toast('Your account and its data were deleted.')
+}
+
+// paragraph draws wrapped text and returns the y below it.
+fn (mut app App) paragraph(x f32, y f32, w f32, text string, muted bool) f32 {
+	mut ui := app.ui
+	style := gui.TextStyle{
+		color: if muted { ui.theme.muted } else { gui.transparent }
+	}
+	mut ly := y
+	for line in ui.wrap(text, w, style) {
+		ui.text(x, ly, line, style)
+		ly += ui.line_height(0)
+	}
+	return ly + 8
 }
 
 // refresh_forms reloads forms after a sync brought in new data, unless the
@@ -507,12 +574,24 @@ fn (mut app App) frame() {
 		app.go_forward()
 	}
 	$if !android {
-		// Ctrl+W closes the window, which quits.
+		// Ctrl+W closes the window, which quits (on_cleanup saves any typing).
 		if ui.key_pressed(.w, true) {
 			app.gg.quit()
 		}
 	}
+	// Escape drops keyboard focus (an open drop-down or a field being
+	// edited took it already).
+	if ui.key_pressed(.escape, false) {
+		ui.clear_nav()
+	}
 	if !ui.has_focus() {
+		// ← and → step through the tabs under the header.
+		if ui.key_pressed(.left, false) {
+			app.next_tab(-1)
+		}
+		if ui.key_pressed(.right, false) {
+			app.next_tab(1)
+		}
 		page := area.h * 0.9
 		if ui.key_pressed(.page_down, false) {
 			ui.scroll_by('main', page)
@@ -591,29 +670,28 @@ fn (mut app App) draw_header(w f32) f32 {
 	draw_logo(ui, pad, (top_h - logo) / 2, logo)
 	brand := gui.Rect{pad, 8, brand_w, bh}
 	ui.pointer_cursor(brand)
-	if ui.clicked(brand) {
+	if ui.tap(brand, 'Weight') {
 		app.navigate(.entry)
 	}
 
-	// Right side: theme, sync, login.
-	mut rx := w - pad
-	rx -= aw
-	if ui.button(gui.Rect{rx, 8, aw, bh}, auth_label, .outline) {
+	// Right side: theme, sync, login, drawn left to right for Tab. Buttons
+	// whose label changes keep a name, so keyboard focus stays on them.
+	mut rx := right_x
+	theme_label := if app.theme_resolved == 'dark' { '☀' } else { '☾' }
+	if ui.named_button(gui.Rect{rx, 8, bh, bh}, theme_label, .ghost, 'theme') {
+		app.toggle_theme()
+	}
+	rx += bh + 8
+	if ui.named_button(gui.Rect{rx, 8, sw, bh}, sync_label, .ghost, 'sync') {
+		app.start_sync(true)
+	}
+	rx += sw + 8
+	if ui.named_button(gui.Rect{rx, 8, aw, bh}, auth_label, .outline, 'auth') {
 		if logged_in {
 			app.logout()
 		} else {
 			app.open_login()
 		}
-	}
-	rx -= sw + 8
-	if ui.button(gui.Rect{rx, 8, sw, bh}, sync_label, .ghost) {
-		app.start_sync(true)
-	}
-	theme_label := if app.theme_resolved == 'dark' { '☀' } else { '☾' }
-	tw := bh
-	rx -= tw + 8
-	if ui.button(gui.Rect{rx, 8, tw, bh}, theme_label, .ghost) {
-		app.toggle_theme()
 	}
 
 	// Navigation tabs. They scroll sideways when they don't fit (zoomed in,
@@ -623,7 +701,7 @@ fn (mut app App) draw_header(w f32) f32 {
 	nav_r := gui.Rect{0, nav_y, w, nav_h}
 	ui.rect(nav_r, t.bg)
 	ui.hline(0, nav_y + nav_h - 1, w, t.border)
-	current := if app.screen.is_account() { app.account_from } else { app.screen }
+	current := app.current_tab()
 	off := ui.begin_hscroll('nav', nav_r)
 	mut nx := pad
 	mut active_x, mut active_w := f32(0), f32(0)
@@ -653,6 +731,20 @@ fn (mut app App) draw_header(w f32) f32 {
 		}
 	}
 	return nav_y + nav_h
+}
+
+// current_tab is the tab for this screen; the account screens show the
+// one they were opened from.
+fn (app &App) current_tab() Screen {
+	return if app.screen.is_account() { app.account_from } else { app.screen }
+}
+
+// next_tab opens the tab `step` places from the current one (← and →).
+fn (mut app App) next_tab(step int) {
+	i := screens.index(app.current_tab()) + step
+	if i >= 0 && i < screens.len {
+		app.navigate(screens[i])
+	}
 }
 
 // draw_logo draws the app's logo (src/web/images/weight.svg, 64 units

@@ -3,14 +3,21 @@ import type { UserSettings } from "./db.js";
 const {
   globalDb: db,
   db: { get, getMany, setMany, set, update },
+  syncQueue: { afterSync },
 } = self.sw;
 
 const SYNC_URL = "/api/data/weight";
 const REFRESH_URL = "/api/auth/v1/refresh";
 
+// sync runs one sync at a time, and none while an account is being deleted
+// (see account.ts).
+export default function sync(): Promise<{ status: number }> {
+  return afterSync(() => syncNow());
+}
+
 // `uploadMerge` is false on the follow-up sync that uploads merged user
 // settings, so a sync never repeats more than once.
-export default async function sync(uploadMerge = true): Promise<{ status: number }> {
+async function syncNow(uploadMerge = true): Promise<{ status: number }> {
   let tokens = await db.authTokens();
   if (!tokens) {
     await db.setLoggedIn(false);
@@ -108,7 +115,7 @@ export default async function sync(uploadMerge = true): Promise<{ status: number
 
   let merged = await mergeConflictedUserSettings(newData.conflicted);
   if (merged && uploadMerge) {
-    await sync(false);
+    await syncNow(false);
   }
 
   if (toSaveNewData.length > 0 || merged) {
@@ -188,7 +195,7 @@ function postSync(body: PostData, authToken: string) {
   });
 }
 
-async function refreshAuthToken(refreshToken: string): Promise<string | null> {
+export async function refreshAuthToken(refreshToken: string): Promise<string | null> {
   try {
     let res = await fetch(REFRESH_URL, {
       method: "POST",

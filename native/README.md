@@ -17,6 +17,7 @@ make run          # build and start
 make build        # optimized ./weight
 make install      # ./weight to ~/.local/bin, plus a launcher and icon
 make test         # unit tests for core/ (dates, stats, charts, storage, sync)
+../tasks/test-native-server.sh  # also against a throwaway TrailBase (deleting an account)
 make check        # type-check and generate C for Linux, Windows and macOS
 make android      # ./weight.apk (needs the Android SDK, NDK and vab)
 make install-apk  # install it on the connected phone or emulator
@@ -27,7 +28,8 @@ Set `V=/path/to/v` if `v` is not on your `PATH`. From the repo root,
 do the same, and `tasks/` has a script for each job, including the one-time
 setup: `desktop-setup.sh`, `desktop-run.sh`, `desktop-install.sh`,
 `android-setup.sh`, `make-apk.sh`, `install-apk.sh`, `android-devices.sh`,
-`android-logs.sh`, `android-emulator.sh` and `test-native.sh`.
+`android-logs.sh`, `android-emulator.sh`, `test-native.sh` and
+`test-native-server.sh`.
 
 Options: `weight [--data-dir DIR] [--size WxH] [--screen entry|entries|charts|settings] [--charts history,average,...]`.
 `--size` and `--screen` are handy for checking the phone-sized layout.
@@ -74,7 +76,7 @@ run on macOS, Windows, iOS and Android.
   file atomically. Login tokens are kept separately in `auth.json` (mode 0600).
 - Records use the web client's shape and keys (`YYYY-MM-DD`, `user-settings`).
   Sync uses the same `POST /api/data/weight` last-write-wins protocol and
-  TrailBase's `/api/auth/v1/{login,refresh,logout}`.
+  TrailBase's `/api/auth/v1/{login,refresh,logout,delete}`.
 - Sync runs at startup, 3 seconds after an edit, when the window regains focus
   (at most once a minute), and on demand (the ↻ button or Ctrl+R). Edits made
   while a sync is in flight are kept and uploaded on the next sync.
@@ -92,6 +94,12 @@ run on macOS, Windows, iOS and Android.
 
 One difference from the web app: Clear All Data keeps you logged in, so
 synced data downloads again on the next sync.
+
+While logged in, Settings can also delete the account
+(`DELETE /api/auth/v1/delete`), as the web app's User Settings can: the
+server deletes the synced data, and this device forgets everything but its
+theme, text size and server. Other devices keep their copy and are logged out
+on their next sync. A sync already in flight is ignored when it comes back.
 
 ## Phones
 
@@ -151,7 +159,7 @@ Touch (tap, drag to scroll) and the on-screen keyboard are handled.
   keypad + and −), Ctrl 0 to reset, or Settings → Text size. It changes in 10% steps from 50%
   to 300% and is saved between runs.
 - **Scrolling:** the wheel, dragging the scroll bar or clicking its track,
-  and, when no field is focused, Page Up/Down, Home/End (with or without Ctrl) and the arrow keys.
+  and, when no field is focused, Page Up/Down, Home/End (with or without Ctrl) and ↑ and ↓.
   The entries table and the tabs scroll sideways when they don't fit: Shift
   with the wheel, a sideways wheel or touchpad, their scroll bar, or a
   sideways swipe on a phone. The table's date column and header row stay
@@ -166,6 +174,22 @@ Touch (tap, drag to scroll) and the on-screen keyboard are handled.
   forward again, even while typing. Logging in drops Login, Register and
   Reset Password from that history.
 - **Close:** Ctrl+W closes the window (on the desktop).
+- **Keyboard focus:** Tab and Shift+Tab move through every button, link,
+  drop-down and field; Tab into a field starts editing it, and Tab out moves
+  on. With nothing focused, Tab starts at the first control below the tabs,
+  and Shift+Tab at the last tab. Enter or Space presses the focused button,
+  and Enter edits a focused field. Enter or Space opens a focused drop-down;
+  ↑ and ↓ move through it, Enter or Space chooses, and Escape closes it.
+  Escape drops keyboard focus; in a field it also undoes the edit. Focus
+  stays on a button whose label changes when pressed. A click drops
+  keyboard focus, as does opening another screen. (`gui/nav.v`, as in
+  `../soccer`.)
+- **Tabs:** ← and → open the previous and next tab under the header (Entry,
+  Entries, Charts, Settings) when not typing.
+- **Remapped keys:** on Linux, Escape, Caps Lock, Tab, Backspace, Enter,
+  Delete and the modifiers do what the keymap makes them (Caps Lock and
+  Escape swapped with `caps:swapescape`, say), not what is printed on
+  them; sokol alone goes by the printed key (`keymap_linux.h`).
 
 Text fields are single-line except the comment, which grows with its text.
 Enter adds a line there; Ctrl+Enter or clicking elsewhere saves. Clipboard

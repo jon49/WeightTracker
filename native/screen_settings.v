@@ -5,12 +5,13 @@ import gui
 
 struct SettingsForm {
 mut:
-	height        gui.Input
-	goal_weight   gui.Input
-	bedtime       gui.Input
-	server        gui.Input
-	dirty         bool
-	confirm_clear bool
+	height         gui.Input
+	goal_weight    gui.Input
+	bedtime        gui.Input
+	server         gui.Input
+	dirty          bool
+	confirm_clear  bool
+	confirm_delete bool
 }
 
 fn (mut app App) load_settings() {
@@ -127,7 +128,7 @@ fn (mut app App) draw_settings(x f32, y0 f32, w f32) f32 {
 		mut bx := x
 		label := if app.syncing { 'Syncing…' } else { 'Sync now' }
 		sw := ui.button_width('Sync now')
-		if ui.button(gui.Rect{bx, y, sw, bh}, label, .primary) {
+		if ui.named_button(gui.Rect{bx, y, sw, bh}, label, .primary, 'sync-now') {
 			app.start_sync(true)
 		}
 		bx += sw + 8
@@ -216,7 +217,7 @@ fn (mut app App) draw_settings(x f32, y0 f32, w f32) f32 {
 		'Clear All Data'
 	}
 	cw2 := ui.button_width(clear_label)
-	if ui.button(gui.Rect{x, y, cw2, bh}, clear_label, .danger) {
+	if ui.named_button(gui.Rect{x, y, cw2, bh}, clear_label, .danger, 'clear-data') {
 		if app.settings.confirm_clear {
 			app.settings.confirm_clear = false
 			app.store.clear_data() or { app.show_error('Could not clear: ${err}') }
@@ -243,5 +244,50 @@ fn (mut app App) draw_settings(x f32, y0 f32, w f32) f32 {
 		color: t.muted
 	})
 	y += 24
+	if auth.logged_in() {
+		y = app.draw_delete_account(x, y + 16, w) + 16
+	}
 	return y - y0
+}
+
+// draw_delete_account is the danger zone at the bottom of Settings, while
+// logged in. Like Clear All Data, it asks again before deleting.
+fn (mut app App) draw_delete_account(x f32, y f32, w f32) f32 {
+	mut ui := app.ui
+	bh := ui.button_height()
+	mut zy := app.subheading(x + 16, y + 16, 'Delete account')
+	zy = app.paragraph(x + 16, zy, w - 32, "Permanently deletes your account and the entries and settings you've synced, from the server and from this device. This can't be undone.",
+		false)
+	zy = app.paragraph(x + 16, zy, w - 32, "Other devices you use this app on keep their own copy of your data. They are logged out the next time they sync, but you'll need to remove the data on each of them yourself.",
+		false)
+	if app.settings.confirm_delete && !app.deleting {
+		zy = app.paragraph(x + 16, zy, w - 32, "Delete your account and all of its data? This can't be undone. Other devices keep their copy until you remove it there.",
+			false)
+	}
+	label := if app.deleting {
+		'Deleting…'
+	} else if app.settings.confirm_delete {
+		'Yes, delete my account'
+	} else {
+		'Delete account'
+	}
+	dw := ui.button_width(label)
+	if ui.named_button(gui.Rect{x + 16, zy, dw, bh}, label, .danger, 'delete-account')
+		&& !app.deleting {
+		if app.settings.confirm_delete {
+			app.settings.confirm_delete = false
+			app.delete_account()
+		} else {
+			app.settings.confirm_delete = true
+		}
+	}
+	if app.settings.confirm_delete && !app.deleting {
+		cw := ui.button_width('Cancel')
+		if ui.button(gui.Rect{x + 16 + dw + 8, zy, cw, bh}, 'Cancel', .outline) {
+			app.settings.confirm_delete = false
+		}
+	}
+	zy += bh + 16
+	ui.rounded_border(gui.Rect{x, y, w, zy - y}, 8, ui.theme.danger)
+	return zy
 }

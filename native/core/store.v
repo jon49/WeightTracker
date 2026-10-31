@@ -262,6 +262,22 @@ pub fn (mut s Store) clear_data() ! {
 	s.save()!
 }
 
+// wipe forgets everything on this device once the account is deleted: the
+// records, what was waiting to sync and the login. Only the device's own
+// preferences stay: theme, text size and server.
+pub fn (mut s Store) wipe() ! {
+	s.entries = map[string]Entry{}
+	s.user_settings = UserSettings{}
+	s.chart_settings = ChartSettings{}
+	s.pending = map[string]int{}
+	s.edit_seq = 0
+	s.last_synced_id = 0
+	s.auth = AuthTokens{}
+	s.version++
+	s.save()!
+	s.save_auth()!
+}
+
 pub fn (s &Store) earliest_date() ?Date {
 	return parse_date(s.user_settings.earliest_date)
 }

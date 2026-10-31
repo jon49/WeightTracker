@@ -44,6 +44,8 @@ pub fn (mut ui Ui) begin_hscroll(id string, r Rect) f32 {
 	}
 	ui.hscrolls[id] = off
 	ui.push_clip(r)
+	ui.hscroll_ids << id
+	ui.hareas[id] = r
 	return off
 }
 
@@ -54,6 +56,9 @@ pub fn (mut ui Ui) set_hscroll(id string, off f32) {
 
 pub fn (mut ui Ui) end_hscroll(id string, r Rect, content_w f32) {
 	ui.pop_clip()
+	if ui.hscroll_ids.len > 0 {
+		ui.hscroll_ids.delete_last()
+	}
 	ui.content_ws[id] = content_w
 	max := if content_w > r.w { content_w - r.w } else { 0 }
 	if (ui.hscrolls[id] or { 0 }) > max {
@@ -161,6 +166,8 @@ mut:
 	// A choice made in the list, for its dropdown to return next frame.
 	chosen_id string
 	chosen    int
+	// The item ↑ and ↓ move to, and Enter or Space chooses (-1: none yet).
+	hot int = -1
 }
 
 fn (ui &Ui) under_menu(x f32, y f32) bool {
@@ -207,12 +214,15 @@ pub fn (mut ui Ui) dropdown(id string, r Rect, labels []string, selected int) in
 	})
 	ui.pop_clip()
 	ui.pointer_cursor(r)
-	if ui.clicked(r) {
+	// Enter or Space opens it from the keyboard, at the selected item.
+	pressed := ui.focusable(r, id)
+	if ui.clicked(r) || pressed {
 		if open {
 			ui.close_menu()
 		} else {
 			ui.menu = Menu{
-				id: id
+				id:  id
+				hot: if pressed { selected } else { -1 }
 			}
 			ui.redraw = true
 		}
@@ -279,11 +289,39 @@ pub fn (mut ui Ui) draw_menu() {
 	ui.rounded(Rect{list.x + 1, list.y + 3, list.w, list.h}, 8, hexa(0x000000, 50))
 	ui.rounded(list, 8, t.surface)
 	ui.rounded_border(list, 8, t.border)
+	// The keyboard: ↑ and ↓ move through the items, Enter or Space chooses.
+	mut hot := m.hot
+	for i := 0; i < ui.keys.len; i++ {
+		k := ui.keys[i]
+		if k.ctrl() || k.alt() {
+			continue
+		}
+		step := match k.code {
+			.down { 1 }
+			.up { -1 }
+			else { 0 }
+		}
+		if step != 0 {
+			hot = if hot < 0 { m.selected } else { hot + step }
+			hot = clamp(hot, 0, m.labels.len - 1)
+			ui.keys.delete(i)
+			i--
+			ui.redraw = true
+		} else if k.code in [.enter, .kp_enter, .space] && hot >= 0 {
+			ui.keys.delete(i)
+			ui.menu.id = ''
+			ui.menu.chosen_id = m.id
+			ui.menu.chosen = hot
+			ui.redraw = true
+			return
+		}
+	}
+	ui.menu.hot = hot
 	for i, l in m.labels {
 		r := Rect{list.x + 4, list.y + 4 + i * item_h, list.w - 8, item_h}
 		if ui.pressing(r) {
 			ui.rounded(r, 6, t.surface_hi)
-		} else if ui.hovered(r) {
+		} else if ui.hovered(r) || i == hot {
 			ui.rounded(r, 6, t.surface_alt)
 		}
 		selected := i == m.selected

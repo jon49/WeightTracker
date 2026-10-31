@@ -7,6 +7,7 @@ import json2
 //   POST /api/auth/v1/login    {email, password} -> {auth_token, refresh_token, csrf_token}
 //   POST /api/auth/v1/refresh  {refresh_token}   -> {auth_token}
 //   POST /api/auth/v1/logout   {refresh_token}
+//   DELETE /api/auth/v1/delete (Bearer auth) deletes the account
 //   POST /api/data/weight      last-write-wins sync, see ImageBase's sync_data.
 //
 // The HTTP calls are plain functions with no Store access so the GUI can run
@@ -326,6 +327,47 @@ pub fn logout(server string, refresh_token string) {
 	post_json(server + '/api/auth/v1/logout', body.json_str(), '') or {}
 }
 
+// DeleteResult is the server's answer to delete_account.
+pub struct DeleteResult {
+pub:
+	ok      bool
+	status  int // 0: the server could not be reached
+	message string
+}
+
+// delete_account deletes the caller's account (DELETE /api/auth/v1/delete).
+// The server then deletes the data it synced (see ../ImageBase's README,
+// "Deleting an account"). A stale auth token is refreshed once, as a sync
+// does. Safe to call from any thread.
+pub fn delete_account(server string, auth AuthTokens) DeleteResult {
+	url := server + '/api/auth/v1/delete'
+	mut res := request_json(.delete, url, '', auth.auth_token) or {
+		return DeleteResult{
+			message: 'Could not reach the server: ${err.msg()}'
+		}
+	}
+	if res.status_code == 401 && auth.refresh_token != '' {
+		if token := refresh_auth_token(server, auth.refresh_token) {
+			res = request_json(.delete, url, '', token) or {
+				return DeleteResult{
+					message: 'Could not reach the server: ${err.msg()}'
+				}
+			}
+		}
+	}
+	if res.status_code >= 200 && res.status_code < 300 {
+		return DeleteResult{
+			ok:     true
+			status: res.status_code
+		}
+	}
+	msg := server_message(res)
+	return DeleteResult{
+		status:  res.status_code
+		message: if msg != '' { msg } else { friendly_status(res.status_code) }
+	}
+}
+
 // register creates an account. TrailBase requires email verification before
 // login works, so this does not log in.
 pub fn register(server string, email string, password string, password_repeat string) ! {
@@ -394,13 +436,17 @@ fn refresh_auth_token(server string, refresh_token string) ?string {
 }
 
 fn post_json(url string, body string, bearer string) !http.Response {
+	return request_json(.post, url, body, bearer)
+}
+
+fn request_json(method http.Method, url string, body string, bearer string) !http.Response {
 	mut header := http.new_header(key: .content_type, value: 'application/json')
 	if bearer != '' {
 		header.add(.authorization, 'Bearer ${bearer}')
 	}
 	return http.fetch(
 		url:         url
-		method:      .post
+		method:      method
 		header:      header
 		data:        body
 		user_agent:  'weight-desktop'

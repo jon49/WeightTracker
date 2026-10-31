@@ -143,8 +143,8 @@ fn (mut app App) draw_login(x f32, y0 f32, w f32) f32 {
 	ev, y2 := app.labeled_field('login-password', 'Password', fx, y, fw, mut app.login.password,
 		.password, '')
 	y = y2
-	if ui.button(gui.Rect{fx, y, fw, bh}, if app.logging_in { 'Logging in…' } else { 'Login' },
-		.primary) || ev == .submitted {
+	label := if app.logging_in { 'Logging in…' } else { 'Login' }
+	if ui.named_button(gui.Rect{fx, y, fw, bh}, label, .primary, 'login') || ev == .submitted {
 		app.start_login()
 	}
 	y += bh + 20
@@ -181,8 +181,8 @@ fn (mut app App) draw_register(x f32, y0 f32, w f32) f32 {
 		y += lh
 	}
 	busy := app.account_busy[Screen.register]
-	if ui.button(gui.Rect{fx, y, fw, bh}, if busy { 'Registering…' } else { 'Register' },
-		.primary) || ev == .submitted {
+	if ui.named_button(gui.Rect{fx, y, fw, bh}, if busy { 'Registering…' } else { 'Register' },
+		.primary, 'register') || ev == .submitted {
 		app.start_register()
 	}
 	y += bh + 20
@@ -206,8 +206,8 @@ fn (mut app App) draw_forgot(x f32, y0 f32, w f32) f32 {
 		.email, '')
 	y = y1
 	busy := app.account_busy[Screen.forgot]
-	if ui.button(gui.Rect{fx, y, fw, bh}, if busy { 'Sending…' } else { 'Send reset link' },
-		.primary) || ev == .submitted {
+	if ui.named_button(gui.Rect{fx, y, fw, bh}, if busy { 'Sending…' } else { 'Send reset link' },
+		.primary, 'send-reset') || ev == .submitted {
 		app.start_forgot()
 	}
 	y += bh + 20

@@ -1,4 +1,4 @@
-import layout, { themeView } from "../pages/_layout.html.js";
+import layout, { loginView, themeView } from "../pages/_layout.html.js";
 import globalDb from "./global-model.js";
 import * as utils from "@jon49/sw/utils.js";
 import html from "html-template-tag-stream";
@@ -8,6 +8,7 @@ import * as validation from "promise-validation";
 import * as validators from "@jon49/sw/validation.js";
 import * as charts from "../js/charts-shared.js";
 import * as serverUtils from "./utils.js";
+import * as syncQueue from "./sync-queue.js";
 
 let app = {
   charts,
@@ -15,7 +16,8 @@ let app = {
   globalDb,
   html,
   layout,
-  page: { themeView },
+  page: { themeView, loginView },
+  syncQueue,
   utils: { ...utils, ...serverUtils, ...localUtils },
   validation: { ...validation, ...validators },
 };

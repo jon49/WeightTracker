@@ -158,7 +158,7 @@ fn (mut app App) draw_entries(x f32, y0 f32, w f32, view gui.Rect) f32 {
 		}
 		ui.hline(x, ry + row.h - 1, table_w, t.border)
 		ui.pointer_cursor(r)
-		if ui.clicked(r) {
+		if ui.tap(r, 'entry-${row.entry.date}') {
 			app.navigate(.entry)
 			app.load_entry(row.entry.date)
 		}

@@ -133,14 +133,26 @@ mut:
 	keys       []KeyPress
 	chars      []rune
 	focus      string
-	tab_from   string
-	// Shift+Tab: the field to focus when it is drawn next.
+	// The field to focus when it is drawn next.
 	focus_request string
 	focus_ids     []string
-	fields        map[string]FieldState
-	clip          Rect
-	clips         []Rect
-	scrolls       map[string]f32
+	// Keyboard focus on a control that isn't being typed in: a button, a
+	// link, or a field before Enter starts editing it. Tab and Shift+Tab move
+	// it between this frame's stops; Enter or Space presses it (see nav.v).
+	nav        string
+	nav_rect   Rect // where the control with keyboard focus was last drawn
+	stops      []Stop
+	stop_count map[string]int
+	// The scroll areas being drawn (innermost last), and where each one is,
+	// to bring a stop into view.
+	vscroll_ids []string
+	hscroll_ids []string
+	vareas      map[string]Rect
+	hareas      map[string]Rect
+	fields      map[string]FieldState
+	clip        Rect
+	clips       []Rect
+	scrolls     map[string]f32
 	// Content heights from the last frame, to place the scroll bars.
 	content_hs map[string]f32
 	// The scroll area whose bar is being dragged, and where on the thumb.
@@ -266,6 +278,7 @@ pub fn (mut ui Ui) handle_event(e &gg.Event) {
 				ui.press_x = e.mouse_x
 				ui.press_y = e.mouse_y - ui.top()
 				ui.drag = false
+				ui.nav = ''
 			}
 		}
 		.mouse_up {
@@ -302,6 +315,7 @@ pub fn (mut ui Ui) handle_event(e &gg.Event) {
 			ui.my = y
 			match e.typ {
 				.touches_began {
+					ui.nav = ''
 					ui.down = true
 					ui.pressed = true
 					ui.press_x = x
@@ -362,6 +376,8 @@ pub fn present_on_demand() {
 pub fn (mut ui Ui) begin_frame() {
 	C.sapp_request_present()
 	ui.focus_ids.clear()
+	ui.stops.clear()
+	ui.stop_count.clear()
 	ui.want = .default
 	ui.clip = Rect{0, 0, ui.width(), ui.height()}
 	ui.clips.clear()
@@ -374,9 +390,15 @@ pub fn (mut ui Ui) end_frame() bool {
 	if ui.focus != '' && ui.focus !in ui.focus_ids {
 		ui.blur()
 	}
+	if ui.nav != '' && ui.stop_index(ui.nav) < 0 {
+		ui.nav = ui.stop_in_place(ui.nav_rect)
+		ui.redraw = true
+	}
+	if ui.focus == '' {
+		ui.keyboard_nav()
+	}
 	ui.apply_keyboard()
 	ui.reveal_focus = false
-	ui.tab_from = ''
 	ui.pressed = false
 	ui.released = false
 	ui.keys.clear()
@@ -459,6 +481,7 @@ fn (mut ui Ui) apply_keyboard() {
 fn (mut ui Ui) set_focus(id string, value string, cursor int, kind FieldKind) {
 	ui.focus = id
 	ui.focus_request = ''
+	ui.nav = ''
 	ui.fields[id] = FieldState{
 		cursor:   cursor
 		original: value
@@ -577,11 +600,16 @@ pub fn (mut ui Ui) begin_scroll(id string, r Rect) f32 {
 	ui.scrolls[id] = off
 	ui.push_clip(r)
 	ui.focus_drawn = false
+	ui.vscroll_ids << id
+	ui.vareas[id] = r
 	return off
 }
 
 pub fn (mut ui Ui) end_scroll(id string, r Rect, content_h f32) {
 	ui.pop_clip()
+	if ui.vscroll_ids.len > 0 {
+		ui.vscroll_ids.delete_last()
+	}
 	ui.content_hs[id] = content_h
 	max := if content_h > r.h { content_h - r.h } else { 0 }
 	mut off := ui.scrolls[id] or { 0 }
@@ -761,6 +789,12 @@ pub fn (ui &Ui) button_width(label string) f32 {
 }
 
 pub fn (mut ui Ui) button(r Rect, label string, style ButtonStyle) bool {
+	return ui.named_button(r, label, style, label)
+}
+
+// named_button is a button whose keyboard stop is named `name` rather than
+// by its label, for a label that changes.
+pub fn (mut ui Ui) named_button(r Rect, label string, style ButtonStyle, name string) bool {
 	t := ui.theme
 	hover := ui.hovered(r)
 	down := ui.pressing(r)
@@ -836,7 +870,7 @@ pub fn (mut ui Ui) button(r Rect, label string, style ButtonStyle) bool {
 		ui.rect(Rect{r.x + 8, r.bottom() - 3, r.w - 16, 3}, t.primary)
 	}
 	ui.pointer_cursor(r)
-	return ui.clicked(r)
+	return ui.tap(r, name)
 }
 
 // link draws clickable accent text and returns whether it was clicked.
@@ -853,7 +887,7 @@ pub fn (mut ui Ui) link(x f32, y f32, label string, style TextStyle) bool {
 		ui.hline(x, y + h - 3, w, ui.theme.link)
 	}
 	ui.pointer_cursor(r)
-	return ui.clicked(r)
+	return ui.tap(r, label)
 }
 
 pub fn (ui &Ui) field_height() f32 {
@@ -893,12 +927,13 @@ pub fn (mut ui Ui) field(id string, r Rect, mut input Input, kind FieldKind, pla
 	mut ev := FieldEvent.none
 	style := TextStyle{}
 	lh := ui.line_height(0)
+	ui.add_stop(id, r, true)
 
-	// Tab from the previous field moves focus here.
-	if ui.tab_from != '' && ui.focus_ids.len >= 2 && ui.focus_ids[ui.focus_ids.len - 2] == ui.tab_from {
-		ui.tab_from = ''
+	// Tab to this field, or Enter on it while it has keyboard focus, starts
+	// editing it.
+	if ui.focus_request == id {
 		ui.set_focus(id, value, value.runes().len, kind)
-	} else if ui.focus_request == id {
+	} else if ui.nav == id && ui.focus == '' && ui.menu.id == '' && ui.take_press(false) {
 		ui.set_focus(id, value, value.runes().len, kind)
 	}
 
@@ -952,6 +987,12 @@ pub fn (mut ui Ui) field(id string, r Rect, mut input Input, kind FieldKind, pla
 				remaining << k
 				continue
 			}
+			// Tab and Shift+Tab finish editing; keyboard_nav then moves on.
+			if k.code == .tab && !k.ctrl() && !k.alt() {
+				done = true
+				remaining << k
+				continue
+			}
 			match k.code {
 				.backspace {
 					if st.cursor > 0 {
@@ -999,17 +1040,6 @@ pub fn (mut ui Ui) field(id string, r Rect, mut input Input, kind FieldKind, pla
 						entered = true
 					}
 				}
-				.tab {
-					done = true
-					if k.shift() {
-						idx := ui.focus_ids.len - 2
-						if idx >= 0 {
-							ui.focus_request = ui.focus_ids[idx]
-						}
-					} else {
-						ui.tab_from = id
-					}
-				}
 				.escape {
 					runes = st.original.runes()
 					st.cursor = runes.len
@@ -1020,6 +1050,11 @@ pub fn (mut ui Ui) field(id string, r Rect, mut input Input, kind FieldKind, pla
 					return .cancelled
 				}
 				else {
+					// Keys that type text were taken as characters above; keep
+					// them from also acting as shortcuts.
+					if int(k.code) < 256 && !k.ctrl() && !k.alt() {
+						continue
+					}
 					remaining << k
 				}
 			}
@@ -1032,6 +1067,7 @@ pub fn (mut ui Ui) field(id string, r Rect, mut input Input, kind FieldKind, pla
 		if done {
 			if ui.focus == id {
 				ui.blur()
+				ui.nav = id
 			}
 			ev = if entered { FieldEvent.submitted } else { FieldEvent.committed }
 			focused = false
@@ -1045,6 +1081,9 @@ pub fn (mut ui Ui) field(id string, r Rect, mut input Input, kind FieldKind, pla
 		ui.rounded_border(r, 6, t.primary)
 	} else {
 		ui.rounded_border(r, 6, t.border)
+		if ui.nav == id && ui.focus == '' {
+			ui.nav_ring(r)
+		}
 	}
 	inner := r.inset(field_pad, 0)
 	ui.push_clip(inner)

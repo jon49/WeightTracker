@@ -111,6 +111,39 @@ fn test_store_persists_and_tracks_changes() {
 	assert s.entries_for_year(2026).map(it.date) == ['2026-10-21', '2026-10-20']
 }
 
+fn test_wipe_forgets_everything_but_device_preferences() {
+	mut s := temp_store()!
+	defer {
+		os.rmdir_all(s.dir) or {}
+	}
+	s.set_entry(Entry{ date: '2026-10-20', weight: 180.4 })!
+	s.set_chart_settings(ChartSettings{ ...s.chart_settings, duration: 3 })!
+	s.set_theme('dark')!
+	s.set_zoom(1.25)!
+	s.set_server_url('http://localhost:4000')!
+	s.last_synced_id = 42
+	s.auth = AuthTokens{
+		email:         'me@example.com'
+		auth_token:    'a'
+		refresh_token: 'r'
+	}
+	s.save()!
+	s.save_auth()!
+	s.wipe()!
+	r := open_store(s.dir)!
+	assert r.entries.len == 0
+	assert r.pending.len == 0
+	assert r.last_synced_id == 0
+	assert r.user_settings == UserSettings{}
+	assert r.chart_settings == ChartSettings{}
+	assert r.theme == 'dark'
+	assert r.zoom == 1.25
+	assert r.server_url == 'http://localhost:4000'
+	assert !r.auth.logged_in()
+	assert r.auth.email == ''
+	assert !os.exists(os.join_path(s.dir, 'auth.json'))
+}
+
 fn test_entry_json_matches_web_client() {
 	e := entry_from_any('2026-10-20', json2.decode[json2.Any]('{"date":"2026-10-20","weight":"180.4","bedtime":"22:30","sleep":8,"comments":"hi","_rev":12}')!)
 	assert e.weight == 180.4
