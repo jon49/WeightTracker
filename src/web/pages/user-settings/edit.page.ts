@@ -97,16 +97,21 @@ const postHandlers: RoutePostHandler = {
     return { status: 200 };
   },
 
+  // Failures answer with a status and a message, as api/sync does:
+  // @jon49/sw 0.16's router can't show a thrown string.
   async deleteAccount() {
     let status = await deleteAccount();
     if (status === 401) {
-      throw "Log in again, then delete your account.";
+      return { status: 401, message: "Log in again, then delete your account." };
     }
     if (status === 0) {
-      throw "You appear to be offline. Connect to the internet and try again.";
+      return {
+        status: 503,
+        message: "You appear to be offline. Connect to the internet and try again.",
+      };
     }
     if (status < 200 || status >= 300) {
-      throw `Could not delete your account (status ${status}).`;
+      return { status, message: `Could not delete your account (status ${status}).` };
     }
     return {
       status: 200,

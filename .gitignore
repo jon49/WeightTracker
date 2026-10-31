@@ -5,3 +5,6 @@ src/web/entry-points.ts
 config.json
 *.db
 .claude/
+e2e/.depot
+playwright-report
+test-results

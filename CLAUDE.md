@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm start` — dev server on :8008, proxying `/api/*` to a local TrailBase on :4000.
 - `npm run start:full` — runs `start`, `server`, and `make -C ../ImageBase dev` (TrailBase backend) concurrently.
 - `npm run build` — production build into `./deploy`.
-- `npm run check` — `tsc --noEmit`.
-- `npm test` — Playwright tests.
+- `npm run check` — `tsc --noEmit`, and the same for `e2e/`.
+- `npm test` — the unit tests (`npm run test:unit`, `node:test` via tsx on `src/**/*.test.ts`), then the end-to-end tests (`npm run e2e`: Playwright in `e2e/`, the real app against a throwaway TrailBase from `e2e/backend.sh`, on ports 8011/4011).
 - `npm run fmt` / `fmt:check` — format with oxfmt.
 - `npm run build:native` / `install:native` / `test:native` — the native desktop and Android client in `native/`, written in V (`make -C native android` for the APK). See `native/README.md`.
 - `tasks/*.sh` — one script per command the user runs by hand (setup, building and installing the APK, the emulator, phone logs, tests). When telling the user to run a command they will want again, add or update a script here.

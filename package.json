@@ -5,7 +5,9 @@
   "author": "Jon Nyman",
   "type": "module",
   "scripts": {
-    "test": "npx playwright test",
+    "test": "npm run test:unit && npm run e2e",
+    "test:unit": "tsx --test 'src/**/*.test.ts'",
+    "e2e": "playwright test",
     "start": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=dev -p 8008 --proxy=/api=http://localhost:4000",
     "server": "tsx ./node_modules/@jon49/sw/bin/start.ts --env=server --target=./server/public",
     "start:full": "concurrently -k -n start,server,trail -c blue,green,yellow \"npm:start\" \"npm:server\" \"make -C ../ImageBase dev\"",
@@ -13,7 +15,7 @@
     "build:native": "make -C native build",
     "install:native": "make -C native install",
     "test:native": "make -C native test",
-    "check": "tsc --noEmit",
+    "check": "tsc --noEmit && tsc -p e2e",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check"
   },
