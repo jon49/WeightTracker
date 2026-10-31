@@ -26,7 +26,8 @@ make install-apk  # install it on the connected phone or emulator
 Set `V=/path/to/v` if `v` is not on your `PATH`. From the repo root,
 `npm run build:native`, `npm run install:native` and `npm run test:native`
 do the same, and `tasks/` has a script for each job, including the one-time
-setup: `desktop-setup.sh`, `desktop-run.sh`, `desktop-install.sh`,
+setup: `desktop-setup.sh`, `desktop-run.sh`, `desktop-install.sh` (and
+`desktop-setup-wayland.sh`, `desktop-install-wayland.sh` for Wayland),
 `android-setup.sh`, `make-apk.sh`, `install-apk.sh`, `android-devices.sh`,
 `android-logs.sh`, `android-emulator.sh`, `test-native.sh` and
 `test-native-server.sh`.
@@ -38,8 +39,11 @@ Options: `weight [--data-dir DIR] [--size WxH] [--screen entry|entries|charts|se
 
 - **Linux (X11, which also runs under XWayland):**
   `sudo apt install libx11-dev libxi-dev libxcursor-dev libxrandr-dev libgl-dev libegl-dev`
-- **Linux, native Wayland:** build with `v -d sokol_wayland` and install
-  `libwayland-dev libxkbcommon-dev libegl-dev wayland-protocols`.
+- **Linux, native Wayland:** install
+  `libwayland-dev libxkbcommon-dev libegl-dev wayland-protocols`
+  (`tasks/desktop-setup-wayland.sh`), then build with
+  `make build VFLAGS='-d sokol_wayland'` (`tasks/desktop-install-wayland.sh`
+  builds and installs it).
 - **macOS:** the Xcode command line tools (`xcode-select --install`).
 - **Windows:** nothing beyond V and its C compiler. Use `make build` or `v -prod -o weight.exe .`.
 

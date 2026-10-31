@@ -1,19 +1,21 @@
 # Weight native app (desktop and Android). Requires V (https://vlang.io); see README.md for the
 # system packages each platform needs.
 V ?= v
+# Extra V flags, e.g. VFLAGS='-d sokol_wayland' for a native Wayland build.
+VFLAGS ?=
 BIN ?= weight
 PREFIX ?= $(HOME)/.local
 
 .PHONY: build dev run test fmt check android install-apk install uninstall clean
 
 build:
-	$(V) -prod -o $(BIN) .
+	$(V) $(VFLAGS) -prod -o $(BIN) .
 
 dev:
-	$(V) -g -o $(BIN) .
+	$(V) $(VFLAGS) -g -o $(BIN) .
 
 run:
-	$(V) run . $(ARGS)
+	$(V) $(VFLAGS) run . $(ARGS)
 
 test:
 	$(V) test core
