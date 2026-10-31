@@ -33,11 +33,9 @@ mut:
 	error   bool
 }
 
-// open_account goes to an account screen, remembering the tab to return to.
+// open_account goes to an account screen; show remembers the tab to return
+// to.
 fn (mut app App) open_account(s Screen) {
-	if !app.screen.is_account() {
-		app.account_from = app.screen
-	}
 	app.navigate(s)
 }
 

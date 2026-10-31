@@ -61,6 +61,10 @@ pub fn (k KeyPress) shift() bool {
 	return k.mods & u32(1) != 0
 }
 
+pub fn (k KeyPress) alt() bool {
+	return k.mods & u32(4) != 0
+}
+
 pub enum ButtonStyle {
 	primary
 	secondary
@@ -400,6 +404,17 @@ pub fn (mut ui Ui) request_redraw() {
 pub fn (mut ui Ui) key_pressed(code gg.KeyCode, ctrl bool) bool {
 	for i, k in ui.keys {
 		if k.code == code && k.ctrl() == ctrl {
+			ui.keys.delete(i)
+			return true
+		}
+	}
+	return false
+}
+
+// alt_pressed reports (and consumes) an Alt+key press.
+pub fn (mut ui Ui) alt_pressed(code gg.KeyCode) bool {
+	for i, k in ui.keys {
+		if k.code == code && k.alt() && !k.ctrl() {
 			ui.keys.delete(i)
 			return true
 		}
@@ -932,6 +947,11 @@ pub fn (mut ui Ui) field(id string, r Rect, mut input Input, kind FieldKind, pla
 		mut entered := false
 		mut remaining := []KeyPress{}
 		for k in ui.keys {
+			// Alt+arrows go back and forward a screen, even while typing.
+			if k.alt() && k.code in [.left, .right] {
+				remaining << k
+				continue
+			}
 			match k.code {
 				.backspace {
 					if st.cursor > 0 {

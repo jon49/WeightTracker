@@ -68,6 +68,10 @@ mut:
 	ui     &gui.Ui
 	store  &core.Store
 	screen Screen
+	// Screens to go back to (Alt+←), and forward to again after going back
+	// (Alt+→).
+	history []Screen
+	forward []Screen
 	// Toast message at the bottom of the window.
 	toast       string
 	toast_error bool
@@ -225,12 +229,61 @@ fn (mut app App) wake_after(ms int) {
 	}(app.gg, ms)
 }
 
+// navigate opens a screen, which Back can return from.
 fn (mut app App) navigate(s Screen) {
+	if s == app.screen {
+		return
+	}
+	app.history << app.screen
+	if app.history.len > 50 {
+		app.history.delete(0)
+	}
+	app.forward.clear()
+	app.show(s)
+}
+
+// go_back returns to the screen before this one.
+fn (mut app App) go_back() {
+	for app.history.len > 0 {
+		s := app.history.pop()
+		if s != app.screen {
+			app.forward << app.screen
+			app.show(s)
+			return
+		}
+	}
+}
+
+// go_forward undoes a go_back.
+fn (mut app App) go_forward() {
+	for app.forward.len > 0 {
+		s := app.forward.pop()
+		if s != app.screen {
+			app.history << app.screen
+			app.show(s)
+			return
+		}
+	}
+}
+
+// forget_account_screens drops Login, Register and Reset Password from the
+// back and forward history, once logged in.
+fn (mut app App) forget_account_screens() {
+	app.history = app.history.filter(!it.is_account())
+	app.forward = app.forward.filter(!it.is_account())
+}
+
+// show switches to a screen without touching the history.
+fn (mut app App) show(s Screen) {
 	if s == app.screen {
 		return
 	}
 	app.commit_forms()
 	app.ui.blur()
+	// The account screens go back to the tab they were opened from.
+	if s.is_account() && !app.screen.is_account() {
+		app.account_from = app.screen
+	}
 	app.screen = s
 	app.ui.set_scroll('main', 0)
 	match s {
@@ -336,8 +389,9 @@ fn (mut app App) poll_workers() {
 		app.login.error = ''
 		app.show_toast('Logged in as ${login.tokens.email}')
 		app.start_sync(false)
+		app.forget_account_screens()
 		if app.screen == .login {
-			app.navigate(app.account_from)
+			app.show(app.account_from)
 		}
 	}
 	mut account := AccountDone{}
@@ -443,6 +497,20 @@ fn (mut app App) frame() {
 	// Keyboard shortcuts that no field used.
 	if ui.key_pressed(.r, true) {
 		app.start_sync(true)
+	}
+	if ui.alt_pressed(.left) {
+		app.ui.close_menu()
+		app.go_back()
+	}
+	if ui.alt_pressed(.right) {
+		app.ui.close_menu()
+		app.go_forward()
+	}
+	$if !android {
+		// Ctrl+W closes the window, which quits.
+		if ui.key_pressed(.w, true) {
+			app.gg.quit()
+		}
 	}
 	if !ui.has_focus() {
 		page := area.h * 0.9

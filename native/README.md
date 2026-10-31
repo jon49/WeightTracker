@@ -162,6 +162,10 @@ Touch (tap, drag to scroll) and the on-screen keyboard are handled.
   beside them to jump there. The fields under the strip set the first and
   last date (weight, for the histogram); Show all zooms back out.
 - **Sync now:** Ctrl+R.
+- **Back and forward:** Alt+← returns to the previous screen and Alt+→ goes
+  forward again, even while typing. Logging in drops Login, Register and
+  Reset Password from that history.
+- **Close:** Ctrl+W closes the window (on the desktop).
 
 Text fields are single-line except the comment, which grows with its text.
 Enter adds a line there; Ctrl+Enter or clicking elsewhere saves. Clipboard
