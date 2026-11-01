@@ -87,27 +87,39 @@ self.addEventListener("install", (e: Event) =>
 // @ts-ignore
 self.addEventListener("fetch", (e: FetchEvent) => e.respondWith(swFramework.start(e)))
 
+// waitUntil must be called before the handler first awaits, or it throws.
 // @ts-ignore
-self.addEventListener("activate", async (e: ExtendableEvent) => {
+self.addEventListener("activate", (e: ExtendableEvent) => {
   console.log("Service worker activated.");
-
-  if (isDev) {
-    let keys = await caches.keys();
-    e.waitUntil(
-      Promise.all([
-        ...keys.map((key) => caches.delete(key)),
-        // @ts-ignore
-        self.clients.claim(),
-      ]),
-    );
-    return;
-  }
-
-  let keys = await caches.keys(),
-    deleteMe = keys.map((x: string) => version !== x && caches.delete(x)).filter((x) => x);
-  if (deleteMe.length === 0) return;
-  e.waitUntil(Promise.all(deleteMe));
+  e.waitUntil(
+    (async () => {
+      let keys = await caches.keys();
+      if (isDev) {
+        await Promise.all([
+          ...keys.map((key) => caches.delete(key)),
+          // @ts-ignore
+          self.clients.claim(),
+        ]);
+        return;
+      }
+      await Promise.all(keys.filter((x) => x !== version).map((x) => caches.delete(x)));
+      await pruneCache();
+    })(),
+  );
 });
+
+// Drops cached files the current file map doesn't list: earlier releases'
+// hashed files. The cache is named for `version`, which only changes when it
+// is bumped by hand, so without this a release that didn't bump it added its
+// files to the ones before.
+async function pruneCache() {
+  let links: { file: string }[] = (self.sw as any).links;
+  let keep = new Set(links.map((x) => x.file));
+  let cache = await caches.open(version);
+  let stale = (await cache.keys()).filter((x) => !keep.has(new URL(x.url).pathname));
+  await Promise.all(stale.map((x) => cache.delete(x)));
+  if (stale.length) console.log(`Removed ${stale.length} old cached files.`);
+}
 
 self.addEventListener("message", (event) => {
   if (event.data.action === "skipWaiting") {
