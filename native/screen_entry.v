@@ -200,11 +200,21 @@ fn (mut app App) draw_entry(x f32, y0 f32, w f32) f32 {
 	ev3, y = app.labeled_field('entry-comments', 'Comment', x, y, w, mut app.entry.comments,
 		.multiline, '')
 	app.on_entry_field(ev3)
-	ui.text(x, y - 8, 'Enter adds a line; Ctrl+Enter or clicking elsewhere saves.', gui.TextStyle{
-		size:  12
-		color: ui.theme.muted
-	})
-	return y + 20 - y0
+	// How to finish a comment, for a keyboard and mouse. A phone's keyboard
+	// has its own Done, and tapping elsewhere saves, so it gets no hint.
+	$if !android && !ios {
+		hint := gui.TextStyle{
+			size:  12
+			color: ui.theme.muted
+		}
+		y -= 8
+		for line in ui.wrap('Enter adds a line; Ctrl+Enter or clicking elsewhere saves.', w,
+			hint) {
+			ui.text(x, y, line, hint)
+			y += ui.line_height(12)
+		}
+	}
+	return y + 12 - y0
 }
 
 fn (mut app App) on_entry_field(ev gui.FieldEvent) {
