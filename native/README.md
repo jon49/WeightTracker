@@ -64,7 +64,7 @@ gui/              a small immediate-mode toolkit on gg: buttons, text fields, dr
                   nothing about the app.
 core/             no GUI imports: models, dates, stats and charts, the JSON store,
                   and the TrailBase sync client
-assets/fonts/     DejaVu Sans, embedded in the binary so text looks the same everywhere
+fonts/           DejaVu Sans, embedded in the binary so text looks the same everywhere
 ```
 
 `core` is plain V and reusable as is. `gui` uses only `gg`/sokol, which also
@@ -138,6 +138,13 @@ Touch (tap, drag to scroll) and the on-screen keyboard are handled.
   - `-d sokol_gles3`: vab builds sokol for GLES 3 but doesn't tell V, and
     gg would compile desktop GLSL. `-prod` for an optimized build (vab
     signs it with its debug key; pass `--keystore` for a release).
+  - Phones only need arm64-v8a, and each processor type adds a copy of the
+    app (about 4.4 MB), so `make android` builds for arm64-v8a only (`ARCHS=`
+    to change it) and `make install-apk` for the connected device (the test
+    emulator is x86_64).
+  - The fonts are embedded in the app, so they live in `fonts/` rather than
+    `assets/`, which vab would copy into the APK as well; only their license
+    goes in as an asset.
   - stderr goes to logcat (`tasks/android-logs.sh`), for sokol's messages.
   - The emulator's default software GPU only has GLES 3.0; start it with
     `-gpu swangle_indirect` (or `host`).
