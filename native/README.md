@@ -81,12 +81,14 @@ run on macOS, Windows, iOS and Android.
 - Records use the web client's shape and keys (`YYYY-MM-DD`, `user-settings`).
   Sync uses the same `POST /api/data/weight` last-write-wins protocol and
   TrailBase's `/api/auth/v1/{login,refresh,logout,delete}`.
-- Sync runs at startup, 3 seconds after an edit, when the window regains focus
-  (at most once a minute), and on demand (the ↻ button or Ctrl+R). Edits made
+- Sync runs only on demand (the ↻ button, Ctrl+R, or Settings' Sync now),
+  never on its own: not at startup, after an edit, on regaining focus, or
+  after logging in. Settings shows how many changes are waiting. Edits made
   while a sync is in flight are kept and uploaded on the next sync.
 - If another device changed `user-settings` since the last sync, the server
   reports a conflict. The app keeps its own values, fills in the ones it lacks
-  (such as height), keeps the earlier start date, and uploads the merge.
+  (such as height), keeps the earlier start date, and uploads the merge
+  straight away, as part of the same sync.
 - Chart settings stay on each device, as on the web.
 - Login, Register and Reset Password are screens of their own, like the
   web app's pages, opened from Settings or the header's Login button; they

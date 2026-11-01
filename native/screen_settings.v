@@ -65,7 +65,6 @@ fn (mut app App) save_settings() {
 		app.show_error(errors.join('\n'))
 	}
 	app.load_settings()
-	app.schedule_sync()
 }
 
 fn (mut app App) on_settings_field(ev gui.FieldEvent) {

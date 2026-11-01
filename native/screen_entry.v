@@ -74,7 +74,6 @@ fn (mut app App) save_entry() {
 		app.show_error(errors.join('\n'))
 	}
 	app.load_entry(e.date)
-	app.schedule_sync()
 }
 
 fn (mut app App) change_date(date string) {

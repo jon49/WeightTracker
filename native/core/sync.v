@@ -39,6 +39,8 @@ pub struct SyncSummary {
 pub:
 	received int
 	uploaded int
+	// Settings were merged with another device's and still need uploading.
+	merged bool
 }
 
 pub fn (s &Store) begin_sync() SyncRequest {
@@ -138,6 +140,7 @@ pub fn (mut s Store) finish_sync(req SyncRequest, res SyncResponse) !SyncSummary
 	})
 
 	mut received := 0
+	mut uploads_merge := false
 	for item in any_arr(root['data'] or { json2.null }) {
 		m := as_map(item)
 		key := parse_key(m['key'] or { json2.null })
@@ -185,6 +188,7 @@ pub fn (mut s Store) finish_sync(req SyncRequest, res SyncResponse) !SyncSummary
 		if merged != s.user_settings {
 			s.user_settings = merged
 			s.touch(user_settings_key, true)
+			uploads_merge = true
 		}
 	}
 
@@ -197,6 +201,7 @@ pub fn (mut s Store) finish_sync(req SyncRequest, res SyncResponse) !SyncSummary
 	return SyncSummary{
 		received: received
 		uploaded: uploaded
+		merged:   uploads_merge
 	}
 }
 

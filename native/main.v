@@ -84,7 +84,6 @@ fn on_init(mut app App) {
 	app.base_scale = platform_scale() or { app.gg.scale }
 	app.apply_zoom()
 	platform_start(mut app)
-	app.start_sync(false)
 }
 
 // gg has just reset its scale for the window's screen; zoom it again.

@@ -81,8 +81,6 @@ mut:
 	// Ignore the answer to the sync in flight (the account was deleted).
 	drop_sync  bool
 	sync_ch    chan SyncDone
-	sync_due   i64
-	last_sync  i64
 	logging_in bool
 	login_ch   chan LoginDone
 	// Registering or asking for a reset link (.register or .forgot), on a
@@ -226,7 +224,7 @@ fn (mut app App) show_error(msg string) {
 }
 
 // wake_after requests a redraw later; in ui_mode nothing is drawn without
-// input, so timers (toasts, delayed sync) need a nudge.
+// input, so timers (toasts) need a nudge.
 fn (mut app App) wake_after(ms int) {
 	spawn fn (ctx &gg.Context, ms int) {
 		time.sleep(ms * time.millisecond)
@@ -316,25 +314,15 @@ fn (mut app App) commit_forms() {
 
 // ---- sync ----
 
-fn (mut app App) schedule_sync() {
-	if !app.store.auth.logged_in() {
-		return
-	}
-	app.sync_due = now_ms() + 3000
-	app.wake_after(3050)
-}
-
 fn (mut app App) on_focus() {
 	// The system may have switched between light and dark meanwhile.
 	if app.store.theme == '' {
 		app.apply_theme()
 	}
-	// Pick up changes made on other devices.
-	if now_ms() - app.last_sync > 60_000 {
-		app.start_sync(false)
-	}
 }
 
+// start_sync runs only when asked for (the ↻ button, Ctrl+R, Settings' Sync
+// now); nothing syncs on its own.
 fn (mut app App) start_sync(manual bool) {
 	if app.syncing {
 		return
@@ -347,9 +335,7 @@ fn (mut app App) start_sync(manual bool) {
 		return
 	}
 	app.commit_forms()
-	app.sync_due = 0
 	app.syncing = true
-	app.last_sync = now_ms()
 	req := app.store.begin_sync()
 	spawn sync_worker(app.sync_ch, req, manual, app.gg)
 }
@@ -382,9 +368,10 @@ fn (mut app App) poll_workers() {
 		if summary.received > 0 {
 			app.refresh_forms()
 		}
-		// Merged settings, or edits made during the sync, still need uploading.
-		if app.store.pending.len > 0 {
-			app.schedule_sync()
+		// Finish the sync by uploading settings merged with another device's.
+		// Edits made during the sync wait for the next one.
+		if summary.merged {
+			app.start_sync(false)
 		}
 	}
 	mut login := LoginDone{}
@@ -399,7 +386,6 @@ fn (mut app App) poll_workers() {
 		app.login.password = gui.Input{}
 		app.login.error = ''
 		app.show_toast('Logged in as ${login.tokens.email}')
-		app.start_sync(false)
 		app.forget_account_screens()
 		if app.screen == .login {
 			app.show(app.account_from)
@@ -414,9 +400,6 @@ fn (mut app App) poll_workers() {
 	if app.delete_ch.try_pop(mut deleted) == .success {
 		app.deleting = false
 		app.on_account_deleted(deleted)
-	}
-	if app.sync_due > 0 && now_ms() >= app.sync_due {
-		app.start_sync(false)
 	}
 }
 
@@ -489,7 +472,6 @@ fn (mut app App) on_account_deleted(res core.DeleteResult) {
 	// A sync in flight was sent before the delete; its answer must not
 	// write anything back.
 	app.drop_sync = app.syncing
-	app.sync_due = 0
 	app.store.wipe() or { app.show_error(err.msg()) }
 	app.load_entry(core.default_entry_date().str())
 	app.load_settings()

@@ -206,6 +206,7 @@ fn test_sync_round_trip() {
 	summary := s.finish_sync(req, res)!
 	assert summary.received == 1
 	assert summary.uploaded == 2
+	assert summary.merged
 	assert s.entry('2026-10-19').weight == 182
 	assert s.entry('2026-10-19').rev == 40
 	// The local edit wins over the incoming row and is still pending.
