@@ -6,9 +6,9 @@ import core
 import gui
 
 // Fonts are embedded so text looks the same on every platform and nothing
-// depends on what is installed (DejaVu Sans, see assets/fonts/LICENSE-DejaVu.txt).
-const font_regular = $embed_file('assets/fonts/DejaVuSans.ttf')
-const font_bold = $embed_file('assets/fonts/DejaVuSans-Bold.ttf')
+// depends on what is installed (DejaVu Sans, see fonts/LICENSE-DejaVu.txt).
+const font_regular = $embed_file('fonts/DejaVuSans.ttf')
+const font_bold = $embed_file('fonts/DejaVuSans-Bold.ttf')
 
 fn main() {
 	platform_init()
