@@ -1,11 +1,4 @@
-/* The unhashed base.css path here requires server-side resolution to the
- * built hashed file (e.g. /web/css/base.4e713321.css):
- *   - dev: handled by @jon49/sw's dev proxy via the file-map.
- *   - prod: NGINX must serve a hashed equivalent for /web/css/base.css
- *     (e.g. `try_files $uri $uri.* =404;` or an explicit alias).
- *   - service worker: also rewrites unhashed → hashed once active.
- */
-@import url("/web/css/base.css");
+/* Goes after base.css (nimble), which every page links before this file. */
 
 :root {
   /* Keep the purple accent from the old Pico build (oklch 0.55 0.197 278).

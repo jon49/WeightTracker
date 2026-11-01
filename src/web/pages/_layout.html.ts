@@ -65,6 +65,7 @@ const render = async ({ main, head, scripts, nav, title, cssLinks }: LayoutTempl
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title} - Weight</title>
     <link rel="icon" type="image/x-icon" href="/web/images/weight.ico">
+    <link href="/web/css/base.css" rel=stylesheet>
     <link href="/web/css/app.css" rel=stylesheet>
     ${when(cssLinks?.length, () => cssLinks?.map((x) => html`<link rel="stylesheet" href="$${x}">`))}
     <link rel="manifest" href="/web/manifest.json">
