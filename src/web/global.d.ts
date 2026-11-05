@@ -7,4 +7,4 @@ declare global {
   }
 }
 
-export interface App extends SettingsApp, SharedApp { }
+export interface App extends SettingsApp, SharedApp {}

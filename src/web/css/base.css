@@ -56,7 +56,7 @@
     font: inherit;
     letter-spacing: inherit;
   }
-  :where(button, [type=button], [type=reset], [type=submit]) {
+  :where(button, [type="button"], [type="reset"], [type="submit"]) {
     -webkit-appearance: button;
   }
   :where(progress) {
@@ -65,7 +65,7 @@
   :where(textarea) {
     resize: vertical;
   }
-  :where([type=search]) {
+  :where([type="search"]) {
     -webkit-appearance: textfield;
     outline-offset: -2px;
   }
@@ -80,17 +80,17 @@
     -webkit-appearance: button;
     font: inherit;
   }
-  :where([hidden]:not([hidden=until-found i])) {
+  :where([hidden]:not([hidden="until-found" i])) {
     display: none !important;
   }
   :where(a, area, button, input, label, select, summary, textarea, [tabindex]) {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
   }
-  :where([aria-busy=true]) {
+  :where([aria-busy="true"]) {
     cursor: progress;
   }
-  :where([aria-disabled=true], [disabled]) {
+  :where([aria-disabled="true"], [disabled]) {
     cursor: not-allowed;
   }
   @media (prefers-reduced-motion: reduce) {
@@ -113,24 +113,49 @@
   :root {
     color-scheme: light dark;
     --nc-surface-hue: 250;
-    --nc-surface-1: light-dark(oklch(0.985 0.002 var(--nc-surface-hue)), oklch(0.17 0.005 calc(var(--nc-surface-hue) + 10)));
-    --nc-surface-2: light-dark(oklch(0.955 0.002 var(--nc-surface-hue)), oklch(0.2 0.005 calc(var(--nc-surface-hue) + 10)));
-    --nc-surface-3: light-dark(oklch(0.925 0.002 var(--nc-surface-hue)), oklch(0.23 0.005 calc(var(--nc-surface-hue) + 10)));
-    --nc-surface-4: light-dark(oklch(0.885 0.002 var(--nc-surface-hue)), oklch(0.27 0.005 calc(var(--nc-surface-hue) + 10)));
-    --nc-text: light-dark(oklch(0.28 0.005 var(--nc-surface-hue)), oklch(0.86 0.005 var(--nc-surface-hue)));
-    --nc-border: light-dark(oklch(0.83 0.005 var(--nc-surface-hue)), oklch(0.28 0.005 calc(var(--nc-surface-hue) + 10)));
+    --nc-surface-1: light-dark(
+      oklch(0.985 0.002 var(--nc-surface-hue)),
+      oklch(0.17 0.005 calc(var(--nc-surface-hue) + 10))
+    );
+    --nc-surface-2: light-dark(
+      oklch(0.955 0.002 var(--nc-surface-hue)),
+      oklch(0.2 0.005 calc(var(--nc-surface-hue) + 10))
+    );
+    --nc-surface-3: light-dark(
+      oklch(0.925 0.002 var(--nc-surface-hue)),
+      oklch(0.23 0.005 calc(var(--nc-surface-hue) + 10))
+    );
+    --nc-surface-4: light-dark(
+      oklch(0.885 0.002 var(--nc-surface-hue)),
+      oklch(0.27 0.005 calc(var(--nc-surface-hue) + 10))
+    );
+    --nc-text: light-dark(
+      oklch(0.28 0.005 var(--nc-surface-hue)),
+      oklch(0.86 0.005 var(--nc-surface-hue))
+    );
+    --nc-border: light-dark(
+      oklch(0.83 0.005 var(--nc-surface-hue)),
+      oklch(0.28 0.005 calc(var(--nc-surface-hue) + 10))
+    );
     --nc-primary: light-dark(oklch(0.5 0.2 250), oklch(0.6 0.2 250));
-    --nc-primary-hover: light-dark(oklch(from var(--nc-primary) calc(l - 0.1) c h), oklch(from var(--nc-primary) calc(l + 0.1) c h));
+    --nc-primary-hover: light-dark(
+      oklch(from var(--nc-primary) calc(l - 0.1) c h),
+      oklch(from var(--nc-primary) calc(l + 0.1) c h)
+    );
     --nc-primary-focus: oklch(from var(--nc-primary) l c h / 0.4);
     --nc-primary-contrast: light-dark(#fff, oklch(0.15 0.005 250));
     --nc-secondary: light-dark(oklch(0.45 0.05 250), oklch(0.6 0.05 250));
-    --nc-secondary-hover: light-dark(oklch(from var(--nc-secondary) calc(l - 0.1) c h), oklch(from var(--nc-secondary) calc(l + 0.1) c h));
+    --nc-secondary-hover: light-dark(
+      oklch(from var(--nc-secondary) calc(l - 0.1) c h),
+      oklch(from var(--nc-secondary) calc(l + 0.1) c h)
+    );
     --nc-secondary-focus: oklch(from var(--nc-secondary) l c h / 0.3);
     --nc-secondary-contrast: light-dark(#fff, oklch(0.15 0.005 250));
     --nc-valid: light-dark(oklch(0.52 0.17 145), oklch(0.65 0.2 145));
     --nc-invalid: light-dark(oklch(0.55 0.22 25), oklch(0.65 0.22 25));
     --nc-font-sans: system-ui, sans-serif;
-    --nc-font-mono: ui-monospace, Cascadia Code, Source Code Pro, Menlo, Consolas, DejaVu Sans Mono, monospace;
+    --nc-font-mono:
+      ui-monospace, Cascadia Code, Source Code Pro, Menlo, Consolas, DejaVu Sans Mono, monospace;
     --nc-spacing: 1rem;
     --nc-page-padding-inline: var(--nc-spacing);
     --nc-page-padding-block: var(--nc-spacing);
@@ -138,10 +163,10 @@
     --nc-control-padding-block: 0.5em;
     --nc-content-width: 60ch;
   }
-  [data-theme=dark] {
+  [data-theme="dark"] {
     color-scheme: dark;
   }
-  [data-theme=light] {
+  [data-theme="light"] {
     color-scheme: light;
   }
 }
@@ -182,7 +207,42 @@
 }
 @layer nimble.base {
   :root {
-    --nc-content-shadow: 0 0 5px 0 light-dark(oklch(0.55 0.01 var(--nc-surface-hue) / 0.03), oklch(0.85 0.01 calc(var(--nc-surface-hue) + 10) / 0.015)), 0 0 1px -2px light-dark(oklch(0.55 0.01 var(--nc-surface-hue) / 0.04), oklch(0.85 0.01 calc(var(--nc-surface-hue) + 10) / 0.02)), 0 0 2px -2px light-dark(oklch(0.55 0.01 var(--nc-surface-hue) / 0.04), oklch(0.85 0.01 calc(var(--nc-surface-hue) + 10) / 0.025)), 0 0 5px -2px light-dark(oklch(0.55 0.01 var(--nc-surface-hue) / 0.05), oklch(0.85 0.01 calc(var(--nc-surface-hue) + 10) / 0.03)), 0 0 9px -2px light-dark(oklch(0.55 0.01 var(--nc-surface-hue) / 0.06), oklch(0.85 0.01 calc(var(--nc-surface-hue) + 10) / 0.035)), 0 0 16px -2px light-dark(oklch(0.55 0.01 var(--nc-surface-hue) / 0.07), oklch(0.85 0.01 calc(var(--nc-surface-hue) + 10) / 0.04)), 0 0 0px 0.0625rem light-dark(oklch(0.55 0.01 var(--nc-surface-hue) / 0.015), oklch(0.85 0.01 calc(var(--nc-surface-hue) + 10) / 0.01));
+    --nc-content-shadow:
+      0 0 5px 0
+        light-dark(
+          oklch(0.55 0.01 var(--nc-surface-hue) / 0.03),
+          oklch(0.85 0.01 calc(var(--nc-surface-hue) + 10) / 0.015)
+        ),
+      0 0 1px -2px
+        light-dark(
+          oklch(0.55 0.01 var(--nc-surface-hue) / 0.04),
+          oklch(0.85 0.01 calc(var(--nc-surface-hue) + 10) / 0.02)
+        ),
+      0 0 2px -2px
+        light-dark(
+          oklch(0.55 0.01 var(--nc-surface-hue) / 0.04),
+          oklch(0.85 0.01 calc(var(--nc-surface-hue) + 10) / 0.025)
+        ),
+      0 0 5px -2px
+        light-dark(
+          oklch(0.55 0.01 var(--nc-surface-hue) / 0.05),
+          oklch(0.85 0.01 calc(var(--nc-surface-hue) + 10) / 0.03)
+        ),
+      0 0 9px -2px
+        light-dark(
+          oklch(0.55 0.01 var(--nc-surface-hue) / 0.06),
+          oklch(0.85 0.01 calc(var(--nc-surface-hue) + 10) / 0.035)
+        ),
+      0 0 16px -2px
+        light-dark(
+          oklch(0.55 0.01 var(--nc-surface-hue) / 0.07),
+          oklch(0.85 0.01 calc(var(--nc-surface-hue) + 10) / 0.04)
+        ),
+      0 0 0px 0.0625rem
+        light-dark(
+          oklch(0.55 0.01 var(--nc-surface-hue) / 0.015),
+          oklch(0.85 0.01 calc(var(--nc-surface-hue) + 10) / 0.01)
+        );
   }
   body::before {
     content: "";
@@ -191,7 +251,11 @@
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: clamp(0px, calc((100% - var(--_column-width) - 2 * var(--nc-spacing)) * 9999), var(--_column-width));
+    width: clamp(
+      0px,
+      calc((100% - var(--_column-width) - 2 * var(--nc-spacing)) * 9999),
+      var(--_column-width)
+    );
     box-shadow: var(--nc-content-shadow);
     pointer-events: none;
     z-index: -1;
@@ -201,7 +265,11 @@
   .bleed-edge {
     grid-column: 1/-1;
     width: 100%;
-    max-width: clamp(var(--_column-width), calc((100% - var(--_column-width) - 2 * var(--nc-spacing)) * -9999), 100%);
+    max-width: clamp(
+      var(--_column-width),
+      calc((100% - var(--_column-width) - 2 * var(--nc-spacing)) * -9999),
+      100%
+    );
     margin-inline: auto;
     box-shadow: none;
     position: relative;
@@ -263,10 +331,13 @@
   a[href^="javascript:"]::after {
     content: none;
   }
-  pre, blockquote {
+  pre,
+  blockquote {
     page-break-inside: avoid;
   }
-  h2, h3, h4 {
+  h2,
+  h3,
+  h4 {
     page-break-after: avoid;
   }
   img {
@@ -325,17 +396,31 @@
     font-weight: 700;
     text-wrap: balance;
   }
-  p:where(:not(.no-nimble, .no-nimble *)), ul:where(:not(.no-nimble, .no-nimble *)), ol:where(:not(.no-nimble, .no-nimble *)), dl:where(:not(.no-nimble, .no-nimble *)), blockquote:where(:not(.no-nimble, .no-nimble *)), pre:where(:not(.no-nimble, .no-nimble *)), table:where(:not(.no-nimble, .no-nimble *)), figure:where(:not(.no-nimble, .no-nimble *)), form:where(:not(.no-nimble, .no-nimble *)), fieldset:where(:not(.no-nimble, .no-nimble *)) {
+  p:where(:not(.no-nimble, .no-nimble *)),
+  ul:where(:not(.no-nimble, .no-nimble *)),
+  ol:where(:not(.no-nimble, .no-nimble *)),
+  dl:where(:not(.no-nimble, .no-nimble *)),
+  blockquote:where(:not(.no-nimble, .no-nimble *)),
+  pre:where(:not(.no-nimble, .no-nimble *)),
+  table:where(:not(.no-nimble, .no-nimble *)),
+  figure:where(:not(.no-nimble, .no-nimble *)),
+  form:where(:not(.no-nimble, .no-nimble *)),
+  fieldset:where(:not(.no-nimble, .no-nimble *)) {
     margin-top: 0;
     margin-bottom: var(--nc-spacing);
   }
-  body > :first-child:where(:not(.no-nimble, .no-nimble *)), body > :first-child > :first-child:where(:not(.no-nimble, .no-nimble *)) {
+  body > :first-child:where(:not(.no-nimble, .no-nimble *)),
+  body > :first-child > :first-child:where(:not(.no-nimble, .no-nimble *)) {
     margin-top: 0;
   }
-  body > :nth-last-child(1 of :not(script, style, dialog)):where(:not(.no-nimble, .no-nimble *)), body > :nth-last-child(1 of :not(script, style, dialog)) > :last-child:where(:not(.no-nimble, .no-nimble *)) {
+  body > :nth-last-child(1 of :not(script, style, dialog)):where(:not(.no-nimble, .no-nimble *)),
+  body
+    > :nth-last-child(1 of :not(script, style, dialog))
+    > :last-child:where(:not(.no-nimble, .no-nimble *)) {
     margin-bottom: 0;
   }
-  ul:where(:not(.no-nimble, .no-nimble *)), ol:where(:not(.no-nimble, .no-nimble *)) {
+  ul:where(:not(.no-nimble, .no-nimble *)),
+  ol:where(:not(.no-nimble, .no-nimble *)) {
     padding-inline-start: 1.5em;
   }
   :where(li):where(:not(.no-nimble, .no-nimble *)) {
@@ -358,7 +443,8 @@
     border-inline-start: 0.25rem solid var(--nc-border);
     font-style: italic;
   }
-  :where(blockquote) footer:where(:not(.no-nimble, .no-nimble *)), :where(blockquote) cite:where(:not(.no-nimble, .no-nimble *)) {
+  :where(blockquote) footer:where(:not(.no-nimble, .no-nimble *)),
+  :where(blockquote) cite:where(:not(.no-nimble, .no-nimble *)) {
     font-style: normal;
     font-size: 0.9em;
     color: color-mix(in oklch, var(--nc-text), transparent 40%);
@@ -385,7 +471,9 @@
     text-decoration: underline;
     text-underline-offset: 0.15em;
     text-decoration-color: color-mix(in oklch, var(--nc-primary), transparent 50%);
-    transition: color 0.2s, text-decoration-color 0.2s;
+    transition:
+      color 0.2s,
+      text-decoration-color 0.2s;
   }
   :where(a:not(.nc-button)):visited:where(:not(.no-nimble, .no-nimble *)) {
     color: color-mix(in oklch, var(--nc-primary) 40%, oklch(0.38 0.15 310));
@@ -397,7 +485,9 @@
   }
 }
 @layer nimble.base {
-  :where(button, [type=submit], [type=reset], [type=button], .nc-button):where(:not(.no-nimble, .no-nimble *)) {
+  :where(button, [type="submit"], [type="reset"], [type="button"], .nc-button):where(
+    :not(.no-nimble, .no-nimble *)
+  ) {
     --_btn-padding-v: var(--nc-control-padding-block, 0.5em);
     --_btn-padding-h: 1em;
     padding: var(--_btn-padding-v) var(--_btn-padding-h);
@@ -413,7 +503,9 @@
     display: inline-block;
     text-align: center;
     margin: 0;
-    transition: background-color 0.2s, border-color 0.2s;
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
   }
   :where(button, .nc-button:not(input)):where(:not(.no-nimble, .no-nimble *)) {
     display: inline-flex;
@@ -425,34 +517,42 @@
   :where(button, .nc-button:not(input)) > svg:where(:not(.no-nimble, .no-nimble *)) {
     flex-shrink: 0;
   }
-  :where(button, [type=submit], [type=reset], [type=button], .nc-button):hover:where(:not(.no-nimble, .no-nimble *)) {
+  :where(button, [type="submit"], [type="reset"], [type="button"], .nc-button):hover:where(
+      :not(.no-nimble, .no-nimble *)
+    ) {
     background-color: var(--nc-primary-hover);
     border-color: var(--nc-primary-hover);
   }
-  :where(button, [type=submit], [type=reset], [type=button], .nc-button):focus-visible:where(:not(.no-nimble, .no-nimble *)) {
+  :where(button, [type="submit"], [type="reset"], [type="button"], .nc-button):focus-visible:where(
+      :not(.no-nimble, .no-nimble *)
+    ) {
     box-shadow: 0 0 0 2px var(--nc-primary-focus);
     outline: none;
   }
-  :where([type=reset]):where(:not(.no-nimble, .no-nimble *)) {
+  :where([type="reset"]):where(:not(.no-nimble, .no-nimble *)) {
     background-color: var(--nc-secondary);
     border-color: var(--nc-secondary);
     color: var(--nc-secondary-contrast);
   }
-  :where([type=reset]):hover:where(:not(.no-nimble, .no-nimble *)) {
+  :where([type="reset"]):hover:where(:not(.no-nimble, .no-nimble *)) {
     background-color: var(--nc-secondary-hover);
     border-color: var(--nc-secondary-hover);
   }
-  :where([type=reset]):focus-visible:where(:not(.no-nimble, .no-nimble *)) {
+  :where([type="reset"]):focus-visible:where(:not(.no-nimble, .no-nimble *)) {
     box-shadow: 0 0 0 2px var(--nc-secondary-focus);
   }
-  :where(button, [type=submit], [type=reset], [type=button], .nc-button).inline:where(:not(.no-nimble, .no-nimble *)) {
+  :where(button, [type="submit"], [type="reset"], [type="button"], .nc-button).inline:where(
+      :not(.no-nimble, .no-nimble *)
+    ) {
     --_btn-padding-v: 0.05em;
     --_btn-padding-h: 0.4em;
     margin: 0.1em 0.15em;
     font-size: 0.875em;
     vertical-align: baseline;
   }
-  :where(button, [type=submit], [type=reset], [type=button], .nc-button):disabled:where(:not(.no-nimble, .no-nimble *)) {
+  :where(button, [type="submit"], [type="reset"], [type="button"], .nc-button):disabled:where(
+      :not(.no-nimble, .no-nimble *)
+    ) {
     opacity: 0.5;
     cursor: not-allowed;
     pointer-events: none;
@@ -467,10 +567,7 @@
   }
   .nc-join > * + :where(:not(.no-nimble, .no-nimble *)) {
     --_divider: "";
-    --_divider-color: var(
-      --nc-join-divider,
-      color-mix(in oklch, currentColor, transparent 70%)
-    );
+    --_divider-color: var(--nc-join-divider, color-mix(in oklch, currentColor, transparent 70%));
   }
   .nc-join > * + *:where(:not(.no-nimble, .no-nimble *))::before {
     content: var(--_divider);
@@ -482,16 +579,20 @@
     background: var(--_divider-color);
     pointer-events: none;
   }
-  .nc-join > :not(.secondary):not(.outline) + .secondary:where(:not(.no-nimble, .no-nimble *)), .nc-join > .secondary + :not(.secondary):not(.outline):where(:not(.no-nimble, .no-nimble *)) {
+  .nc-join > :not(.secondary):not(.outline) + .secondary:where(:not(.no-nimble, .no-nimble *)),
+  .nc-join > .secondary + :not(.secondary):not(.outline):where(:not(.no-nimble, .no-nimble *)) {
     --_divider: none;
   }
-  .nc-join > :not(.secondary):not(.outline) + .outline:where(:not(.no-nimble, .no-nimble *)), .nc-join > .outline + :not(.secondary):not(.outline):where(:not(.no-nimble, .no-nimble *)) {
+  .nc-join > :not(.secondary):not(.outline) + .outline:where(:not(.no-nimble, .no-nimble *)),
+  .nc-join > .outline + :not(.secondary):not(.outline):where(:not(.no-nimble, .no-nimble *)) {
     --_divider: none;
   }
-  .nc-join > .secondary + .outline:where(:not(.no-nimble, .no-nimble *)), .nc-join > .outline + .secondary:where(:not(.no-nimble, .no-nimble *)) {
+  .nc-join > .secondary + .outline:where(:not(.no-nimble, .no-nimble *)),
+  .nc-join > .outline + .secondary:where(:not(.no-nimble, .no-nimble *)) {
     --_divider: none;
   }
-  .nc-join > input + :where(:not(.no-nimble, .no-nimble *)), .nc-join > select + :where(:not(.no-nimble, .no-nimble *)) {
+  .nc-join > input + :where(:not(.no-nimble, .no-nimble *)),
+  .nc-join > select + :where(:not(.no-nimble, .no-nimble *)) {
     --_divider: none;
   }
   .nc-join > :first-child:where(:not(.no-nimble, .no-nimble *)) {
@@ -506,18 +607,19 @@
     border: 1px solid var(--nc-primary);
     border-radius: var(--nc-radius);
   }
-  .nc-join:has(.outline):not(:has(> :not(.outline))) > .outline:where(:not(.no-nimble, .no-nimble *)) {
+  .nc-join:has(.outline):not(:has(> :not(.outline)))
+    > .outline:where(:not(.no-nimble, .no-nimble *)) {
     border: none;
   }
   .nc-join > .outline + .outline:where(:not(.no-nimble, .no-nimble *))::before {
     --_divider-color: var(--nc-join-divider, currentColor);
   }
-  [role=search] .nc-join > :first-child:where(:not(.no-nimble, .no-nimble *)) {
+  [role="search"] .nc-join > :first-child:where(:not(.no-nimble, .no-nimble *)) {
     border-start-start-radius: 5rem;
     border-end-start-radius: 5rem;
     padding-inline-start: 1.25em;
   }
-  [role=search] .nc-join > :last-child:where(:not(.no-nimble, .no-nimble *)) {
+  [role="search"] .nc-join > :last-child:where(:not(.no-nimble, .no-nimble *)) {
     border-start-end-radius: 5rem;
     border-end-end-radius: 5rem;
     padding-inline-end: 1.25em;
@@ -555,31 +657,89 @@
   }
 }
 @layer nimble.base {
-  :where(input:not([type=checkbox], [type=radio], [type=range], [type=file], [type=color], [type=submit], [type=button], [type=reset]), select, textarea):where(:not(.no-nimble, .no-nimble *)) {
+  :where(
+    input:not(
+      [type="checkbox"],
+      [type="radio"],
+      [type="range"],
+      [type="file"],
+      [type="color"],
+      [type="submit"],
+      [type="button"],
+      [type="reset"]
+    ),
+    select,
+    textarea
+  ):where(:not(.no-nimble, .no-nimble *)) {
     --_input-bg: color-mix(in oklch, var(--nc-surface-1), var(--nc-surface-2) 20%);
     padding: var(--nc-control-padding-block, 0.5em) 0.75em;
-    min-height: calc(1.5em + var(--nc-control-padding-block, 0.5em) + var(--nc-control-padding-block, 0.5em) + 2px);
+    min-height: calc(
+      1.5em + var(--nc-control-padding-block, 0.5em) + var(--nc-control-padding-block, 0.5em) + 2px
+    );
     background-color: var(--_input-bg);
     border: 1px solid var(--nc-border);
     border-radius: var(--nc-radius);
     color: var(--nc-text);
     font: inherit;
     font-size: 1rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
   }
-  :where(input:not([type=checkbox], [type=radio], [type=range], [type=file], [type=color], [type=submit], [type=button], [type=reset], [type=date], [type=month], [type=week], [type=time], [type=datetime-local]), select, textarea):where(:not(.no-nimble, .no-nimble *)) {
+  :where(
+    input:not(
+      [type="checkbox"],
+      [type="radio"],
+      [type="range"],
+      [type="file"],
+      [type="color"],
+      [type="submit"],
+      [type="button"],
+      [type="reset"],
+      [type="date"],
+      [type="month"],
+      [type="week"],
+      [type="time"],
+      [type="datetime-local"]
+    ),
+    select,
+    textarea
+  ):where(:not(.no-nimble, .no-nimble *)) {
     width: 100%;
   }
-  :where(form, fieldset) > :where(:nth-child(n+2 of :where(label, input:not([type=hidden]), select, textarea, button, .nc-button, .nc-join, small))):where(:not(.no-nimble, .no-nimble *)) {
+  :where(form, fieldset)
+    > :where(
+      :nth-child(
+        n
+          + 2
+          of
+          :where(
+            label,
+            input:not([type="hidden"]),
+            select,
+            textarea,
+            button,
+            .nc-button,
+            .nc-join,
+            small
+          )
+      )
+    ):where(:not(.no-nimble, .no-nimble *)) {
     margin-block-start: var(--nc-spacing);
   }
-  :where(form, fieldset) > :where(label) + :where(input, select, textarea):where(:not(.no-nimble, .no-nimble *)) {
+  :where(form, fieldset)
+    > :where(label)
+    + :where(input, select, textarea):where(:not(.no-nimble, .no-nimble *)) {
     margin-block-start: 0.25em;
   }
-  :where(form, fieldset) > :where(label) + :where([type=file], [type=range]):where(:not(.no-nimble, .no-nimble *)) {
+  :where(form, fieldset)
+    > :where(label)
+    + :where([type="file"], [type="range"]):where(:not(.no-nimble, .no-nimble *)) {
     margin-block-start: 0.5em;
   }
-  :where(form, fieldset) > :where(label:has([type=checkbox], [type=radio])) + :where(label:has([type=checkbox], [type=radio])):where(:not(.no-nimble, .no-nimble *)) {
+  :where(form, fieldset)
+    > :where(label:has([type="checkbox"], [type="radio"]))
+    + :where(label:has([type="checkbox"], [type="radio"])):where(:not(.no-nimble, .no-nimble *)) {
     margin-block-start: 0.5em;
   }
   :where(input, select, textarea):focus-visible:where(:not(.no-nimble, .no-nimble *)) {
@@ -587,34 +747,50 @@
     box-shadow: 0 0 0 2px var(--nc-primary-focus);
     outline: none;
   }
-  :where(input:not([type=submit], [type=button], [type=reset]), select, textarea) + :where(small):where(:not(.no-nimble, .no-nimble *)) {
+  :where(input:not([type="submit"], [type="button"], [type="reset"]), select, textarea)
+    + :where(small):where(:not(.no-nimble, .no-nimble *)) {
     display: block;
     margin-block-start: 0.25em;
     font-size: 0.875em;
     color: color-mix(in oklch, var(--nc-text), transparent 40%);
   }
-  :where(input, select, textarea)[aria-invalid=false]:where(:not(.no-nimble, .no-nimble *)) {
+  :where(input, select, textarea)[aria-invalid="false"]:where(:not(.no-nimble, .no-nimble *)) {
     border-color: var(--nc-valid);
   }
-  :where(input, select, textarea)[aria-invalid=true]:where(:not(.no-nimble, .no-nimble *)) {
+  :where(input, select, textarea)[aria-invalid="true"]:where(:not(.no-nimble, .no-nimble *)) {
     border-color: var(--nc-invalid);
   }
-  :where(input:not([type=submit], [type=button], [type=reset]), select, textarea)[aria-invalid=false] + :where(small):where(:not(.no-nimble, .no-nimble *)) {
+  :where(
+      input:not([type="submit"], [type="button"], [type="reset"]),
+      select,
+      textarea
+    )[aria-invalid="false"]
+    + :where(small):where(:not(.no-nimble, .no-nimble *)) {
     color: var(--nc-valid);
   }
-  :where(input:not([type=submit], [type=button], [type=reset]), select, textarea)[aria-invalid=true] + :where(small):where(:not(.no-nimble, .no-nimble *)) {
+  :where(
+      input:not([type="submit"], [type="button"], [type="reset"]),
+      select,
+      textarea
+    )[aria-invalid="true"]
+    + :where(small):where(:not(.no-nimble, .no-nimble *)) {
     color: var(--nc-invalid);
   }
   :where(label):where(:not(.no-nimble, .no-nimble *)) {
     display: block;
   }
-  :where(label:has(+ input, + select, + textarea)):where(:not(.no-nimble, .no-nimble *)), :where(label:not(:has([type=checkbox], [type=radio])):has(input, select, textarea)):where(:not(.no-nimble, .no-nimble *)) {
+  :where(label:has(+ input, + select, + textarea)):where(:not(.no-nimble, .no-nimble *)),
+  :where(label:not(:has([type="checkbox"], [type="radio"])):has(input, select, textarea)):where(
+    :not(.no-nimble, .no-nimble *)
+  ) {
     font-weight: 600;
   }
-  :where(label:not(:has([type=checkbox], [type=radio])):has(input, select, textarea)) :where(input, select, textarea, small):where(:not(.no-nimble, .no-nimble *)) {
+  :where(label:not(:has([type="checkbox"], [type="radio"])):has(input, select, textarea))
+    :where(input, select, textarea, small):where(:not(.no-nimble, .no-nimble *)) {
     font-weight: normal;
   }
-  :where(label:not(:has([type=checkbox], [type=radio]))) > :where(input, select, textarea):where(:not(.no-nimble, .no-nimble *)) {
+  :where(label:not(:has([type="checkbox"], [type="radio"])))
+    > :where(input, select, textarea):where(:not(.no-nimble, .no-nimble *)) {
     display: block;
     margin-top: 0.25em;
   }
@@ -629,35 +805,35 @@
     font-weight: 600;
     padding-inline: 0.25em;
   }
-  :where([type=checkbox], [type=radio]):where(:not(.no-nimble, .no-nimble *)) {
+  :where([type="checkbox"], [type="radio"]):where(:not(.no-nimble, .no-nimble *)) {
     accent-color: var(--nc-primary);
     width: 1.125em;
     height: 1.125em;
     margin: 0;
   }
-  :where(label:has([type=checkbox], [type=radio])):where(:not(.no-nimble, .no-nimble *)) {
+  :where(label:has([type="checkbox"], [type="radio"])):where(:not(.no-nimble, .no-nimble *)) {
     display: flex;
     align-items: center;
     gap: 0.35em;
   }
-  :where([type=search]):where(:not(.no-nimble, .no-nimble *)) {
+  :where([type="search"]):where(:not(.no-nimble, .no-nimble *)) {
     border-radius: 5rem;
     padding-inline: 1.25em;
   }
-  :where([type=range]):where(:not(.no-nimble, .no-nimble *)) {
+  :where([type="range"]):where(:not(.no-nimble, .no-nimble *)) {
     accent-color: var(--nc-primary);
     width: 100%;
   }
   :where(input[list]):where(:not(.no-nimble, .no-nimble *)) {
     width: auto;
   }
-  :where([type=file]):where(:not(.no-nimble, .no-nimble *)) {
+  :where([type="file"]):where(:not(.no-nimble, .no-nimble *)) {
     color: var(--nc-text);
     font: inherit;
     cursor: pointer;
     max-width: 100%;
   }
-  :where([type=file]):where(:not(.no-nimble, .no-nimble *))::file-selector-button {
+  :where([type="file"]):where(:not(.no-nimble, .no-nimble *))::file-selector-button {
     padding: 0.5em 1em;
     margin-right: 0.75em;
     margin-inline-end: 0.75em;
@@ -667,16 +843,24 @@
     border-radius: var(--nc-radius);
     font: inherit;
     cursor: pointer;
-    transition: background-color 0.2s, border-color 0.2s;
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
   }
-  :where([type=file]):where(:not(.no-nimble, .no-nimble *))::file-selector-button:hover {
+  :where([type="file"]):where(:not(.no-nimble, .no-nimble *))::file-selector-button:hover {
     background-color: var(--nc-primary-hover);
     border-color: var(--nc-primary-hover);
   }
-  :where([type=date], [type=month], [type=week], [type=time], [type=datetime-local]):where(:not(.no-nimble, .no-nimble *)) {
+  :where(
+    [type="date"],
+    [type="month"],
+    [type="week"],
+    [type="time"],
+    [type="datetime-local"]
+  ):where(:not(.no-nimble, .no-nimble *)) {
     min-width: 10em;
   }
-  :where([type=color]):where(:not(.no-nimble, .no-nimble *)) {
+  :where([type="color"]):where(:not(.no-nimble, .no-nimble *)) {
     --_color-size: calc(1em * 1.5 + 1em + 2px);
     --_color-pad: 0.25em;
     height: var(--_color-size);
@@ -687,19 +871,19 @@
     border-radius: var(--nc-radius);
     cursor: pointer;
   }
-  :where([type=color]):where(:not(.no-nimble, .no-nimble *))::-webkit-color-swatch-wrapper {
+  :where([type="color"]):where(:not(.no-nimble, .no-nimble *))::-webkit-color-swatch-wrapper {
     padding: 0;
   }
-  :where([type=color]):where(:not(.no-nimble, .no-nimble *))::-webkit-color-swatch {
+  :where([type="color"]):where(:not(.no-nimble, .no-nimble *))::-webkit-color-swatch {
     border: none;
     border-radius: calc(var(--nc-radius) * 0.5);
   }
-  :where(label:has([type=checkbox][role=switch])):where(:not(.no-nimble, .no-nimble *)) {
+  :where(label:has([type="checkbox"][role="switch"])):where(:not(.no-nimble, .no-nimble *)) {
     display: flex;
     align-items: center;
     gap: 0.5em;
   }
-  :where([type=checkbox][role=switch]):where(:not(.no-nimble, .no-nimble *)) {
+  :where([type="checkbox"][role="switch"]):where(:not(.no-nimble, .no-nimble *)) {
     appearance: none;
     width: 2.5em;
     height: 1.25em;
@@ -711,7 +895,7 @@
     margin: 0;
     transition: background-color 0.2s;
   }
-  :where([type=checkbox][role=switch]):where(:not(.no-nimble, .no-nimble *))::before {
+  :where([type="checkbox"][role="switch"]):where(:not(.no-nimble, .no-nimble *))::before {
     content: "";
     position: absolute;
     top: 2px;
@@ -722,14 +906,18 @@
     background-color: #fff;
     transition: transform 0.2s;
   }
-  :where([type=checkbox][role=switch]):checked:where(:not(.no-nimble, .no-nimble *)) {
+  :where([type="checkbox"][role="switch"]):checked:where(:not(.no-nimble, .no-nimble *)) {
     background-color: var(--nc-primary);
   }
-  :where([type=checkbox][role=switch]):checked:where(:not(.no-nimble, .no-nimble *))::before {
+  :where([type="checkbox"][role="switch"]):checked:where(:not(.no-nimble, .no-nimble *))::before {
     transform: translateX(1.25em);
   }
 }
-[type=date]:where(:not(.no-nimble, .no-nimble *)), [type=month]:where(:not(.no-nimble, .no-nimble *)), [type=week]:where(:not(.no-nimble, .no-nimble *)), [type=time]:where(:not(.no-nimble, .no-nimble *)), [type=datetime-local]:where(:not(.no-nimble, .no-nimble *)) {
+[type="date"]:where(:not(.no-nimble, .no-nimble *)),
+[type="month"]:where(:not(.no-nimble, .no-nimble *)),
+[type="week"]:where(:not(.no-nimble, .no-nimble *)),
+[type="time"]:where(:not(.no-nimble, .no-nimble *)),
+[type="datetime-local"]:where(:not(.no-nimble, .no-nimble *)) {
   -webkit-appearance: none;
   appearance: none;
 }
@@ -800,7 +988,8 @@
     padding: var(--nc-spacing);
     margin-bottom: var(--nc-spacing);
   }
-  :where(article > header):where(:not(.no-nimble, .no-nimble *)), :where(article > footer):where(:not(.no-nimble, .no-nimble *)) {
+  :where(article > header):where(:not(.no-nimble, .no-nimble *)),
+  :where(article > footer):where(:not(.no-nimble, .no-nimble *)) {
     background-color: color-mix(in oklch, var(--nc-surface-1), var(--nc-surface-2) 20%);
     padding: var(--nc-spacing);
   }
@@ -820,7 +1009,12 @@
   :where(article > header, article > footer) > :last-child:where(:not(.no-nimble, .no-nimble *)) {
     margin-bottom: 0;
   }
-  :where(article > header, article > footer) > h1:where(:not(.no-nimble, .no-nimble *)), :where(article > header, article > footer) > h2:where(:not(.no-nimble, .no-nimble *)), :where(article > header, article > footer) > h3:where(:not(.no-nimble, .no-nimble *)), :where(article > header, article > footer) > h4:where(:not(.no-nimble, .no-nimble *)), :where(article > header, article > footer) > h5:where(:not(.no-nimble, .no-nimble *)), :where(article > header, article > footer) > h6:where(:not(.no-nimble, .no-nimble *)) {
+  :where(article > header, article > footer) > h1:where(:not(.no-nimble, .no-nimble *)),
+  :where(article > header, article > footer) > h2:where(:not(.no-nimble, .no-nimble *)),
+  :where(article > header, article > footer) > h3:where(:not(.no-nimble, .no-nimble *)),
+  :where(article > header, article > footer) > h4:where(:not(.no-nimble, .no-nimble *)),
+  :where(article > header, article > footer) > h5:where(:not(.no-nimble, .no-nimble *)),
+  :where(article > header, article > footer) > h6:where(:not(.no-nimble, .no-nimble *)) {
     margin-top: 0;
     margin-bottom: 0;
   }
@@ -868,7 +1062,9 @@ details :last-child:last-child:where(:not(.no-nimble, .no-nimble *)) {
 
 @supports selector(details::details-content) {
   details:where(:not(.no-nimble, .no-nimble *))::details-content {
-    transition: opacity 0.3s ease, content-visibility 0.3s ease allow-discrete;
+    transition:
+      opacity 0.3s ease,
+      content-visibility 0.3s ease allow-discrete;
     opacity: 0;
   }
   details[open]:where(:not(.no-nimble, .no-nimble *))::details-content {
@@ -879,7 +1075,10 @@ details :last-child:last-child:where(:not(.no-nimble, .no-nimble *)) {
       interpolate-size: allow-keywords;
     }
     details:where(:not(.no-nimble, .no-nimble *))::details-content {
-      transition: height 0.3s ease, opacity 0.3s ease, content-visibility 0.3s ease allow-discrete;
+      transition:
+        height 0.3s ease,
+        opacity 0.3s ease,
+        content-visibility 0.3s ease allow-discrete;
       height: 0;
       overflow: clip;
     }
@@ -991,7 +1190,8 @@ details :last-child:last-child:where(:not(.no-nimble, .no-nimble *)) {
 }
 @layer nimble.base {
   @supports (appearance: base-select) {
-    :where(select):where(:not(.no-nimble, .no-nimble *)), :where(select):where(:not(.no-nimble, .no-nimble *))::picker(select) {
+    :where(select):where(:not(.no-nimble, .no-nimble *)),
+    :where(select):where(:not(.no-nimble, .no-nimble *))::picker(select) {
       appearance: base-select;
     }
     :where(select):where(:not(.no-nimble, .no-nimble *))::picker-icon {
@@ -1010,7 +1210,10 @@ details :last-child:last-child:where(:not(.no-nimble, .no-nimble *)) {
       background-color: var(--nc-surface-1);
       padding: 0.25em;
       opacity: 0;
-      transition: opacity 0.2s, overlay 0.2s allow-discrete, display 0.2s allow-discrete;
+      transition:
+        opacity 0.2s,
+        overlay 0.2s allow-discrete,
+        display 0.2s allow-discrete;
     }
     :where(select):open:where(:not(.no-nimble, .no-nimble *))::picker(select) {
       opacity: 1;

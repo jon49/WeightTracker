@@ -5,7 +5,9 @@ let { html, layout } = self.sw;
 const route: RoutePage = {
   get: async () => {
     return layout({
-      main: html`<i _load="redirect" data-url="/web/entries/edit">Redirecting...</i>`,
+      main: html`
+        <i _load="redirect" data-url="/web/entries/edit">Redirecting...</i>
+      `,
       title: "Weight Tracking",
     });
   },
