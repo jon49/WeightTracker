@@ -1,5 +1,5 @@
 import { Theme } from "../api/settings.page.js";
-import { Settings, get, set, update } from "./db.js";
+import { Settings, Updated, get, getMany, set, update } from "./db.js";
 
 function parseKey(key: unknown): string | number {
   return typeof key === "string" && key.startsWith("[")
@@ -18,9 +18,32 @@ export interface AuthTokens {
   csrf_token?: string;
 }
 
+function pendingKeys(updated: Updated | undefined): (string | number)[] {
+  return Array.from(updated ?? new Set()).map(parseKey);
+}
+
 class GlobalDB {
   async updated(): Promise<(string | number)[]> {
-    return Array.from((await get("updated")) ?? new Set()).map(parseKey);
+    return pendingKeys(await get("updated"));
+  }
+
+  async updatedCount(): Promise<number> {
+    return (await get("updated"))?.size ?? 0;
+  }
+
+  // pageState is what every page's header shows, in one read.
+  async pageState(): Promise<{ isLoggedIn: boolean; updatedCount: number; settings: Settings }> {
+    let [loggedIn, authToken, updated, settings] = await getMany([
+      "loggedIn",
+      "auth_token",
+      "updated",
+      "settings",
+    ]);
+    return {
+      isLoggedIn: !!(loggedIn || authToken),
+      updatedCount: (updated as Updated | undefined)?.size ?? 0,
+      settings: { ...settingDefaults, ...(settings ?? {}) },
+    };
   }
 
   async setLoggedIn(loggedIn: boolean): Promise<void> {
@@ -31,25 +54,25 @@ class GlobalDB {
   }
 
   async isLoggedIn(): Promise<boolean> {
-    if (await get("loggedIn")) return true;
-    return !!(await get("auth_token"));
+    let [loggedIn, authToken] = await getMany(["loggedIn", "auth_token"]);
+    return !!(loggedIn || authToken);
   }
 
   async authTokens(): Promise<AuthTokens | undefined> {
-    let auth_token = await get<string>("auth_token");
+    let [auth_token, refresh_token, csrf_token] = await getMany<string | undefined>([
+      "auth_token",
+      "refresh_token",
+      "csrf_token",
+    ]);
     if (!auth_token) return;
-    let refresh_token = (await get<string>("refresh_token")) ?? "";
-    let csrf_token = await get<string>("csrf_token");
-    return { auth_token, refresh_token, csrf_token };
+    return { auth_token, refresh_token: refresh_token ?? "", csrf_token };
   }
 
   async setAuthTokens(tokens: AuthTokens): Promise<void> {
     await Promise.all([
       set("auth_token", tokens.auth_token, false),
       set("refresh_token", tokens.refresh_token, false),
-      tokens.csrf_token != null
-        ? set("csrf_token", tokens.csrf_token, false)
-        : Promise.resolve(),
+      tokens.csrf_token != null ? set("csrf_token", tokens.csrf_token, false) : Promise.resolve(),
       set("loggedIn", true, false),
     ]);
   }

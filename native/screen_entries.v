@@ -46,7 +46,7 @@ fn (app &App) entry_columns(w f32) []Column {
 }
 
 fn (mut app App) layout_entries(w f32) {
-	key := '${app.entries.year}:${app.store.version}:${w}:${app.ui.theme.dark}'
+	key := '${app.entries.year}:${app.store.version}:${w}:${app.store.zoom}:${app.ui.theme.dark}'
 	if key == app.entries.cache_key {
 		return
 	}

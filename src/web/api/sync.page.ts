@@ -3,21 +3,11 @@ import sync from "../server/sync.js";
 
 const { html } = self.sw;
 
-let refresh = html`<i hz-target="#temp" hz-swap="append" _load=refresh></i>`;
+let refresh = html`
+  <i hz-target="#temp" hz-swap="append" _load="refresh"></i>
+`;
 
 const postHandlers: RoutePostHandler = {
-  async post() {
-    let result = await sync();
-    switch (result.status) {
-      case 200:
-        return {
-          status: 200,
-          body: refresh,
-        };
-      default:
-        return { status: 204, message: "" };
-    }
-  },
   async force() {
     let result = await sync();
     switch (result.status) {

@@ -37,7 +37,6 @@ async function render(query: any) {
     date = dateToString(d);
   }
   let data = <WeightData>await db.get<WeightData | undefined>(date) ?? { date };
-  cleanWeightData(data);
 
   return html`
 <h2>Edit Entry</h2>

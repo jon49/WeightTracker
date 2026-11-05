@@ -26,7 +26,8 @@ pub mut:
 	zoom           f64    = 1.0 // text and layout scale
 	server_url     string = default_server_url
 	auth           AuthTokens
-	// version is bumped on every change so views can cache derived data.
+	// version is bumped whenever the records change, so views can cache what
+	// they derive from them. Device preferences (theme, zoom, server) don't.
 	version int
 }
 
@@ -226,7 +227,6 @@ pub fn (mut s Store) set_chart_settings(cs ChartSettings) ! {
 
 pub fn (mut s Store) set_theme(theme string) ! {
 	s.theme = theme
-	s.version++
 	s.save()!
 }
 
@@ -235,7 +235,6 @@ pub fn (mut s Store) set_zoom(zoom f64) ! {
 		return
 	}
 	s.zoom = zoom
-	s.version++
 	s.save()!
 }
 
@@ -247,7 +246,6 @@ pub fn (mut s Store) set_server_url(url string) ! {
 	s.server_url = if clean == '' { default_server_url } else { clean }
 	// A different server has a different change history.
 	s.last_synced_id = 0
-	s.version++
 	s.save()!
 }
 

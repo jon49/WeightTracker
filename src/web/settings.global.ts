@@ -2,18 +2,6 @@ import { Route } from "@jon49/sw/routes.middleware.js";
 
 const routes: Route[] = [
   {
-    route: /\/api\/data\/$/,
-    file: "/web/api/data.page.js",
-  },
-  {
-    route: /\/api\/user-settings\/$/,
-    file: "/web/api/user-settings.page.js",
-  },
-  {
-    route: /\/api\/chart-settings\/$/,
-    file: "/web/api/chart-settings.page.js",
-  },
-  {
     route: /\/api\/sync\/$/,
     file: "/web/api/sync.page.js",
   },

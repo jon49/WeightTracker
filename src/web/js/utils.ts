@@ -30,6 +30,12 @@ export function dateToString(date: Date) {
   return `${date.getFullYear()}-${(date.getMonth() + 1 + "").padStart(2, "0")}-${(date.getDate() + "").padStart(2, "0")}`;
 }
 
+// parseDate reads a YYYY-MM-DD date as local midnight.
+export function parseDate(date: string) {
+  const [year, month, day] = date.split("-");
+  return new Date(+year, +month - 1, +day);
+}
+
 export function dateFill(from: Date, to: Date): string[] {
   from = new Date(from);
   // 1e3*60*60*24 == 86,400,000 ms to days
@@ -56,7 +62,7 @@ export function reduceSlice<T, S>(
   const length = data.length;
   const arr = new Array(Math.ceil(length / step));
   for (let index = 0; index < length; index += step) {
-    let acc = init instanceof Function ? init() : init;
+    let acc = init();
     for (let i = index; i < step + index && i < length; i++) {
       acc = f(acc, data[i], i);
     }
@@ -121,8 +127,8 @@ export function setDefaults<T>(o: T | undefined, defaults: [keyof T, T[keyof T]]
 
 export const isSelected =
   <T extends string>(currentValue: string | undefined) =>
-    (value: T) =>
-      value === currentValue ? "selected" : null;
+  (value: T) =>
+    value === currentValue ? "selected" : null;
 
 export function toNumber(s: unknown) {
   // @ts-ignore

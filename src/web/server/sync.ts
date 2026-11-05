@@ -1,8 +1,9 @@
 import type { UserSettings } from "./db.js";
+import type { AuthTokens } from "./global-model.js";
 
 const {
   globalDb: db,
-  db: { get, getMany, setMany, set, update },
+  db: { get, getMany, setMany, set, update, updatedId },
   syncQueue: { afterSync },
 } = self.sw;
 
@@ -35,16 +36,7 @@ async function syncNow(uploadMerge = true): Promise<{ status: number }> {
   const lastSyncedId = (await db.settings()).lastSyncedId ?? 0;
 
   let postData: PostData = { lastSyncedId, data };
-  let res = await postSync(postData, tokens.auth_token);
-
-  // TrailBase may have a stale auth token (1h TTL by default). Refresh once.
-  if (res.status === 401 && tokens.refresh_token) {
-    let refreshed = await refreshAuthToken(tokens.refresh_token);
-    if (refreshed) {
-      await db.setAuthTokens({ ...tokens, auth_token: refreshed });
-      res = await postSync(postData, refreshed);
-    }
-  }
+  let res = await withAuth(tokens, (authToken) => postSync(postData, authToken));
 
   let newData: ResponseData;
   if (
@@ -95,11 +87,7 @@ async function syncNow(uploadMerge = true): Promise<{ status: number }> {
 
   await Promise.all([
     ...updatedRevisionsTask,
-    update(
-      "settings",
-      (val) => ({ ...val, lastSynced: +new Date(), lastSyncedId: newData.lastSyncedId }),
-      { sync: false },
-    ),
+    update("settings", (val) => ({ ...val, lastSyncedId: newData.lastSyncedId }), { sync: false }),
     update(
       "updated",
       (val) => {
@@ -169,11 +157,6 @@ async function changedSince(sentKeys: (string | number)[], sentItems: any[]) {
   return changed;
 }
 
-// updatedId is how a key is stored in the "updated" set (see db.ts).
-function updatedId(key: unknown): IDBValidKey {
-  return Array.isArray(key) ? JSON.stringify(key) : (key as IDBValidKey);
-}
-
 // Dates are YYYY-MM-DD, so they compare as strings.
 function earlierDate(a: string | undefined, b: string | undefined) {
   if (!a) return b;
@@ -195,7 +178,22 @@ function postSync(body: PostData, authToken: string) {
   });
 }
 
-export async function refreshAuthToken(refreshToken: string): Promise<string | null> {
+// withAuth sends a request with the auth token. TrailBase's auth token may be
+// stale (1h TTL by default), so on a 401 it refreshes the token once, saves
+// it, and sends the request again.
+export async function withAuth(
+  tokens: AuthTokens,
+  send: (authToken: string) => Promise<Response>,
+): Promise<Response> {
+  let res = await send(tokens.auth_token);
+  if (res.status !== 401 || !tokens.refresh_token) return res;
+  let refreshed = await refreshAuthToken(tokens.refresh_token);
+  if (!refreshed) return res;
+  await db.setAuthTokens({ ...tokens, auth_token: refreshed });
+  return send(refreshed);
+}
+
+async function refreshAuthToken(refreshToken: string): Promise<string | null> {
   try {
     let res = await fetch(REFRESH_URL, {
       method: "POST",

@@ -50,7 +50,7 @@ swFramework.use(useRoutes);
 swFramework.use(async function useHtmz(req, res, ctx): Promise<void> {
   if (req.method !== "POST") return;
 
-  let updated = await globalDB.updated();
+  let updatedCount = await globalDB.updatedCount();
 
   let messages = (ctx.messages || []) as string[];
 
@@ -63,7 +63,7 @@ swFramework.use(async function useHtmz(req, res, ctx): Promise<void> {
     ${messages.map((x) => html`<dialog class=toast _load=toast open><p class=message>${x}</p></dialog>`)}
 </div>
 ${res.status === 401 ? html`${loginView()}` : null}
-${syncCountView(updated.length)}
+${syncCountView(updatedCount)}
 `;
 });
 swFramework.use(useResponse);
@@ -72,8 +72,8 @@ self.addEventListener("install", (e: Event) =>
   // @ts-ignore
   e.waitUntil(
     isDev
-      // @ts-ignore
-      ? self.skipWaiting()
+      ? // @ts-ignore
+        self.skipWaiting()
       : caches
           .open(version)
           .then((cache) =>
@@ -85,7 +85,7 @@ self.addEventListener("install", (e: Event) =>
 );
 
 // @ts-ignore
-self.addEventListener("fetch", (e: FetchEvent) => e.respondWith(swFramework.start(e)))
+self.addEventListener("fetch", (e: FetchEvent) => e.respondWith(swFramework.start(e)));
 
 // waitUntil must be called before the handler first awaits, or it throws.
 // @ts-ignore

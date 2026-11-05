@@ -19,12 +19,14 @@
   }
 
   async function saveTokens({ auth_token, refresh_token, csrf_token }) {
-    await Promise.all([
-      auth_token != null && idbSet("auth_token", auth_token),
-      refresh_token != null && idbSet("refresh_token", refresh_token),
-      csrf_token != null && idbSet("csrf_token", csrf_token),
-      idbSet("loggedIn", true),
-    ].filter(Boolean));
+    await Promise.all(
+      [
+        auth_token != null && idbSet("auth_token", auth_token),
+        refresh_token != null && idbSet("refresh_token", refresh_token),
+        csrf_token != null && idbSet("csrf_token", csrf_token),
+        idbSet("loggedIn", true),
+      ].filter(Boolean),
+    );
   }
 
   function formToJson(form) {
@@ -53,7 +55,9 @@
 
     let data;
     if (response.headers.get("content-type")?.includes("application/json")) {
-      try { data = await response.json(); } catch {}
+      try {
+        data = await response.json();
+      } catch {}
     }
 
     if (!response.ok) {
@@ -70,9 +74,7 @@
     if (action.includes("/api/auth/v1/register")) {
       // TrailBase requires email verification before login works. Don't
       // attempt auto-login — direct the user to check their email.
-      writeMessage(
-        "Registration received. Check your email for a verification link, then log in.",
-      );
+      writeMessage("Registration received. Check your email for a verification link, then log in.");
       return;
     }
 
@@ -89,12 +91,6 @@
     }
   });
 
-  function getHtml(text) {
-    const template = doc.createElement("template");
-    template.innerHTML = text.trim();
-    return template.content;
-  }
-
   function friendlyStatus(status) {
     if (status === 429) return "Too many attempts. Please wait a minute and try again.";
     if (status >= 500) {
@@ -103,8 +99,11 @@
     return `Something went wrong (error ${status}). Please try again.`;
   }
 
+  // The message can come from the server, so it is set as text, not HTML.
   function writeMessage(msg) {
-    let message = getHtml(`<p class="message">${msg}</p>`);
+    let message = doc.createElement("p");
+    message.className = "message";
+    message.textContent = msg;
     doc.querySelector("main").prepend(message);
   }
 })();

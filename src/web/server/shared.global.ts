@@ -7,7 +7,6 @@ import * as localUtils from "../js/utils.js";
 import * as validation from "promise-validation";
 import * as validators from "@jon49/sw/validation.js";
 import * as charts from "../js/charts-shared.js";
-import * as serverUtils from "./utils.js";
 import * as syncQueue from "./sync-queue.js";
 
 let app = {
@@ -18,7 +17,7 @@ let app = {
   layout,
   page: { themeView, loginView },
   syncQueue,
-  utils: { ...utils, ...serverUtils, ...localUtils },
+  utils: { ...utils, ...localUtils },
   validation: { ...validation, ...validators },
 };
 

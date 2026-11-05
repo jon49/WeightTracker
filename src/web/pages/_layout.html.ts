@@ -17,13 +17,21 @@ export function themeView(theme: Theme | undefined) {
   return html`<span id=theme>
 <button form=post formaction="/web/api/settings?handler=theme" name=theme value="${next}" class=bg>$${icon}</button>
 ${when(isSet, () => html`<input type=radio name=theme value="${current}" checked hidden>`)}
-${when(!isSet, () => html`<script>
-(function(){
-  var btn = document.currentScript.parentNode.querySelector('button');
-  btn.value = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  btn.click();
-})();
-</script>`)}
+${when(
+  !isSet,
+  () => html`
+    <script>
+      (function () {
+        var btn = document.currentScript.parentNode.querySelector("button");
+        btn.value =
+          window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+        btn.click();
+      })();
+    </script>
+  `,
+)}
 </span>`;
 }
 
@@ -43,25 +51,24 @@ export function loginView() {
   `;
 }
 
-interface Nav {
-  name: string;
-  url: string;
-}
-
-const render = async ({ main, head, scripts, nav, title, cssLinks }: LayoutTemplateArguments) => {
-  const [isLoggedIn, updated, { theme }] = await Promise.all([
-    db.isLoggedIn(),
-    db.updated(),
-    db.settings(),
-  ]);
-  const updatedCount = updated.length;
+export default async function layout({
+  main,
+  head,
+  scripts,
+  title,
+  cssLinks,
+}: LayoutTemplateArguments) {
+  const {
+    isLoggedIn,
+    updatedCount,
+    settings: { theme },
+  } = await db.pageState();
 
   return html`
 <!DOCTYPE html>
 <html>
  <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title} - Weight</title>
     <link rel="icon" type="image/x-icon" href="/web/images/weight.ico">
@@ -87,12 +94,13 @@ const render = async ({ main, head, scripts, nav, title, cssLinks }: LayoutTempl
 
                     ${syncCountView(updatedCount)}
 
-                    ${isLoggedIn
-      ? html`
+                    ${
+                      isLoggedIn
+                        ? html`
                             <a id="auth-link" href="/login?logout" role="button" class="nc-button">Logout</a>
                           `
-      : loginView()
-    }
+                        : loginView()
+                    }
                 </li>
             </ul>
         </nav>
@@ -103,9 +111,6 @@ const render = async ({ main, head, scripts, nav, title, cssLinks }: LayoutTempl
                 <li><a href="/web/entries/edit">Entry</a></li>
                 <li><a href="/web/charts">Charts</a></li>
                 <li><a href="/web/user-settings/edit">User Settings</a></li>
-                ${when(nav?.length, () =>
-      nav?.map((x) => html`<li><a href="$${x.url}">${x.name}</a></li>`),
-    )}
             </ul>
         </nav>
     </header>
@@ -126,20 +131,12 @@ const render = async ({ main, head, scripts, nav, title, cssLinks }: LayoutTempl
     ${(scripts ?? []).map((x) => html`<script src="${x}" ${when(!x.includes(".min."), "type=module")}></script>`)}
 </body>
 </html>`;
-};
-
-export default async function layout(o: LayoutTemplateArguments) {
-  return render(o);
 }
 
-export type Layout = typeof layout;
-
 export interface LayoutTemplateArguments {
-  cssLinks?: string[]
+  cssLinks?: string[];
   title: string;
   head?: string;
-  bodyAttr?: string;
   main?: AsyncGenerator<any, void, unknown>;
   scripts?: string[];
-  nav?: Nav[];
 }

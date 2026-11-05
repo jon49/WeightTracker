@@ -3,19 +3,16 @@ import { Theme } from "../api/settings.page.js";
 
 const get: DBGet = get1;
 
+// updatedId is how a key is stored in the "updated" set: arrays as JSON,
+// anything else that isn't a string or number as a string.
+function updatedId(key: unknown): string | number {
+  if (Array.isArray(key)) return JSON.stringify(key);
+  if (typeof key === "string" || typeof key === "number") return key;
+  return String(key);
+}
+
 const _updated = async (key: IDBValidKey) => {
-  await update1("updated", (val?: Updated) => {
-    if (Array.isArray(key)) {
-      key = JSON.stringify(key);
-    }
-
-    // If key is not string or number then make it a string.
-    if (typeof key !== "string" && typeof key !== "number") {
-      key = key.toString();
-    }
-
-    return (val || new Set()).add(key);
-  });
+  await update1("updated", (val?: Updated) => (val || new Set()).add(updatedId(key)));
 };
 
 function set<K extends keyof DBAccessors>(
@@ -26,14 +23,9 @@ function set<K extends keyof DBAccessors>(
 function set<T>(key: string | any[], value: T, sync?: boolean): Promise<void>;
 async function set(key: string | any[], value: any, sync = true) {
   if (sync && "_rev" in value) {
-    if ("_rev" in value) {
-      await _updated(key);
-    } else {
-      return Promise.reject(`Revision number not specified! For "${key}".`);
-    }
+    await _updated(key);
   }
   await set1(key, value);
-  return;
 }
 
 function update<K extends keyof DBAccessors>(
@@ -59,7 +51,7 @@ interface DBAccessors {
   settings: Settings;
 }
 
-export { update, set, get, getMany, setMany, clear };
+export { update, set, get, getMany, setMany, clear, updatedId };
 
 export interface WeightData extends Revision {
   date: string;
@@ -82,7 +74,8 @@ export interface UserSettings extends Revision {
   bedtime?: string;
 }
 
-export type DurationUnit = "month" | "year" | "week";
+export const durationUnits = ["month", "year", "week"] as const;
+export type DurationUnit = (typeof durationUnits)[number];
 export interface ChartSettings extends Revision {
   duration: number;
   durationUnit: DurationUnit;

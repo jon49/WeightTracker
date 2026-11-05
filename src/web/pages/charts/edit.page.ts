@@ -1,5 +1,5 @@
 import { RoutePage } from "@jon49/sw/routes.middleware.js";
-import { ChartSettings } from "../../server/db.js";
+import type { ChartSettings, DurationUnit } from "../../server/db.js";
 
 let {
   db,
@@ -8,9 +8,6 @@ let {
   utils: { formatNumber, isSelected, toNumber },
   validation: { createPositiveNumber, createPositiveWholeNumber, createString25, validateObject },
 } = self.sw;
-
-const units = ["month", "year", "week"] as const;
-export type DurationUnit = (typeof units)[number];
 
 async function render() {
   let chartSettings = await db.get("chart-settings");
@@ -55,7 +52,7 @@ const route: RoutePage = {
     const o = await validateObject(data, settingsValidator);
     const duration = toNumber(o.duration) || 9;
     const maybeDurationUnit = o.durationUnit;
-    const durationUnit = units.find((x) => x === maybeDurationUnit) ?? "month";
+    const durationUnit = db.durationUnits.find((x) => x === maybeDurationUnit) ?? "month";
     const settings: ChartSettings = { duration, durationUnit, _rev: o._rev };
     await db.set("chart-settings", settings, false);
     return { status: 200 };

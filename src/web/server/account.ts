@@ -1,7 +1,7 @@
 // Deleting the user's account. TrailBase's `DELETE /api/auth/v1/delete`
 // removes the account and its sessions, and ImageBase's triggers remove the
 // data it synced (see ../ImageBase README, "Deleting an account").
-import { refreshAuthToken } from "./sync.js";
+import { withAuth } from "./sync.js";
 
 const {
   globalDb: db,
@@ -19,15 +19,7 @@ export function deleteAccount(): Promise<number> {
   return afterSync(async () => {
     let tokens = await db.authTokens();
     if (!tokens) return 401;
-    let res = await deleteWithToken(tokens.auth_token);
-    // TrailBase's auth token may be stale (1h TTL by default). Refresh once.
-    if (res.status === 401 && tokens.refresh_token) {
-      let refreshed = await refreshAuthToken(tokens.refresh_token);
-      if (refreshed) {
-        await db.setAuthTokens({ ...tokens, auth_token: refreshed });
-        res = await deleteWithToken(refreshed);
-      }
-    }
+    let res = await withAuth(tokens, deleteWithToken);
     if (!res.ok) return res.status;
     let { theme } = await db.settings();
     await clear();

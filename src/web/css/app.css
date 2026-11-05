@@ -12,7 +12,15 @@
  * filled backgrounds to the darker shade here and darken on hover instead of
  * lightening. Scoped to these elements so dark-mode links keep the lighter,
  * readable-on-dark primary from :root. */
-:where(button, [type=submit], [type=reset], [type=button], [type=file], .nc-button, .toast):not(.outline) {
+:where(
+  button,
+  [type="submit"],
+  [type="reset"],
+  [type="button"],
+  [type="file"],
+  .nc-button,
+  .toast
+):not(.outline) {
   --nc-primary: oklch(0.55 0.197 278);
   --nc-primary-hover: oklch(from var(--nc-primary) calc(l - 0.1) c h);
   --nc-primary-focus: oklch(from var(--nc-primary) l c h / 0.4);
@@ -25,11 +33,11 @@
 
 /* Theme toggle: the radio rendered inside #theme (see themeView in
  * _layout.html.ts) forces the scheme, which flips every light-dark() value. */
-:root:has(#theme input[value=light]:checked) {
+:root:has(#theme input[value="light"]:checked) {
   color-scheme: light;
 }
 
-:root:has(#theme input[value=dark]:checked) {
+:root:has(#theme input[value="dark"]:checked) {
   color-scheme: dark;
 }
 
@@ -197,4 +205,14 @@ nav :where(button, .nc-button) {
 
 .danger-zone h3 {
   margin-top: 0;
+}
+
+/* The comment box grows with its text, at least two lines tall (a
+ * textarea's default rows). Where the browser can't size a field to its
+ * content, elastic-textarea.js does it instead. */
+@supports (field-sizing: content) {
+  elastic-textarea textarea {
+    field-sizing: content;
+    min-height: calc(2lh + 2 * var(--nc-control-padding-block, 0.5em) + 2px);
+  }
 }

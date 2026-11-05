@@ -53,10 +53,10 @@ async function render(query: any) {
 
 <div class="flex gap-10">
     ${years
-        .reverse()
-        .map((x: string) =>
-          x === "" + year ? html`<span>${x}</span>` : html`<a href="/web/entries?year=${x}">${x}</a>`,
-        )}
+      .reverse()
+      .map((x: string) =>
+        x === "" + year ? html`<span>${x}</span>` : html`<a href="/web/entries?year=${x}">${x}</a>`,
+      )}
 </div>
 
 <div class="overflow-auto">
@@ -122,7 +122,6 @@ const route: RoutePage = {
     return layout({
       main,
       head,
-      bodyAttr: `data-mpa-scroll-to="#top"`,
       title: `Entries — ${year}`,
     });
   },

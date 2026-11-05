@@ -1,41 +1,22 @@
-import {
-  avg,
-  dateAdd,
-  dateFill,
-  formatNumber,
-  getPreviousDay,
-  reduceSlice,
-  setDefaults,
-} from "./utils.js";
-import { ChartSettings, UserSettings, WeightData } from "../server/db.js";
+import { avg, dateAdd, formatNumber, getPreviousDay, reduceSlice } from "./utils.js";
+import { UserSettings, WeightData } from "../server/db.js";
 
-export async function setChartSettingDefaults(rawChartSettings: ChartSettings) {
-  return setDefaults(rawChartSettings, [
-    ["duration", 9],
-    ["durationUnit", "month"],
-  ]);
-}
+export { bedtimeSuccess, timeToNumber } from "./charts/_utils.js";
 
-export async function getWeeklyData(
-  chartSettings: ChartSettings,
-  weightDataGetter: (start: Date) => Promise<WeightData[] | undefined>,
-): Promise<WeeklyData | undefined> {
-  const startDate = getStartDate(chartSettings.duration, chartSettings.durationUnit);
-  const dates = dateFill(startDate, new Date());
-  const rawValues = await weightDataGetter(startDate);
-  if (!rawValues) return;
+// getWeeklyData summarizes the entries for `dates` (which start on a Sunday)
+// by week: the first date, and the lowest, highest and average weight.
+export function getWeeklyData(dates: string[], values: (WeightData | undefined)[]): WeeklyData {
   const results = reduceSlice(
     dates,
     7,
     (acc, x, i) => {
-      let weight;
-      acc.date = acc.date ?? x;
-      if ((weight = rawValues[i]?.weight) && !!weight) {
+      acc.date ??= x;
+      const weight = values[i]?.weight;
+      if (weight) {
         acc.min = acc.min === null ? weight : Math.min(acc.min, weight);
         acc.max = acc.max === null ? weight : Math.max(acc.max, weight);
         acc.total += weight;
         acc.count++;
-        return acc;
       }
       return acc;
     },
@@ -61,7 +42,7 @@ export async function getWeeklyData(
     avgValues[index] = r.count ? r.total / r.count : null;
   }
 
-  return { labels, maxValues, minValues, avgValues } as WeeklyData;
+  return { labels, maxValues, minValues, avgValues };
 }
 
 export function getStartDate(duration: number, unit: "month" | "week" | "year") {
@@ -120,7 +101,7 @@ export function estimateWeeksToGo(
 
 interface WeeklyData {
   labels: string[];
-  maxValues: number[];
-  avgValues: number[];
-  minValues: number[];
+  maxValues: (number | null)[];
+  avgValues: (number | null)[];
+  minValues: (number | null)[];
 }

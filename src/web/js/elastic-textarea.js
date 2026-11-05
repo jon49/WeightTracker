@@ -2,6 +2,9 @@ customElements.define(
   "elastic-textarea",
   class extends HTMLElement {
     connectedCallback() {
+      // app.css sizes the textareas where the browser supports it.
+      if (CSS.supports("field-sizing", "content")) return;
+
       /**
        * Find all inner textareas and use their rows attributes as a minimum count
        */
