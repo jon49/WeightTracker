@@ -19,15 +19,16 @@ export function themeView(theme: Theme | undefined) {
 ${when(isSet, () => html`<input type=radio name=theme value="${current}" checked hidden>`)}
 ${when(
   !isSet,
+  // Until a theme is picked the page follows the system's, so the button
+  // offers the other one.
   () => html`
     <script>
       (function () {
         var btn = document.currentScript.parentNode.querySelector("button");
-        btn.value =
-          window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light";
-        btn.click();
+        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          btn.value = "light";
+          btn.innerHTML = "$${sunIcon}";
+        }
       })();
     </script>
   `,
