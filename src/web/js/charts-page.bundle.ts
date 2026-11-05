@@ -1,1 +1,1 @@
-import "./charts/_chart-frontend.js";
+import "./charts/_chart-view.js";

@@ -1,6 +1,7 @@
 import { UserSettings, WeightData } from "../server/db.js";
 import { RouteGetHandler, RoutePage } from "@jon49/sw/routes.middleware.js";
-import { createChartHtml } from "./charts/_chart.js";
+import { chartHtml } from "./charts/_chart.js";
+import type { ChartData } from "../js/charts/_chart-model.js";
 
 let {
   charts: {
@@ -67,12 +68,15 @@ function byWeek(dates: string[], values: (WeightData | undefined)[]) {
   return weeks;
 }
 
-// chartResponse clears the chart's button and, when there is a chart, adds it.
-function chartResponse(buttonId: string, chart?: ReturnType<typeof createChartHtml>) {
-  return html`
-      <template id="${buttonId}"></template>
-      ${chart ? html`<template hz-target="#charts-location" hz-swap="prepend">${chart}</template>` : null}
-    `;
+const red = "#ff6384";
+const green = "#63ff83";
+const blue = "#6391ff";
+const darkGreen = "#00c800";
+const orange = "#ff9f40";
+
+// chartResponse puts the chart above the ones already open.
+function chartResponse(id: string, title: string, data?: ChartData) {
+  return html`<template hz-target="#charts-location" hz-swap="prepend">${chartHtml(id, title, data)}</template>`;
 }
 
 const render = ({
@@ -115,12 +119,12 @@ const render = ({
 </div>
 
 <div id=create-chart class="flex m-1">
-    <a id=history-chart-btn class=nc-button role=button target=htmz href="?handler=historyChart">History</a>
-    <a id=avg-chart-btn class=nc-button role=button target=htmz href="?handler=averageChart">Average</a>
-    <a id=histogram-chart-btn class=nc-button role=button target=htmz href="?handler=histogramChart">Histogram</a>
-    <a id=bedtime-chart-btn class=nc-button role=button target=htmz href="?handler=bedtimeChart">Bedtime</a>
-    <a id=sleep-chart-btn class=nc-button role=button target=htmz href="?handler=sleepChart">Sleep</a>
-    <a id=rate-chart-btn class=nc-button role=button target=htmz href="?handler=rateChart">Rate</a>
+    <a id=history-chart-btn class="nc-button outline" role=button aria-pressed=false data-chart-id=history-chart target=htmz href="?handler=historyChart">History</a>
+    <a id=avg-chart-btn class="nc-button outline" role=button aria-pressed=false data-chart-id=average-chart target=htmz href="?handler=averageChart">Average</a>
+    <a id=histogram-chart-btn class="nc-button outline" role=button aria-pressed=false data-chart-id=histogram-chart target=htmz href="?handler=histogramChart">Histogram</a>
+    <a id=bedtime-chart-btn class="nc-button outline" role=button aria-pressed=false data-chart-id=bedtime-chart target=htmz href="?handler=bedtimeChart">Bedtime</a>
+    <a id=sleep-chart-btn class="nc-button outline" role=button aria-pressed=false data-chart-id=sleep-chart target=htmz href="?handler=sleepChart">Sleep</a>
+    <a id=rate-chart-btn class="nc-button outline" role=button aria-pressed=false data-chart-id=rate-chart target=htmz href="?handler=rateChart">Rate</a>
 </div>
 
 <div id=charts-location></div>
@@ -199,74 +203,72 @@ const getHanders: RouteGetHandler = {
   async averageChart() {
     const { dates, values } = await chartRange();
     const { labels, maxValues, minValues, avgValues } = getWeeklyData(dates, values);
-
     const r = (v: number | null) => (v != null ? round(v, 1) : v);
-    const chartHtml = createChartHtml("average-chart", labels, {
-      datasets: [
-        { label: "Max", data: maxValues.map(r), lineColor: "#ff6384" },
-        { label: "Average", data: avgValues.map(r), lineColor: "#63ff83" },
-        { label: "Min", data: minValues.map(r), lineColor: "#6391ff" },
+    return chartResponse("average-chart", "Average", {
+      kind: "average",
+      style: "line",
+      labels,
+      series: [
+        { label: "Max", values: maxValues.map(r), color: red },
+        { label: "Average", values: avgValues.map(r), color: green },
+        { label: "Min", values: minValues.map(r), color: blue },
       ],
-      xPaddingPercent: 5,
     });
-
-    return chartResponse("avg-chart-btn", chartHtml);
   },
 
   async rateChart() {
     const { dates, values } = await chartRange();
     const { labels: weekLabels, avgValues } = getWeeklyData(dates, values);
-    const length = avgValues.length;
-    const rateLabels: string[] = [];
-    const posValues: (number | null)[] = [];
-    const negValues: (number | null)[] = [];
-    let allTotal = 0;
-    let negTotal = 0;
+    if (weekLabels.length < 2) return chartResponse("rate-chart", "Rate");
+    const labels: string[] = [];
+    const gained: (number | null)[] = [];
+    const lost: (number | null)[] = [];
+    let total = 0;
+    let lostTotal = 0;
     let count = 0;
-
-    for (let index = 1; index < length; index++) {
+    for (let index = 1; index < avgValues.length; index++) {
       const first = avgValues[index - 1];
       const last = avgValues[index];
-      rateLabels.push(weekLabels[index]);
+      labels.push(weekLabels[index]);
       let pos: number | null = null;
       let neg: number | null = null;
       if (first && last) {
         count++;
         const diff = last - first;
-        allTotal += diff;
+        total += diff;
         if (diff > 0) {
           pos = round(diff, 2);
         } else {
           neg = round(diff, 2);
-          negTotal += diff;
+          lostTotal += diff;
         }
       }
-      posValues.push(pos);
-      negValues.push(neg);
+      gained.push(pos);
+      lost.push(neg);
     }
-
-    const overallChange = count > 0 ? round(allTotal / count, 2) : null;
-    const overallLoss = count > 0 ? round(negTotal / count, 2) : null;
-
-    const chartHtml = createChartHtml("rate-chart", rateLabels, {
-      datasets: [
-        { label: "Weight Gained", data: posValues, lineColor: "#6391ff" },
-        { label: "Weight Lost", data: negValues, lineColor: "#ff6384" },
+    const overall = count > 0 ? round(total / count, 2) : null;
+    const overallLoss = count > 0 ? round(lostTotal / count, 2) : null;
+    return chartResponse("rate-chart", "Rate", {
+      kind: "rate",
+      style: "line",
+      labels,
+      series: [
+        { label: "Weight Gained", values: gained, color: blue },
+        { label: "Weight Lost", values: lost, color: red },
         {
           label: "Overall Weight Change",
-          data: rateLabels.map(() => overallChange),
-          lineColor: "#63ff83",
+          values: labels.map(() => overall),
+          color: green,
+          hidePoints: true,
         },
         {
           label: "Overall Weight Loss",
-          data: rateLabels.map(() => overallLoss),
-          lineColor: "#ff9f40",
+          values: labels.map(() => overallLoss),
+          color: orange,
+          hidePoints: true,
         },
       ],
-      xPaddingPercent: 5,
     });
-
-    return chartResponse("rate-chart-btn", chartHtml);
   },
 
   async bedtimeChart() {
@@ -275,7 +277,6 @@ const getHanders: RouteGetHandler = {
       get("user-settings"),
     ]);
     const goalTime = timeToNumber(userSettings?.bedtime ?? "22:00");
-
     const weeks = byWeek(dates, values).map((week) => {
       const bedtimes = week.values.filter((x) => x?.bedtime).map((x) => timeToNumber(x!.bedtime!));
       return {
@@ -284,128 +285,94 @@ const getHanders: RouteGetHandler = {
         success: round(avg(bedtimeSuccess(bedtimes, goalTime)) || 0, 3) || null,
       };
     });
-    if (weeks.length === 0) return chartResponse("bedtime-chart-btn");
-
-    const chartLabels = weeks.map((x) => x.date);
-    const chartHtml = createChartHtml("bedtime-chart", chartLabels, {
-      datasets: [
-        {
-          label: "Bedtime Success",
-          data: weeks.map((x) => x.success),
-          lineColor: "#ff6384",
-          yAxis: "left",
-        },
+    if (weeks.length === 0) return chartResponse("bedtime-chart", "Bedtime");
+    return chartResponse("bedtime-chart", "Bedtime", {
+      kind: "bedtime",
+      style: "bar",
+      labels: weeks.map((x) => x.date),
+      series: [
+        { label: "Bedtime Success", values: weeks.map((x) => x.success), color: red },
         {
           label: "Standard Deviation",
-          data: weeks.map((x) => x.std),
-          lineColor: "rgba(0, 200, 0, 0.5)",
-          yAxis: "right",
+          values: weeks.map((x) => x.std),
+          color: darkGreen,
+          rightAxis: true,
         },
       ],
-      chartType: "bar",
-      xPaddingPercent: 5,
-      yAxes: {
-        left: { min: 0, exactMax: 1 },
-        right: { min: 0 },
-      },
+      left: { min: 0, max: 1 },
+      right: { min: 0 },
     });
-
-    return chartResponse("bedtime-chart-btn", chartHtml);
   },
 
   async sleepChart() {
     const { dates, values } = await chartRange();
-
     const weeks = byWeek(dates, values).map((week) => {
       const sleep = week.values.map((x) => x?.sleep);
+      const average = avg(sleep);
       return {
         date: week.date,
-        avg: avg(sleep) || null,
+        avg: average ? round(average, 2) : null,
         std: round(stdev(sleep) || 0, 2) || null,
       };
     });
-    if (weeks.length === 0) return chartResponse("sleep-chart-btn");
-
-    const chartLabels = weeks.map((x) => x.date);
-    const chartHtml = createChartHtml("sleep-chart", chartLabels, {
-      datasets: [
-        {
-          label: "Average Sleep for Week",
-          data: weeks.map((x) => x.avg),
-          lineColor: "#ff6384",
-          yAxis: "left",
-        },
+    if (weeks.length === 0) return chartResponse("sleep-chart", "Sleep");
+    return chartResponse("sleep-chart", "Sleep", {
+      kind: "sleep",
+      style: "line",
+      labels: weeks.map((x) => x.date),
+      series: [
+        { label: "Average Sleep for Week", values: weeks.map((x) => x.avg), color: red },
         {
           label: "Standard Deviation",
-          data: weeks.map((x) => x.std),
-          lineColor: "#63ff83",
-          yAxis: "right",
+          values: weeks.map((x) => x.std),
+          color: green,
+          rightAxis: true,
         },
       ],
-      xPaddingPercent: 5,
-      yAxes: {
-        left: { min: 0 },
-        right: { min: 0 },
-      },
+      left: { min: 0 },
+      right: { min: 0 },
     });
-
-    return chartResponse("sleep-chart-btn", chartHtml);
   },
 
   async histogramChart() {
     const entries = await allEntries();
-    if (!entries) return chartResponse("histogram-chart-btn");
-
     const counts: Record<number, number> = {};
-    for (const val of entries.values) {
+    for (const val of entries?.values ?? []) {
       const weight = (val?.weight || 0) | 0;
       if (weight) {
         counts[weight] = (counts[weight] || 0) + 1;
       }
     }
-
     const keys = Object.keys(counts)
       .map(Number)
       .sort((a, b) => a - b);
-    if (keys.length === 0) return chartResponse("histogram-chart-btn");
-
-    const minKey = keys[0];
-    const maxKey = keys[keys.length - 1];
-    const histLabels: string[] = [];
-    const histData: number[] = [];
-    for (let i = minKey; i <= maxKey; i++) {
-      histLabels.push(String(i));
-      histData.push(counts[i] ?? 0);
+    if (keys.length === 0) return chartResponse("histogram-chart", "Histogram");
+    const labels: string[] = [];
+    const data: number[] = [];
+    for (let i = keys[0]; i <= keys[keys.length - 1]; i++) {
+      labels.push(String(i));
+      data.push(counts[i] ?? 0);
     }
-
-    const chartHtml = createChartHtml("histogram-chart", histLabels, {
-      datasets: [{ label: "Weight (Count)", data: histData, lineColor: "#ff6384" }],
-      chartType: "bar",
-      xPaddingPercent: 3,
-      yAxes: { left: { min: 0 } },
+    return chartResponse("histogram-chart", "Histogram", {
+      kind: "histogram",
+      style: "bar",
+      labels,
+      series: [{ label: "Weight (Count)", values: data, color: red }],
+      left: { min: 0 },
     });
-
-    return chartResponse("histogram-chart-btn", chartHtml);
   },
 
   async historyChart() {
     const entries = await allEntries();
-    if (!entries) return chartResponse("history-chart-btn");
-    const { dates: labels, values } = entries;
-
-    const chartHtml = createChartHtml("history-chart", labels, {
-      datasets: [
-        {
-          label: "Weight",
-          data: values.map((x) => x?.weight || null),
-          lineColor: "#ff6384",
-          showLines: labels.length < 500,
-        },
+    if (!entries) return chartResponse("history-chart", "History");
+    return chartResponse("history-chart", "History", {
+      kind: "history",
+      style: "line",
+      labels: entries.dates,
+      series: [
+        { label: "Weight", values: entries.values.map((x) => x?.weight || null), color: red },
       ],
-      xPaddingPercent: 2,
     });
-
-    return chartResponse("history-chart-btn", chartHtml);
   },
 };
 

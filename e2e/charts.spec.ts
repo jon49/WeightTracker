@@ -27,21 +27,42 @@ async function seedWeeks(user: User) {
   return dates;
 }
 
-// Opens a chart from its button: the button goes, and the chart comes in.
+type Chart = ReturnType<User["page"]["locator"]>;
+
+// Opens a chart from its button: the button shows it open, and the chart
+// comes in.
 async function openChart(user: User, button: string, chart: string) {
   await user.page.click(`#${button}`);
-  await expect(user.page.locator(`#${button}`)).toHaveCount(0);
+  await expect(user.page.locator(`#${button}`)).toHaveAttribute("aria-pressed", "true");
   let section = user.page.locator(`#${chart}`);
   await expect(section).toBeVisible();
   return section;
 }
 
-// The values a series plots, as points or bars.
-function values(chart: ReturnType<User["page"]["locator"]>, series: string) {
-  return chart
-    .locator(`.series[data-series-label="${series}"]`)
-    .locator(".point-btn, .bar-segment")
-    .evaluateAll((xs) => xs.map((x) => (x as HTMLElement).dataset.value));
+// The chart's data, as the page draws it.
+async function chartData(chart: Chart) {
+  return JSON.parse((await chart.getAttribute("data-chart"))!) as {
+    labels: string[];
+    series: { label: string; values: (number | null)[]; rightAxis?: boolean }[];
+  };
+}
+
+// The values a series plots, leaving out the gaps.
+async function values(chart: Chart, series: string) {
+  let data = await chartData(chart);
+  let s = data.series.find((x) => x.label === series);
+  expect(s, `series ${series}`).toBeTruthy();
+  return s!.values.filter((x) => x != null);
+}
+
+// How many of the canvas's pixels are drawn on.
+function inked(chart: Chart) {
+  return chart.locator("canvas").evaluate((c: HTMLCanvasElement) => {
+    let { data } = c.getContext("2d")!.getImageData(0, 0, c.width, c.height);
+    let count = 0;
+    for (let i = 3; i < data.length; i += 4) if (data[i]) count++;
+    return count;
+  });
 }
 
 test.describe("the Charts page", () => {
@@ -84,20 +105,20 @@ test.describe("the Charts page", () => {
     let a = await guest();
     let dates = await seedWeeks(a);
     let weeks = 11;
-    let sunday = dateString(thisSunday());
     await a.goto("/web/charts");
+    await expect(a.page.locator("#charts-location")).toBeEmpty();
 
     let history = await openChart(a, "history-chart-btn", "history-chart");
     expect(await values(history, "Weight")).toHaveLength(dates.length);
-    await expect(history.locator("polyline")).toHaveCount(1);
-    await expect(history.locator(".legend-label")).toHaveText(["Weight"]);
+    await expect(history.locator(".legend li")).toHaveText(["Weight"]);
+    await expect.poll(() => inked(history)).toBeGreaterThan(1000);
 
     let average = await openChart(a, "avg-chart-btn", "average-chart");
-    await expect(average.locator(".legend-label")).toHaveText(["Max", "Average", "Min"]);
+    await expect(average.locator(".legend li")).toHaveText(["Max", "Average", "Min"]);
     let averages = await values(average, "Average");
     expect(averages).toHaveLength(weeks);
-    expect(averages.at(-1)).toBe("180");
-    expect(averages[0]).toBe("190");
+    expect(averages.at(-1)).toBe(180);
+    expect(averages[0]).toBe(190);
     expect(await values(average, "Max")).toEqual(averages);
     // Charts come in above the ones already open.
     expect(
@@ -105,56 +126,119 @@ test.describe("the Charts page", () => {
     ).toEqual(["average-chart", "history-chart"]);
 
     let histogram = await openChart(a, "histogram-chart-btn", "histogram-chart");
-    let bars = histogram.locator(".bar-segment");
-    await expect(bars).toHaveCount(weeks);
-    expect(await bars.evaluateAll((xs) => xs.map((x) => (x as SVGElement).dataset.label))).toEqual(
-      Array.from({ length: weeks }, (_, i) => String(180 + i)),
-    );
+    let counts = await chartData(histogram);
+    expect(counts.labels).toEqual(Array.from({ length: weeks }, (_, i) => String(180 + i)));
     // A full week at 181; this week has a day per day so far.
-    await expect(histogram.locator('.bar-segment[data-label="181"]')).toHaveAttribute(
-      "data-value",
-      "7",
-    );
-    await expect(histogram.locator('.bar-segment[data-label="180"]')).toHaveAttribute(
-      "data-value",
-      String(new Date().getDay() + 1),
-    );
+    expect(counts.series[0].values[1]).toBe(7);
+    expect(counts.series[0].values[0]).toBe(new Date().getDay() + 1);
 
     let bedtime = await openChart(a, "bedtime-chart-btn", "bedtime-chart");
-    expect(await values(bedtime, "Bedtime Success")).toEqual(Array(weeks).fill("1"));
+    expect(await values(bedtime, "Bedtime Success")).toEqual(Array(weeks).fill(1));
     expect(await values(bedtime, "Standard Deviation")).toEqual([]);
-    // Success runs 0 to 1; the deviation, always 0, gets no axis.
-    await expect(bedtime.locator(".y-axis li").first()).toHaveText("1");
-    await expect(bedtime.locator(".y-axis-right")).toHaveCount(0);
 
     let sleep = await openChart(a, "sleep-chart-btn", "sleep-chart");
-    expect(await values(sleep, "Average Sleep for Week")).toEqual(Array(weeks).fill("7.5"));
+    expect(await values(sleep, "Average Sleep for Week")).toEqual(Array(weeks).fill(7.5));
     expect(await values(sleep, "Standard Deviation")).toEqual([]);
 
     let rate = await openChart(a, "rate-chart-btn", "rate-chart");
-    expect(await values(rate, "Weight Lost")).toEqual(Array(weeks - 1).fill("-1"));
+    expect(await values(rate, "Weight Lost")).toEqual(Array(weeks - 1).fill(-1));
     expect(await values(rate, "Weight Gained")).toEqual([]);
-    let overall = await values(rate, "Overall Weight Change");
-    expect(new Set(overall)).toEqual(new Set(["-1"]));
+    expect(new Set(await values(rate, "Overall Weight Change"))).toEqual(new Set([-1]));
 
-    // Focusing a point shows its value.
-    let point = average.locator('.series[data-series-label="Average"] .point-btn').last();
-    await point.focus();
-    await expect(average.locator(".point-popover")).toBeVisible();
-    await expect(average.locator(".point-popover")).toHaveText(`Average · ${sunday}: 180`);
-    await point.blur();
-    await expect(average.locator(".point-popover")).toBeHidden();
+    for (let chart of [history, average, histogram, bedtime, sleep, rate]) {
+      expect(await inked(chart)).toBeGreaterThan(1000);
+    }
   });
 
-  test("leaves out the charts there is nothing to draw for", async ({ guest }) => {
+  test("reads out a chart's points from the keyboard", async ({ guest }) => {
+    let a = await guest();
+    await seedWeeks(a);
+    let sunday = dateString(thisSunday());
+    await a.goto("/web/charts");
+    let average = await openChart(a, "avg-chart-btn", "average-chart");
+    let canvas = average.locator("canvas");
+    let readout = average.locator(".chart-readout");
+
+    await canvas.focus();
+    await a.page.keyboard.press("ArrowLeft");
+    await expect(readout).toHaveText(`${sunday}, Max: 180, Average: 180, Min: 180`);
+    await a.page.keyboard.press("ArrowLeft");
+    await expect(readout).toHaveText(
+      `${dateString(addDays(thisSunday(), -7))}, Max: 181, Average: 181, Min: 181`,
+    );
+    // The period goes back before the entries: its first week has none.
+    await a.page.keyboard.press("Home");
+    await expect(readout).toHaveText((await chartData(average)).labels[0]);
+  });
+
+  test("zooms in on part of a chart and back out", async ({ guest }) => {
+    let a = await guest();
+    await seedWeeks(a);
+    let sunday = thisSunday();
+    await a.goto("/web/charts");
+    let average = await openChart(a, "avg-chart-btn", "average-chart");
+    let first = (await chartData(average)).labels[0];
+    let from = average.locator(".chart-from");
+    let to = average.locator(".chart-to");
+    await expect(from).toHaveValue(first);
+    await expect(to).toHaveValue(dateString(sunday));
+
+    // A date inside a week starts the window at that week.
+    await from.fill(dateString(addDays(sunday, -19)));
+    await from.dispatchEvent("change");
+    await expect(from).toHaveValue(dateString(addDays(sunday, -21)));
+    let canvas = average.locator("canvas");
+    await canvas.focus();
+    await a.page.keyboard.press("Home");
+    await expect(average.locator(".chart-readout")).toContainText("Average: 183");
+
+    // Dragging the plot right shows earlier weeks.
+    let box = (await canvas.boundingBox())!;
+    let y = box.y + box.height * 0.3;
+    await a.page.mouse.move(box.x + box.width * 0.4, y);
+    await a.page.mouse.down();
+    await a.page.mouse.move(box.x + box.width * 0.9, y, { steps: 5 });
+    await a.page.mouse.up();
+    await expect(to).not.toHaveValue(dateString(sunday));
+    await expect(from).not.toHaveValue(dateString(addDays(sunday, -21)));
+
+    await average.getByRole("button", { name: "Show all" }).click();
+    await expect(from).toHaveValue(first);
+    await expect(to).toHaveValue(dateString(sunday));
+  });
+
+  test("closes a chart from its button or its ×", async ({ guest }) => {
+    let a = await guest();
+    await seedWeeks(a);
+    await a.goto("/web/charts");
+    let button = a.page.locator("#history-chart-btn");
+    await expect(button).toHaveAttribute("aria-pressed", "false");
+
+    await openChart(a, "history-chart-btn", "history-chart");
+    await button.click();
+    await expect(a.page.locator("#history-chart")).toHaveCount(0);
+    await expect(button).toHaveAttribute("aria-pressed", "false");
+
+    let history = await openChart(a, "history-chart-btn", "history-chart");
+    await history.getByRole("button", { name: "Close the History chart" }).click();
+    await expect(a.page.locator("#history-chart")).toHaveCount(0);
+    await expect(button).toHaveAttribute("aria-pressed", "false");
+  });
+
+  test("says when there is nothing to draw", async ({ guest }) => {
     let a = await guest();
     await a.goto("/web/charts");
     await expect(a.page.locator("table td").first()).toHaveText("");
-    for (let button of ["history-chart-btn", "histogram-chart-btn"]) {
-      await a.page.click(`#${button}`);
-      await expect(a.page.locator(`#${button}`)).toHaveCount(0);
+    for (let [button, chart] of [
+      ["history-chart-btn", "history-chart"],
+      ["histogram-chart-btn", "histogram-chart"],
+    ]) {
+      let section = await openChart(a, button, chart);
+      await expect(section.locator(".chart-empty")).toHaveText(
+        "Not enough data for this chart yet.",
+      );
+      await expect(section.locator("canvas")).toHaveCount(0);
     }
-    await expect(a.page.locator("#charts-location > *")).toHaveCount(0);
   });
 
   test("covers the period set in the chart settings", async ({ guest }) => {
@@ -176,6 +260,6 @@ test.describe("the Charts page", () => {
     let average = await openChart(a, "avg-chart-btn", "average-chart");
     // Two weeks back, a week more, and back to a Sunday: this week and the
     // three before it.
-    expect(await values(average, "Average")).toEqual(["183", "182", "181", "180"]);
+    expect(await values(average, "Average")).toEqual([183, 182, 181, 180]);
   });
 });
