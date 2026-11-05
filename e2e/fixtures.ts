@@ -38,7 +38,8 @@ export interface SyncResult {
 // Entry keys are dates, YYYY-MM-DD.
 const isEntryKey = (key: unknown) => typeof key === "string" && /^\d{4}-\d\d-\d\d$/.test(key);
 
-// One user on one device: a logged-in browser context of its own.
+// One user on one device: a browser context of its own, logged in unless it
+// is a guest's (email "").
 export class User {
   constructor(
     readonly email: string,
@@ -100,16 +101,41 @@ export class User {
     expect(await this.idb("auth_token")).toBeFalsy();
   }
 
+  // Opens the app the first time, as a guest: the loader installs the
+  // service worker, then goes on to the Entry page.
+  async open() {
+    await this.page.goto("/web/");
+    await this.page.waitForURL(/\/web\/entries\/edit/);
+    await this.serviceWorker();
+  }
+
   // Saves today's weight from the Entry page.
   async addEntry(weight: string) {
     await this.goto("/web/entries/edit");
-    let saved = this.page.waitForResponse(
-      (x) => x.request().method() === "POST" && x.url().includes("/web/entries/edit"),
-    );
-    await this.page.fill("input[name=weight]", weight);
-    await this.page.press("input[name=weight]", "Tab");
-    expect((await saved).ok()).toBe(true);
+    await this.saveField("input[name=weight]", weight);
     expect(await this.entryKeys()).toHaveLength(1);
+  }
+
+  // Changes a field on a form that saves on change, and waits for the save.
+  async saveField(selector: string, value: string) {
+    let saved = this.page.waitForResponse((x) => x.request().method() === "POST");
+    let field = this.page.locator(selector);
+    if (await field.evaluate((x) => x instanceof HTMLSelectElement)) {
+      await field.selectOption(value);
+    } else {
+      await field.fill(value);
+      await field.press("Tab");
+    }
+    expect((await saved).ok()).toBe(true);
+    await this.page.waitForLoadState("networkidle");
+  }
+
+  // Presses a button that posts, and waits for the answer.
+  async press(selector: string) {
+    let answered = this.page.waitForResponse((x) => x.request().method() === "POST");
+    await this.page.click(selector);
+    expect((await answered).ok()).toBe(true);
+    await this.page.waitForLoadState("networkidle");
   }
 
   // Deletes the account from User Settings (the confirm is accepted);
@@ -174,6 +200,30 @@ export class User {
   async entryKeys(): Promise<unknown[]> {
     return (await this.idbKeys()).filter(isEntryKey);
   }
+
+  // The keys waiting to be synced.
+  async pending(): Promise<unknown[]> {
+    return (await this.idb<unknown[]>("updated")) ?? [];
+  }
+
+  // Writes records straight into the app's storage, as if saved earlier.
+  async seed(records: Record<string, unknown>) {
+    await this.page.evaluate(
+      (records) =>
+        new Promise<void>((resolve, reject) => {
+          let open = indexedDB.open("keyval-store");
+          open.onsuccess = () => {
+            let tx = open.result.transaction("keyval", "readwrite");
+            for (let [key, value] of Object.entries(records)) {
+              tx.objectStore("keyval").put(value, key);
+            }
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+          };
+        }),
+      records,
+    );
+  }
 }
 
 interface Fixtures {
@@ -181,6 +231,8 @@ interface Fixtures {
   // a second device of the same user.
   newUser: (name: string) => Promise<User>;
   device: (email: string) => Promise<User>;
+  // A device with no account, the app opened and ready.
+  guest: () => Promise<User>;
 }
 
 export const test = base.extend<Fixtures>({
@@ -190,6 +242,17 @@ export const test = base.extend<Fixtures>({
       let user = await User.create(browser, email);
       users.push(user);
       await user.login();
+      return user;
+    });
+    await Promise.all(users.map((x) => x.context.close()));
+  },
+
+  guest: async ({ browser }, use) => {
+    let users: User[] = [];
+    await use(async () => {
+      let user = await User.create(browser, "");
+      users.push(user);
+      await user.open();
       return user;
     });
     await Promise.all(users.map((x) => x.context.close()));
