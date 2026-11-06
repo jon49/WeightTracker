@@ -16,6 +16,7 @@ shared; only packaging and a few platform details differ.
 make run          # build and start
 make build        # optimized ./weight
 make install      # ./weight to ~/.local/bin, plus a launcher and icon
+make uninstall    # remove them again (your data in ~/.local/share/weight stays)
 make test         # unit tests for core/ (dates, stats, charts, storage, sync)
 ../tasks/test-native-server.sh  # also against a throwaway TrailBase (deleting an account)
 make check        # type-check and generate C for Linux, Windows and macOS
@@ -26,8 +27,9 @@ make install-apk  # install it on the connected phone or emulator
 Set `V=/path/to/v` if `v` is not on your `PATH`. From the repo root,
 `npm run build:native`, `npm run install:native` and `npm run test:native`
 do the same, and `tasks/` has a script for each job, including the one-time
-setup: `desktop-setup.sh`, `desktop-run.sh`, `desktop-install.sh` (and
-`desktop-setup-wayland.sh`, `desktop-install-wayland.sh` for Wayland),
+setup: `desktop-setup.sh`, `desktop-run.sh`, `desktop-install.sh`,
+`desktop-uninstall.sh` (and `desktop-setup-wayland.sh`,
+`desktop-install-wayland.sh` for Wayland),
 `android-setup.sh`, `make-apk.sh`, `install-apk.sh`, `android-devices.sh`,
 `android-logs.sh`, `android-emulator.sh`, `test-native.sh` and
 `test-native-server.sh`.
