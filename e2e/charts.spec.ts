@@ -284,10 +284,15 @@ test.describe("the Charts page", () => {
   test("won't take a chart period that isn't positive", async ({ guest }) => {
     let a = await guest();
     await a.goto("/web/charts");
+    await a.saveField("select[name=durationUnit]", "week");
+    let saved = await a.idb("chart-settings");
     let field = a.page.locator("input[name=duration]");
     await field.fill("0");
     await field.press("Tab");
     await expect(a.page.getByText("The chart period must be a positive number.")).toBeVisible();
-    expect(await a.idb("chart-settings")).toBeUndefined();
+    expect(await a.idb("chart-settings")).toEqual(saved);
+    // The field goes back to the period saved.
+    await expect(field).toHaveValue("9");
+    await expect(a.page.locator("select[name=durationUnit]")).toHaveValue("week");
   });
 });

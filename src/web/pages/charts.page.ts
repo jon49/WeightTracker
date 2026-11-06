@@ -104,12 +104,12 @@ const statsHtml = (statsData: StatsData) => html`
 <p class=stats-note>Weight, rate, sleep and σ are for this week (from Sunday); rate is the change from last week. Weeks to go uses the chart period.</p>
 </section>`;
 
-// periodHtml is the chart period, saved as soon as it changes.
+// periodHtml is the chart period, saved as soon as it changes. A period
+// that isn't saved puts back the one that is.
 function periodHtml(chartSettings: ChartSettings) {
   const selected = isSelected(chartSettings.durationUnit);
   return html`
-<h3>Chart period</h3>
-<form class=chart-period method=post action="?handler=period" target=htmz onchange="this.submit()">
+<form id=chart-period class=chart-period method=post action="?handler=period" target=htmz onchange="this.submit()">
     <input name=duration type=number min=0 step=any required aria-label="Chart period"
         value="${formatNumber(chartSettings.duration)}">
     <select name=durationUnit aria-label="Chart period unit">
@@ -271,6 +271,7 @@ const render = ({
 
 ${statsHtml(statsData)}
 
+<h3>Chart period</h3>
 ${periodHtml(chartSettings)}
 
 <div id=create-chart class="flex m-1">
@@ -415,7 +416,13 @@ const postHandlers: RoutePostHandler = {
   // the period charts are open (htmz skips the sections not on the page).
   async period({ data }) {
     const duration = toNumber(data.duration);
-    if (!duration || duration <= 0) throw "The chart period must be a positive number.";
+    if (!duration || duration <= 0) {
+      return {
+        status: 200,
+        body: periodHtml(await getChartSettings()),
+        message: "The chart period must be a positive number.",
+      };
+    }
     const durationUnit = durationUnits.find((x) => x === data.durationUnit) ?? "month";
     const old = await get("chart-settings");
     await set("chart-settings", { duration, durationUnit, _rev: old?._rev ?? 0 }, false);
