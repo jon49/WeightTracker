@@ -71,8 +71,8 @@ test.describe("the Charts page", () => {
     await seedWeeks(a);
     await a.goto("/web/charts");
 
-    await expect(a.page.locator("h3")).toHaveText("Stats for past 9 months");
-    await expect(a.page.locator("table th")).toHaveText([
+    await expect(a.page.locator("#stats h3")).toHaveText("Stats");
+    await expect(a.page.locator(".stats dt")).toHaveText([
       "Weight",
       "Rate",
       "BMI Prime",
@@ -82,15 +82,15 @@ test.describe("the Charts page", () => {
       "Goal",
     ]);
     // BMI prime: 180 / 70² × 703 / 25. The weight is the same all week, so σ
-    // is 0, which shows as blank. At a pound a week, 10 pounds to go is ten
+    // is 0, which shows as a dash. At a pound a week, 10 pounds to go is ten
     // weeks at both the average loss and the average change.
-    await expect(a.page.locator("table td")).toHaveText([
+    await expect(a.page.locator(".stats dd")).toHaveText([
       "180.00",
       "-1.00",
       "1.033",
       "7.50",
       "10.0 to 10.0",
-      "",
+      "—",
       "170.00",
     ]);
     // The chart styles are a stylesheet of their own.
@@ -228,7 +228,7 @@ test.describe("the Charts page", () => {
   test("says when there is nothing to draw", async ({ guest }) => {
     let a = await guest();
     await a.goto("/web/charts");
-    await expect(a.page.locator("table td").first()).toHaveText("");
+    await expect(a.page.locator(".stats dd").first()).toHaveText("—");
     for (let [button, chart] of [
       ["history-chart-btn", "history-chart"],
       ["histogram-chart-btn", "histogram-chart"],
@@ -241,13 +241,20 @@ test.describe("the Charts page", () => {
     }
   });
 
-  test("covers the period set in the chart settings", async ({ guest }) => {
+  test("covers the chart period, which redraws the open charts", async ({ guest }) => {
     let a = await guest();
     await seedWeeks(a);
     await a.goto("/web/charts");
-    await a.page.click("a[title='Edit Chart Settings']");
-    await a.page.waitForURL(/\/web\/charts\/edit/);
+    await expect(a.page.locator("input[name=duration]")).toHaveValue("9");
     await expect(a.page.locator("select[name=durationUnit]")).toHaveValue("month");
+    let average = await openChart(a, "avg-chart-btn", "average-chart");
+    let history = await openChart(a, "history-chart-btn", "history-chart");
+    expect(await values(average, "Average")).toHaveLength(11);
+    // Zoomed in on the last two weeks.
+    let sunday = dateString(thisSunday());
+    let lastWeek = dateString(addDays(thisSunday(), -7));
+    await average.locator(".chart-from").fill(lastWeek);
+    await average.locator(".chart-from").dispatchEvent("change");
 
     await a.saveField("input[name=duration]", "2");
     await a.saveField("select[name=durationUnit]", "week");
@@ -255,11 +262,32 @@ test.describe("the Charts page", () => {
     // A per-device preference: not synced.
     expect(await a.pending()).toEqual([]);
 
-    await a.goto("/web/charts");
-    await expect(a.page.locator("h3")).toHaveText("Stats for past 2 weeks");
-    let average = await openChart(a, "avg-chart-btn", "average-chart");
     // Two weeks back, a week more, and back to a Sunday: this week and the
-    // three before it.
-    expect(await values(average, "Average")).toEqual([183, 182, 181, 180]);
+    // three before it. The charts stay where they were, and open.
+    await expect.poll(() => values(average, "Average")).toEqual([183, 182, 181, 180]);
+    expect(
+      await a.page.locator("#charts-location > .chart").evaluateAll((xs) => xs.map((x) => x.id)),
+    ).toEqual(["history-chart", "average-chart"]);
+    await expect(history.locator("canvas")).toHaveCount(1);
+    // Still zoomed in on the same weeks.
+    await expect(average.locator(".chart-from")).toHaveValue(lastWeek);
+    await expect(average.locator(".chart-to")).toHaveValue(sunday);
+    await expect(a.page.locator("#avg-chart-btn")).toHaveAttribute("aria-pressed", "true");
+    await expect(a.page.locator("#stats dd").first()).toHaveText("180.00");
+
+    // And it's kept.
+    await a.goto("/web/charts");
+    await expect(a.page.locator("input[name=duration]")).toHaveValue("2");
+    await expect(a.page.locator("select[name=durationUnit]")).toHaveValue("week");
+  });
+
+  test("won't take a chart period that isn't positive", async ({ guest }) => {
+    let a = await guest();
+    await a.goto("/web/charts");
+    let field = a.page.locator("input[name=duration]");
+    await field.fill("0");
+    await field.press("Tab");
+    await expect(a.page.getByText("The chart period must be a positive number.")).toBeVisible();
+    expect(await a.idb("chart-settings")).toBeUndefined();
   });
 });

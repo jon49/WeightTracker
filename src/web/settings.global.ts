@@ -14,10 +14,6 @@ const routes: Route[] = [
     file: "/web/pages/user-settings/edit.page.js",
   },
   {
-    route: /\/charts\/edit\/$/,
-    file: "/web/pages/charts/edit.page.js",
-  },
-  {
     route: /\/charts\/$/,
     file: "/web/pages/charts.page.js",
   },

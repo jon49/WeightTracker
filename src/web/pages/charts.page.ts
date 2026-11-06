@@ -1,5 +1,5 @@
-import { UserSettings, WeightData } from "../server/db.js";
-import { RouteGetHandler, RoutePage } from "@jon49/sw/routes.middleware.js";
+import type { ChartSettings, UserSettings, WeightData } from "../server/db.js";
+import type { RouteGetHandler, RoutePage, RoutePostHandler } from "@jon49/sw/routes.middleware.js";
 import { chartHtml } from "./charts/_chart.js";
 import type { ChartData } from "../js/charts/_chart-model.js";
 
@@ -12,7 +12,7 @@ let {
     getWeeklyData,
     timeToNumber,
   },
-  db: { get, getMany },
+  db: { durationUnits, get, getMany, set },
   html,
   layout,
   utils: {
@@ -23,10 +23,12 @@ let {
     formatNumber,
     getPreviousDay,
     isNil,
+    isSelected,
     parseDate,
     round,
     setDefaults,
     stdev,
+    toNumber,
   },
 } = self.sw;
 
@@ -79,44 +81,197 @@ function chartResponse(id: string, title: string, data?: ChartData) {
   return html`<template hz-target="#charts-location" hz-swap="prepend">${chartHtml(id, title, data)}</template>`;
 }
 
+// stats lists the stats cards in the order the native client shows them.
+const stats = (s: StatsData): [string, string | undefined][] => [
+  ["Weight", s.weight],
+  ["Rate", s.rate],
+  ["BMI Prime", s.bmiPrime],
+  ["Sleep", s.sleep],
+  ["Weeks to Go", s.weeksToGo],
+  ["σ", s.std],
+  ["Goal", s.goalWeight],
+];
+
+// statsHtml is the stats cards, which a change to the chart period redraws.
+const statsHtml = (statsData: StatsData) => html`
+<section id=stats class=stats>
+<h3>Stats</h3>
+<dl>
+    ${stats(statsData).map(
+      ([label, value]) => html`<div><dt>${label}</dt><dd>${value || "—"}</dd></div>`,
+    )}
+</dl>
+<p class=stats-note>Weight, rate, sleep and σ are for this week (from Sunday); rate is the change from last week. Weeks to go uses the chart period.</p>
+</section>`;
+
+// periodHtml is the chart period, saved as soon as it changes.
+function periodHtml(chartSettings: ChartSettings) {
+  const selected = isSelected(chartSettings.durationUnit);
+  return html`
+<h3>Chart period</h3>
+<form class=chart-period method=post action="?handler=period" target=htmz onchange="this.submit()">
+    <input name=duration type=number min=0 step=any required aria-label="Chart period"
+        value="${formatNumber(chartSettings.duration)}">
+    <select name=durationUnit aria-label="Chart period unit">
+        <option value=week ${selected("week")}>Weeks</option>
+        <option value=month ${selected("month")}>Months</option>
+        <option value=year ${selected("year")}>Years</option>
+    </select>
+</form>`;
+}
+
+// The charts drawn over the chart period, which a change to it redraws.
+const periodCharts = [
+  { id: "average-chart", title: "Average", data: averageChart },
+  { id: "rate-chart", title: "Rate", data: rateChart },
+  { id: "bedtime-chart", title: "Bedtime", data: bedtimeChart },
+  { id: "sleep-chart", title: "Sleep", data: sleepChart },
+];
+
+type Range = Awaited<ReturnType<typeof chartRange>>;
+
+function averageChart({ dates, values }: Range): ChartData | undefined {
+  const { labels, maxValues, minValues, avgValues } = getWeeklyData(dates, values);
+  const r = (v: number | null) => (v != null ? round(v, 1) : v);
+  return {
+    kind: "average",
+    style: "line",
+    labels,
+    series: [
+      { label: "Max", values: maxValues.map(r), color: red },
+      { label: "Average", values: avgValues.map(r), color: green },
+      { label: "Min", values: minValues.map(r), color: blue },
+    ],
+  };
+}
+
+function rateChart({ dates, values }: Range): ChartData | undefined {
+  const { labels: weekLabels, avgValues } = getWeeklyData(dates, values);
+  if (weekLabels.length < 2) return;
+  const labels: string[] = [];
+  const gained: (number | null)[] = [];
+  const lost: (number | null)[] = [];
+  let total = 0;
+  let lostTotal = 0;
+  let count = 0;
+  for (let index = 1; index < avgValues.length; index++) {
+    const first = avgValues[index - 1];
+    const last = avgValues[index];
+    labels.push(weekLabels[index]);
+    let pos: number | null = null;
+    let neg: number | null = null;
+    if (first && last) {
+      count++;
+      const diff = last - first;
+      total += diff;
+      if (diff > 0) {
+        pos = round(diff, 2);
+      } else {
+        neg = round(diff, 2);
+        lostTotal += diff;
+      }
+    }
+    gained.push(pos);
+    lost.push(neg);
+  }
+  const overall = count > 0 ? round(total / count, 2) : null;
+  const overallLoss = count > 0 ? round(lostTotal / count, 2) : null;
+  return {
+    kind: "rate",
+    style: "line",
+    labels,
+    series: [
+      { label: "Weight Gained", values: gained, color: blue },
+      { label: "Weight Lost", values: lost, color: red },
+      {
+        label: "Overall Weight Change",
+        values: labels.map(() => overall),
+        color: green,
+        hidePoints: true,
+      },
+      {
+        label: "Overall Weight Loss",
+        values: labels.map(() => overallLoss),
+        color: orange,
+        hidePoints: true,
+      },
+    ],
+  };
+}
+
+function bedtimeChart(
+  { dates, values }: Range,
+  userSettings: UserSettings | undefined,
+): ChartData | undefined {
+  const goalTime = timeToNumber(userSettings?.bedtime ?? "22:00");
+  const weeks = byWeek(dates, values).map((week) => {
+    const bedtimes = week.values.filter((x) => x?.bedtime).map((x) => timeToNumber(x!.bedtime!));
+    return {
+      date: week.date,
+      std: round(stdev(bedtimes) || 0, 3) || null,
+      success: round(avg(bedtimeSuccess(bedtimes, goalTime)) || 0, 3) || null,
+    };
+  });
+  if (weeks.length === 0) return;
+  return {
+    kind: "bedtime",
+    style: "bar",
+    labels: weeks.map((x) => x.date),
+    series: [
+      { label: "Bedtime Success", values: weeks.map((x) => x.success), color: red },
+      {
+        label: "Standard Deviation",
+        values: weeks.map((x) => x.std),
+        color: darkGreen,
+        rightAxis: true,
+      },
+    ],
+    left: { min: 0, max: 1 },
+    right: { min: 0 },
+  };
+}
+
+function sleepChart({ dates, values }: Range): ChartData | undefined {
+  const weeks = byWeek(dates, values).map((week) => {
+    const sleep = week.values.map((x) => x?.sleep);
+    const average = avg(sleep);
+    return {
+      date: week.date,
+      avg: average ? round(average, 2) : null,
+      std: round(stdev(sleep) || 0, 2) || null,
+    };
+  });
+  if (weeks.length === 0) return;
+  return {
+    kind: "sleep",
+    style: "line",
+    labels: weeks.map((x) => x.date),
+    series: [
+      { label: "Average Sleep for Week", values: weeks.map((x) => x.avg), color: red },
+      {
+        label: "Standard Deviation",
+        values: weeks.map((x) => x.std),
+        color: green,
+        rightAxis: true,
+      },
+    ],
+    left: { min: 0 },
+    right: { min: 0 },
+  };
+}
+
 const render = ({
-  statsHeaderText,
+  chartSettings,
   statsData,
 }: {
-  statsHeaderText: string;
+  chartSettings: ChartSettings;
   statsData: StatsData;
 }) => html`
-<h2>Charts <a href="/web/charts/edit" title="Edit Chart Settings" aria-label="Edit Chart Settings">&#9881;</a></h2>
+<h2>Charts</h2>
 
-<div>
-    <h3>${statsHeaderText}</h3>
-<div class="overflow-auto">
-    <table>
-        <thead>
-            <tr>
-                <th>Weight</th>
-                <th>Rate</th>
-                <th>BMI Prime</th>
-                <th>Sleep</th>
-                <th>Weeks to Go</th>
-                <th>&sigma;</th>
-                <th>Goal</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>${statsData.weight}</td>
-                <td>${statsData.rate}</td>
-                <td>${statsData.bmiPrime}</td>
-                <td>${statsData.sleep}</td>
-                <td>${statsData.weeksToGo}</td>
-                <td>${statsData.std}</td>
-                <td>${statsData.goalWeight}</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-</div>
+${statsHtml(statsData)}
+
+${periodHtml(chartSettings)}
 
 <div id=create-chart class="flex m-1">
     <a id=history-chart-btn class="nc-button outline" role=button aria-pressed=false data-chart-id=history-chart target=htmz href="?handler=historyChart">History</a>
@@ -130,11 +285,11 @@ const render = ({
 <div id=charts-location></div>
 `;
 
-async function setupStats(): Promise<{ statsHeaderText: string; statsData: StatsData }> {
-  const [{ chartSettings, dates, values }, userSettings] = await Promise.all([
-    chartRange(),
-    get("user-settings"),
-  ]);
+// setupStats works out the stats from the entries over the chart period.
+function setupStats(
+  { chartSettings, dates, values }: Range,
+  userSettings: UserSettings | undefined,
+): { chartSettings: ChartSettings; statsData: StatsData } {
   // The chart range starts at least a week before this one, so it holds
   // both this week and last.
   const thisWeek = getPreviousDay(new Date(), 0);
@@ -157,7 +312,7 @@ async function setupStats(): Promise<{ statsHeaderText: string; statsData: Stats
   }
 
   return {
-    statsHeaderText: `Stats for past ${chartSettings.duration} ${chartSettings.durationUnit}s`,
+    chartSettings,
     statsData: {
       bmiPrime: bmiPrime || "",
       weeksToGo: weeksToGo(userSettings, getWeeklyData(dates, values).avgValues),
@@ -189,9 +344,17 @@ interface StatsData {
   weight: string | undefined;
 }
 
+// periodChart opens one of the period charts.
+async function periodChart(i: number) {
+  const [range, userSettings] = await Promise.all([chartRange(), get("user-settings")]);
+  const { id, title, data } = periodCharts[i];
+  return chartResponse(id, title, data(range, userSettings));
+}
+
 const getHanders: RouteGetHandler = {
   get: async () => {
-    let data = await setupStats();
+    const [range, userSettings] = await Promise.all([chartRange(), get("user-settings")]);
+    const data = setupStats(range, userSettings);
     return layout({
       main: render(data),
       scripts: ["/web/js/charts-page.bundle.js"],
@@ -200,139 +363,10 @@ const getHanders: RouteGetHandler = {
     });
   },
 
-  async averageChart() {
-    const { dates, values } = await chartRange();
-    const { labels, maxValues, minValues, avgValues } = getWeeklyData(dates, values);
-    const r = (v: number | null) => (v != null ? round(v, 1) : v);
-    return chartResponse("average-chart", "Average", {
-      kind: "average",
-      style: "line",
-      labels,
-      series: [
-        { label: "Max", values: maxValues.map(r), color: red },
-        { label: "Average", values: avgValues.map(r), color: green },
-        { label: "Min", values: minValues.map(r), color: blue },
-      ],
-    });
-  },
-
-  async rateChart() {
-    const { dates, values } = await chartRange();
-    const { labels: weekLabels, avgValues } = getWeeklyData(dates, values);
-    if (weekLabels.length < 2) return chartResponse("rate-chart", "Rate");
-    const labels: string[] = [];
-    const gained: (number | null)[] = [];
-    const lost: (number | null)[] = [];
-    let total = 0;
-    let lostTotal = 0;
-    let count = 0;
-    for (let index = 1; index < avgValues.length; index++) {
-      const first = avgValues[index - 1];
-      const last = avgValues[index];
-      labels.push(weekLabels[index]);
-      let pos: number | null = null;
-      let neg: number | null = null;
-      if (first && last) {
-        count++;
-        const diff = last - first;
-        total += diff;
-        if (diff > 0) {
-          pos = round(diff, 2);
-        } else {
-          neg = round(diff, 2);
-          lostTotal += diff;
-        }
-      }
-      gained.push(pos);
-      lost.push(neg);
-    }
-    const overall = count > 0 ? round(total / count, 2) : null;
-    const overallLoss = count > 0 ? round(lostTotal / count, 2) : null;
-    return chartResponse("rate-chart", "Rate", {
-      kind: "rate",
-      style: "line",
-      labels,
-      series: [
-        { label: "Weight Gained", values: gained, color: blue },
-        { label: "Weight Lost", values: lost, color: red },
-        {
-          label: "Overall Weight Change",
-          values: labels.map(() => overall),
-          color: green,
-          hidePoints: true,
-        },
-        {
-          label: "Overall Weight Loss",
-          values: labels.map(() => overallLoss),
-          color: orange,
-          hidePoints: true,
-        },
-      ],
-    });
-  },
-
-  async bedtimeChart() {
-    const [{ dates, values }, userSettings] = await Promise.all([
-      chartRange(),
-      get("user-settings"),
-    ]);
-    const goalTime = timeToNumber(userSettings?.bedtime ?? "22:00");
-    const weeks = byWeek(dates, values).map((week) => {
-      const bedtimes = week.values.filter((x) => x?.bedtime).map((x) => timeToNumber(x!.bedtime!));
-      return {
-        date: week.date,
-        std: round(stdev(bedtimes) || 0, 3) || null,
-        success: round(avg(bedtimeSuccess(bedtimes, goalTime)) || 0, 3) || null,
-      };
-    });
-    if (weeks.length === 0) return chartResponse("bedtime-chart", "Bedtime");
-    return chartResponse("bedtime-chart", "Bedtime", {
-      kind: "bedtime",
-      style: "bar",
-      labels: weeks.map((x) => x.date),
-      series: [
-        { label: "Bedtime Success", values: weeks.map((x) => x.success), color: red },
-        {
-          label: "Standard Deviation",
-          values: weeks.map((x) => x.std),
-          color: darkGreen,
-          rightAxis: true,
-        },
-      ],
-      left: { min: 0, max: 1 },
-      right: { min: 0 },
-    });
-  },
-
-  async sleepChart() {
-    const { dates, values } = await chartRange();
-    const weeks = byWeek(dates, values).map((week) => {
-      const sleep = week.values.map((x) => x?.sleep);
-      const average = avg(sleep);
-      return {
-        date: week.date,
-        avg: average ? round(average, 2) : null,
-        std: round(stdev(sleep) || 0, 2) || null,
-      };
-    });
-    if (weeks.length === 0) return chartResponse("sleep-chart", "Sleep");
-    return chartResponse("sleep-chart", "Sleep", {
-      kind: "sleep",
-      style: "line",
-      labels: weeks.map((x) => x.date),
-      series: [
-        { label: "Average Sleep for Week", values: weeks.map((x) => x.avg), color: red },
-        {
-          label: "Standard Deviation",
-          values: weeks.map((x) => x.std),
-          color: green,
-          rightAxis: true,
-        },
-      ],
-      left: { min: 0 },
-      right: { min: 0 },
-    });
-  },
+  averageChart: () => periodChart(0),
+  rateChart: () => periodChart(1),
+  bedtimeChart: () => periodChart(2),
+  sleepChart: () => periodChart(3),
 
   async histogramChart() {
     const entries = await allEntries();
@@ -376,8 +410,29 @@ const getHanders: RouteGetHandler = {
   },
 };
 
+const postHandlers: RoutePostHandler = {
+  // period saves the chart period, then redraws the stats and whichever of
+  // the period charts are open (htmz skips the sections not on the page).
+  async period({ data }) {
+    const duration = toNumber(data.duration);
+    if (!duration || duration <= 0) throw "The chart period must be a positive number.";
+    const durationUnit = durationUnits.find((x) => x === data.durationUnit) ?? "month";
+    const old = await get("chart-settings");
+    await set("chart-settings", { duration, durationUnit, _rev: old?._rev ?? 0 }, false);
+    const [range, userSettings] = await Promise.all([chartRange(), get("user-settings")]);
+    const { statsData } = setupStats(range, userSettings);
+    return {
+      status: 200,
+      body: html`${statsHtml(statsData)}${periodCharts.map((x) =>
+        chartHtml(x.id, x.title, x.data(range, userSettings)),
+      )}`,
+    };
+  },
+};
+
 const route: RoutePage = {
   get: getHanders,
+  post: postHandlers,
 };
 
 export default route;

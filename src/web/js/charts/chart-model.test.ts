@@ -4,6 +4,7 @@ import {
   type ChartData,
   axisScale,
   formatAxis,
+  keepWindow,
   labelIndex,
   moveWindow,
   niceStep,
@@ -61,6 +62,29 @@ suite("Chart model", () => {
     deepStrictEqual(moveWindow(10, 7, 12), { zoomed: true, lo: 4, hi: 9 });
     deepStrictEqual(windowRange({ zoomed: false, lo: 2, hi: 3 }, 10), [0, 9]);
     deepStrictEqual(windowRange({ zoomed: true, lo: 2, hi: 3 }, 10), [2, 3]);
+  });
+
+  test("keepWindow keeps the labels on show when the data changes", () => {
+    const old = ["2026-01-04", "2026-01-11", "2026-01-18", "2026-01-25", "2026-02-01"];
+    // Two weeks more at the start: the same weeks stay on show.
+    const longer = chart({ labels: ["2025-12-21", "2025-12-28", ...old] });
+    deepStrictEqual(keepWindow({ zoomed: true, lo: 1, hi: 2 }, old, longer), {
+      zoomed: true,
+      lo: 3,
+      hi: 4,
+    });
+    // A window at the end stays at the end, the same width.
+    deepStrictEqual(keepWindow({ zoomed: true, lo: 3, hi: 4 }, old, longer), {
+      zoomed: true,
+      lo: 5,
+      hi: 6,
+    });
+    // Not zoomed, or too short to zoom, shows it all.
+    deepStrictEqual(keepWindow({ zoomed: false, lo: 0, hi: 0 }, old, longer).zoomed, false);
+    deepStrictEqual(
+      keepWindow({ zoomed: true, lo: 1, hi: 2 }, old, chart({ labels: old.slice(3) })).zoomed,
+      false,
+    );
   });
 
   test("labelIndex finds the last label at or before a date or weight", () => {

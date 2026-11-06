@@ -127,6 +127,17 @@ export function moveWindow(n: number, lo: number, hi: number): ChartWindow {
   return setWindow(n, lo, hi);
 }
 
+// keepWindow moves a zoomed window over the labels it showed before the
+// chart's data changed (from `old` labels to `c`'s). A window at the end
+// stays there, so it follows new weeks; one past the old labels is let go.
+export function keepWindow(w: ChartWindow, old: string[], c: ChartData): ChartWindow {
+  const none = { zoomed: false, lo: 0, hi: 0 };
+  const n = c.labels.length;
+  if (!w.zoomed || n < 3 || w.hi > old.length - 1) return none;
+  if (w.hi === old.length - 1) return setWindow(n, n - 1 - (w.hi - w.lo), n - 1);
+  return setWindow(n, labelIndex(c, old[w.lo]), labelIndex(c, old[w.hi]));
+}
+
 // slice returns the part of a chart from label lo to label hi, inclusive.
 export function slice(c: ChartData, lo: number, hi: number): ChartData {
   return {

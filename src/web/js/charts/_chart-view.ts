@@ -14,6 +14,7 @@ import {
   type Series,
   axisScale,
   formatAxis,
+  keepWindow,
   labelIndex,
   moveWindow,
   setWindow,
@@ -625,16 +626,24 @@ function circles(
 // ---- the charts on the page ----
 
 // mount draws the charts added since it last ran, and forgets the ones
-// gone. The page's buttons show which charts are open.
+// gone. A chart redrawn with new data (the chart period changed) keeps the
+// part on show, as the native client does. The page's buttons show which
+// charts are open.
 function mount() {
+  const gone = new Map<string, ChartView>();
   for (const [section, view] of views) {
     if (!section.isConnected) {
       view.destroy();
       views.delete(section);
+      gone.set(section.id, view);
     }
   }
   for (const section of document.querySelectorAll<HTMLElement>(".chart[data-chart]")) {
-    if (!views.has(section)) views.set(section, new ChartView(section));
+    if (views.has(section)) continue;
+    const view = new ChartView(section);
+    const old = gone.get(section.id);
+    if (old) view.win = keepWindow(old.win, old.data.labels, view.data);
+    views.set(section, view);
   }
   for (const button of document.querySelectorAll<HTMLElement>("[data-chart-id]")) {
     const open = !!document.getElementById(button.dataset.chartId!);
